@@ -1,6 +1,13 @@
 package org.usfirst.frc.team3476.robot;
 
+import org.usfirst.frc.team3476.utility.OrangeDrive;
+import org.usfirst.frc.team3476.utility.OrangeDrivePIDWrapper;
+import org.usfirst.frc.team3476.utility.PIDDashdataWrapper;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -12,11 +19,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	final String defaultAuto = "Default";
-	final String customAuto = "My Auto";
-	String autoSelected;
-	SendableChooser<String> chooser = new SendableChooser<>();
 
+	Joystick joy = new Joystick(0);
+    OrangeDrive driveBase = new OrangeDrive(0,0,0,0);
+    OrangeDrivePIDWrapper turn = new OrangeDrivePIDWrapper(driveBase, OrangeDrivePIDWrapper.Axis.TURN);
+    OrangeDrivePIDWrapper move = new OrangeDrivePIDWrapper(driveBase, OrangeDrivePIDWrapper.Axis.MOVE);
+    PIDDashdataWrapper angle = new PIDDashdataWrapper(""); //Need to add keypath
+    PIDController pidTurn = new PIDController(0, 0, 0, angle, turn, .05); // add p, i, and d values, change refresh rate
+	
+	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -66,8 +77,23 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
+	boolean peg = false;
 	@Override
 	public void teleopPeriodic() {
+		double moveVal = joy.getRawAxis(1);
+    	double turnVal = joy.getRawAxis(4);
+    	
+    	if (joy.getRawButton(1))
+    	{
+    		pidTurn.enable();
+    		pidTurn.setSetpoint(0);
+    		driveBase.setMove(0);
+    	}
+    	else
+    	{    	
+    		pidTurn.disable();
+    		driveBase.arcadeDrive(moveVal, turnVal);
+    	}
 	}
 
 	/**
