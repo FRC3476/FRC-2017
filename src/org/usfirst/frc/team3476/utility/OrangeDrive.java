@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.SpeedController;
 
 public class OrangeDrive extends RobotDrive
 {
-	
 	private double move, turn;
 	private double TURN_DEAD = .33;
 	private double MOVE_DEAD = 0;
@@ -48,6 +47,5 @@ public class OrangeDrive extends RobotDrive
 		OrangeUtility.scalingDonut(move, MOVE_DEAD, 1, 1);
 		super.arcadeDrive(move, turn);
 	}
-	
-	
 }
+

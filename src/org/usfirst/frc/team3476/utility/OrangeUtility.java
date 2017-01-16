@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.usfirst.frc.team3476.Utility.Control.ControlLoop;
 
 import edu.wpi.first.wpilibj.PIDController;
 
