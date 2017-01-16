@@ -34,7 +34,7 @@ public class Drive extends Threaded
 		m_topRightMotor = topRightMotor;
 		m_bottomLeftMotor = bottomLeftMotor;
 		m_bottomRightMotor = bottomRightMotor;
-		driveBase =  new OrangeDrive(m_topLeftMotor, m_topRightMotor, m_bottomLeftMotor, m_bottomRightMotor);
+		driveBase =  new OrangeDrive(m_topLeftMotor, m_bottomLeftMotor, m_topRightMotor, m_bottomRightMotor);
 		System.out.println("orangeDrive created");
 	}
 

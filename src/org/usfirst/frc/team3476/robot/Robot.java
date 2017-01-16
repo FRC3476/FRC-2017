@@ -27,10 +27,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 
 	Joystick joy = new Joystick(0);
-	CANTalon DriveRight1 = new CANTalon(4);
-	CANTalon DriveRight2 = new CANTalon(5);
 	CANTalon DriveLeft1 = new CANTalon(7);
 	CANTalon DriveLeft2 = new CANTalon(8);
+	CANTalon DriveRight1 = new CANTalon(4);
+	CANTalon DriveRight2 = new CANTalon(5);
 	
 	Drive orangeDrive = new Drive(DriveLeft1, DriveLeft2, DriveRight1, DriveRight2);
 	
