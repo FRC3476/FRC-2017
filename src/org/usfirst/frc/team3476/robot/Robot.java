@@ -2,9 +2,7 @@ package org.usfirst.frc.team3476.robot;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import org.usfirst.frc.team3476.subsystem.Drive;
-import org.usfirst.frc.team3476.utility.OrangeDrive;
+import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 import org.usfirst.frc.team3476.utility.OrangeDrivePIDWrapper;
 import org.usfirst.frc.team3476.utility.PIDDashdataWrapper;
 
@@ -32,10 +30,8 @@ public class Robot extends IterativeRobot {
 	CANTalon DriveRight1 = new CANTalon(4);
 	CANTalon DriveRight2 = new CANTalon(5);
 	
-	Drive orangeDrive = new Drive(DriveLeft1, DriveLeft2, DriveRight1, DriveRight2);
-	
-	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(1);
-	
+	OrangeDrive orangeDrive = new OrangeDrive(DriveLeft1, DriveLeft2, DriveRight1, DriveRight2);	
+	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(1);	
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -69,12 +65,10 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 
 	}
-	
-
-	
+		
 	public void teleopInit() {
 		orangeDrive.startTask(mainExecutor);
-		orangeDrive.createPIDController(0, 0, 0, "angle", .05);
+		//create an orangedrivepidwrapper and use a pidcontroller 
 	}
 	
 	/**
@@ -87,10 +81,10 @@ public class Robot extends IterativeRobot {
     	orangeDrive.updateDriveValues(moveVal, turnVal);
     	
     	if (joy.getRawButton(1))
-    		orangeDrive.setState(Drive.DriveState.PEG);
+    		orangeDrive.setState(OrangeDrive.DriveState.AUTO);
     	else
     	{
-    		orangeDrive.setState(Drive.DriveState.MANUAL);
+    		orangeDrive.setState(OrangeDrive.DriveState.MANUAL);
     		System.out.println("set state");
     	}
 	}
@@ -104,5 +98,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
+		
 	}
 }

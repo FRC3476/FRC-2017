@@ -1,5 +1,7 @@
 package org.usfirst.frc.team3476.utility;
 
+import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+
 import edu.wpi.first.wpilibj.PIDOutput;
 
 public class OrangeDrivePIDWrapper implements PIDOutput
@@ -15,11 +17,11 @@ public class OrangeDrivePIDWrapper implements PIDOutput
 		switch(axis)
 		{
 			case MOVE:
-				drive.setMove(output);
+				drive.pidSetMove(output);
 				break;
 				
 			case TURN:
-				drive.setTurn(output);
+				drive.pidSetTurn(output);
 				break;
 		}
 	}
