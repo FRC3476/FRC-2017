@@ -78,7 +78,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		double moveVal = joy.getRawAxis(1);
     	double turnVal = joy.getRawAxis(4);
-    	orangeDrive.updateDriveValues(moveVal, turnVal);
+    	orangeDrive.manualDrive(moveVal, turnVal);
     	
     	if (joy.getRawButton(1))
     		orangeDrive.setState(OrangeDrive.DriveState.AUTO);

@@ -17,11 +17,11 @@ public class OrangeDrivePIDWrapper implements PIDOutput
 		switch(axis)
 		{
 			case MOVE:
-				drive.pidSetMove(output);
+				drive.setMove(output);
 				break;
 				
 			case TURN:
-				drive.pidSetTurn(output);
+				drive.setTurn(output);
 				break;
 		}
 	}

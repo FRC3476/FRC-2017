@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class Threaded implements Runnable {
 	private ScheduledFuture<?> taskFuture;
-
+	
 	protected int RUNNINGSPEED;
 
 	@Override
