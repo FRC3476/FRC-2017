@@ -2,18 +2,11 @@ package org.usfirst.frc.team3476.robot;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import org.usfirst.frc.team3476.subsystem.OrangeDrive;
-import org.usfirst.frc.team3476.utility.OrangeDrivePIDWrapper;
-import org.usfirst.frc.team3476.utility.PIDDashdataWrapper;
 
-import com.ctre.CANTalon;
+import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -25,20 +18,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 
 	Joystick joy = new Joystick(0);
-	CANTalon DriveLeft1 = new CANTalon(7);
-	CANTalon DriveLeft2 = new CANTalon(8);
-	CANTalon DriveRight1 = new CANTalon(4);
-	CANTalon DriveRight2 = new CANTalon(5);
-	
-	OrangeDrive orangeDrive = new OrangeDrive(DriveLeft1, DriveLeft2, DriveRight1, DriveRight2);	
-	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(1);	
-	
+	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+
+	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	@Override
 	public void robotInit() {
+		orangeDrive.addTask(mainExecutor);
 
 	}
 
@@ -55,7 +45,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-
+		orangeDrive.setRunningState(true);
 	}
 
 	/**
@@ -65,39 +55,39 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 
 	}
-		
+
+	@Override
 	public void teleopInit() {
-		orangeDrive.startTask(mainExecutor);
-		//create an orangedrivepidwrapper and use a pidcontroller 
+		orangeDrive.setRunningState(true);
 	}
-	
+
 	/**
 	 * This function is called periodically during operator control
 	 */
+
+	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
 		double moveVal = joy.getRawAxis(1);
-    	double turnVal = joy.getRawAxis(4);
-    	orangeDrive.manualDrive(moveVal, turnVal);
-    	
-    	if (joy.getRawButton(1))
-    		orangeDrive.setState(OrangeDrive.DriveState.AUTO);
-    	else
-    	{
-    		orangeDrive.setState(OrangeDrive.DriveState.MANUAL);
-    		System.out.println("set state");
-    	}
+		double turnVal = joy.getRawAxis(4);
+		// TODO: Use Toggle to get only rising edge
+		if (joy.getRawButton(1)) {
+			orangeDrive.centerOnGear();
+		} else {
+			orangeDrive.setManualDrive(moveVal, turnVal);
+		}
 	}
-	
+
+	@Override
 	public void disabledInit() {
-		orangeDrive.endTask();
+		orangeDrive.setRunningState(false);
 	}
-	
+
 	/**
 	 * This function is called periodically during test mode
 	 */
 	@Override
 	public void testPeriodic() {
-		
+
 	}
 }

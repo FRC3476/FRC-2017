@@ -6,13 +6,20 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class Threaded implements Runnable {
 	private ScheduledFuture<?> taskFuture;
-	
+	private boolean isRunning = false;
+
 	protected int RUNNINGSPEED;
 
-	@Override
-	public abstract void run();
+	public abstract void update();
 
-	public void startTask(ScheduledExecutorService execIn) {
+	@Override
+	public void run() {
+		if (isRunning) {
+			update();
+		}
+	}
+
+	public void addTask(ScheduledExecutorService execIn) {
 		if (RUNNINGSPEED <= 0) { // int is zeroinitialized
 			System.out.println("RUNNINGSPEED not initialized or is negative");
 		} else {
@@ -26,5 +33,9 @@ public abstract class Threaded implements Runnable {
 				taskFuture.cancel(false);
 			}
 		}
+	}
+
+	public void setRunningState(boolean isRunning) {
+		this.isRunning = isRunning;
 	}
 }

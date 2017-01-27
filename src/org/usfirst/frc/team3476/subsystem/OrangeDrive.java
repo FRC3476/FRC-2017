@@ -1,85 +1,79 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.OrangeDrivePIDWrapper;
+import org.usfirst.frc.team3476.utility.OrangeDrivePIDWrapper.Axis;
 import org.usfirst.frc.team3476.utility.OrangeUtility;
+import org.usfirst.frc.team3476.utility.PIDDashdataWrapper;
 import org.usfirst.frc.team3476.utility.Threaded;
 
+import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.SpeedController;
 
-public class OrangeDrive extends Threaded
-{
+public class OrangeDrive extends Threaded {
+	public enum DriveState {
+		MANUAL, AUTO
+	}
+	private DriveState currentState = DriveState.MANUAL;
 	
-	private double move, turn, pidMove, pidTurn;
-	private double TURN_DEAD = .33;
-	private double MOVE_DEAD = 0;
+	private double moveValue, turnValue;
+	private static final double TURN_DEAD = .33;
+	private static final double MOVE_DEAD = 0;
+
 	private RobotDrive driveBase;
-	public enum DriveState{MANUAL, AUTO}
-	private DriveState currentState;
-	private static int DRIVERUNNINGSPEED = 50;
-	private double oldTime;
-	
-	
-	public OrangeDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-	{
-		RUNNINGSPEED = DRIVERUNNINGSPEED;
+	private AnalogGyro testGyro = new AnalogGyro(0);
+	private OrangeDrivePIDWrapper turnOutput = new OrangeDrivePIDWrapper(this, Axis.TURN);
+	private PIDController turnPid = new PIDController(0.05, 0, 0, testGyro, turnOutput);
+	private PIDDashdataWrapper angleOffset = new PIDDashdataWrapper("angle");
+	// TODO: Add a movePid and replace both with a PIDController that doesn't run on it's own thread
+	// TODO: Make a centralize place to set and get constants
+	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
+
+	public static OrangeDrive getInstance() {
+		return driveInstance;
+	}
+
+	private OrangeDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor) {
+		RUNNINGSPEED = 50;
 		driveBase = new RobotDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
 	}
 
-	public OrangeDrive(int leftMotorChannel, int rightMotorChannel)
-	{
-		RUNNINGSPEED = DRIVERUNNINGSPEED;
-		driveBase = new RobotDrive(leftMotorChannel, rightMotorChannel);
+	public void setManualDrive(double moveValue, double turnValue) {
+		if(currentState != DriveState.MANUAL){
+			currentState = DriveState.MANUAL;
+		}
+		this.moveValue = moveValue;
+		this.turnValue = turnValue;
+		setArcadeDrive();
 	}
 
-	public OrangeDrive(SpeedController frontLeftMotor, SpeedController rearLeftMotor, SpeedController frontRightMotor,
-			SpeedController rearRightMotor)
-	{
-		RUNNINGSPEED = DRIVERUNNINGSPEED;
-		driveBase = new RobotDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
+	@Override
+	public void update() {
+		switch(currentState){
+		case MANUAL:
+			break;
+		case AUTO:
+			updateAutoDrive();
+			break;		
+		}
 	}
 
-	public OrangeDrive(SpeedController leftMotor, SpeedController rightMotor)
-	{
-		RUNNINGSPEED = DRIVERUNNINGSPEED;
-		driveBase = new RobotDrive(leftMotor, rightMotor);
+	private void setArcadeDrive() {
+		driveBase.arcadeDrive(OrangeUtility.scalingDonut(moveValue, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turnValue, TURN_DEAD, 1, 1));
+	}
+
+	public void setWaypoint(double angle, double distance){
+		if(currentState != DriveState.AUTO){
+			currentState = DriveState.AUTO;
+		}	
+		// TODO: Set angle/distance in PIDController here
 	}
 	
-	public synchronized void setMove(double move)
-	{
-		this.move = move;
-		updateDrive();
+	private void updateAutoDrive(){
+		// TODO: Add PIDController that doesn't run on it's own thread so we can call calculate();
 	}
-	public synchronized void setTurn(double turn)
-	{
-		this.turn = turn;
-		updateDrive();
+	public void centerOnGear() {
+		setWaypoint(testGyro.getAngle() + angleOffset.pidGet(), 0);
 	}
-	
-	
-	public void manualDrive(double move, double turn){
-		this.move = move;
-		this.turn = turn;
-	}
-	
-	public void setState(DriveState driveState){
-		this.currentState = driveState;
-	}
-	
-	public synchronized void run(){
-		if (System.currentTimeMillis() - oldTime > 50)
-			updateDrive();
-		
-	}
-	
-	private void updateDrive(){		
-		oldTime = System.currentTimeMillis();
-		driveBase.arcadeDrive(OrangeUtility.scalingDonut(move, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turn, TURN_DEAD, 1, 1));
-	}
-	
-	public void centerOnGear(){
-		
-	}
-	
-	
+
 }
-

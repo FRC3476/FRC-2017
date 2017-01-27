@@ -1,64 +1,52 @@
 package org.usfirst.frc.team3476.utility;
-import java.util.Arrays;
-
-import org.usfirst.frc.team3476.utility.Dashcomm;
 
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 
-public class PIDDashdataWrapper implements PIDSource
-{
+public class PIDDashdataWrapper implements PIDSource {
 	private String keypath;
 	private boolean stale;
 	private long lastDataTime;
-	
-	public PIDDashdataWrapper(String keypath)
-	{
+
+	public PIDDashdataWrapper(String keypath) {
 		this.keypath = keypath;
 		stale = true;
 		lastDataTime = System.nanoTime();
 	}
-	
+
 	@Override
-	public double pidGet()
-	{
+	public double pidGet() {
 		return getValue(keypath);
 	}
-	
-	public double getValue(String keypath)
-	{
+
+	public double getValue(String keypath) {
 		return Dashcomm.get(keypath, 0);
 	}
-	
 
-	
-	public boolean checkFrameDouble()
-	{
+	public boolean checkFrameDouble() {
 		boolean newframe = Dashcomm.get("data/newframe", false);
-		if(newframe)
-		{
+		if (newframe) {
 			Dashcomm.put("data/newframe", false);
 			return true;
 		}
 		return false;
 	}
-	
-	public boolean checkFrame()
-	{
+
+	public boolean checkFrame() {
 		boolean newframe = Dashcomm.get("data/newframe", false);
-		if(newframe)
-		{
+		if (newframe) {
 			return true;
 		}
 		return false;
 	}
-	
-
 
 	@Override
-	public void setPIDSourceType(PIDSourceType pidSource){}
+	public void setPIDSourceType(PIDSourceType pidSource) {
+	}
 
 	@Override
-	public PIDSourceType getPIDSourceType(){return PIDSourceType.kDisplacement;}
+	public PIDSourceType getPIDSourceType() {
+		return PIDSourceType.kDisplacement;
+	}
 
 }

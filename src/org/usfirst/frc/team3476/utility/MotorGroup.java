@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 import edu.wpi.first.wpilibj.SpeedController;
 
 public class MotorGroup<T extends SpeedController> {
-	//DO NOT USE UNLESS THEY ARE TALONS!!!!!!!!
+	// DO NOT USE UNLESS THEY ARE TALONS!!!!!!!!
 	private ArrayList<T> motorArray;
 
 	@SafeVarargs
