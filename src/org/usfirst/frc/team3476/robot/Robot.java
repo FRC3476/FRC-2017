@@ -22,6 +22,9 @@ public class Robot extends IterativeRobot {
 	Joystick joy = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 
+	UsbCamera cam = new UsbCamera("camera", 0);
+	MjpegServer server = new MjpegServer("camServer", 8080);
+
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
 	/**
@@ -31,7 +34,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		orangeDrive.addTask(mainExecutor);
-
+		server.setSource(cam);
 	}
 
 	/**
@@ -49,8 +52,6 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
 	}
-	UsbCamera cam = new UsbCamera("camera", 0);
-	MjpegServer server = new MjpegServer("camServer", 0);
 	/**
 	 * This function is called periodically during autonomous
 	 */

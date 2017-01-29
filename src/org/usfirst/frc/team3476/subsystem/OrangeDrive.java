@@ -88,6 +88,14 @@ public class OrangeDrive extends Threaded {
 		updateAutoPath();
 	}
 	
+	public void setGearPath() {
+		if(currentState != DriveState.GEAR){
+			currentState = DriveState.GEAR;
+			configureTalons(TalonControlMode.Speed);
+		}
+		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
+	}
+	
 	// TODO: Wheel Velocity should be one object sent
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
@@ -100,30 +108,37 @@ public class OrangeDrive extends Threaded {
 		//setWheelVelocity();
 	}
 	
-	public void configureTalons(TalonControlMode mode){
-		leftWheel.changeControlMode(mode);
-		rightWheel.changeControlMode(mode);		
-	}
-	
-	public void setGearPath() {
-		if(currentState != DriveState.GEAR){
-			currentState = DriveState.GEAR;
-			configureTalons(TalonControlMode.Speed);
-		}
-		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
-	}
-	
 	public void updateGearPath(){
-		double angleError = Math.abs(desiredAngle - testGyro.getAngle());
-		if(angleError > 2){
+		if(desiredAngle - testGyro.getAngle() > 2 ){
 			// TODO: Angle per sec to inch per sec to rotations per sec
 			// These are arbitrary values
 			DriveVelocity turningSpeed = new DriveVelocity(0, 10);
+			setWheelVelocity(turningSpeed);
+		} else if (desiredAngle - testGyro.getAngle() < -2) {
+			DriveVelocity turningSpeed = new DriveVelocity(0, -10);
 			setWheelVelocity(turningSpeed);
 		} else {
 			DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
 			setWheelVelocity(drivingSpeed);
 		}
+	}
+	
+	public void configureTalons(TalonControlMode mode){
+		leftWheel.changeControlMode(mode);
+		rightWheel.changeControlMode(mode);		
+	}
+	
+	/*
+	private static double angleToInchesPerSecond(){
+		// diameter * pi
+		// times angle per sec
+		// divided by 360
+	}
+	*/
+	
+	private static double  inchesPerSecondToRpm(double inchesPerSec){
+		return inchesPerSec / (5 * Math.PI) * 60;
+		// 5 should be the wheel diameter
 	}
 	
 	public static class DriveVelocity {
