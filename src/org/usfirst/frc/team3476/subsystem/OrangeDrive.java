@@ -49,16 +49,6 @@ public class OrangeDrive extends Threaded {
 		driveBase = new RobotDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
 	}
 
-	public void setManualDrive(double moveValue, double turnValue) {
-		if(currentState != DriveState.MANUAL){
-			currentState = DriveState.MANUAL;
-			configureTalons(TalonControlMode.PercentVbus);
-		}
-		this.moveValue = moveValue;
-		this.turnValue = turnValue;
-		setArcadeDrive();
-	}
-
 	@Override
 	public void update() {
 		switch(currentState){
@@ -73,9 +63,15 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	private void setArcadeDrive() {
-		driveBase.arcadeDrive(OrangeUtility.scalingDonut(moveValue, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turnValue, TURN_DEAD, 1, 1));
-	}
+	public void setManualDrive(double moveValue, double turnValue) {
+		if(currentState != DriveState.MANUAL){
+			currentState = DriveState.MANUAL;
+			configureTalons(TalonControlMode.PercentVbus);
+		}
+		this.moveValue = moveValue;
+		this.turnValue = turnValue;
+		updateArcadeDrive();
+	}	
 
 	// TODO: 2D Coordinates
 	public void setWaypoint(double angle, double distance){
@@ -100,6 +96,10 @@ public class OrangeDrive extends Threaded {
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.set(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+	}
+	
+	private void updateArcadeDrive() {
+		driveBase.arcadeDrive(OrangeUtility.scalingDonut(moveValue, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turnValue, TURN_DEAD, 1, 1));
 	}
 	
 	private void updateAutoPath(){		
