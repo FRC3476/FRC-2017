@@ -19,12 +19,13 @@ public class CANTalonChecker extends Threaded {
 	public void add(CANTalon motorIn) {
 		motorArray.add(motorIn);
 	}
-	
+
 	public void remove(CANTalon motorIn) {
 		motorArray.remove(motorIn);
 	}
+
 	@Override
-	public void run() {
+	public void update() {
 		for (CANTalon motor : motorArray) {
 			if (motor.getOutputCurrent() > MAXCURRENT) {
 				motor.disableControl();

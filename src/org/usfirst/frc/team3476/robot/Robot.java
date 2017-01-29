@@ -1,8 +1,14 @@
 package org.usfirst.frc.team3476.robot;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Joystick;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -12,10 +18,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	final String defaultAuto = "Default";
-	final String customAuto = "My Auto";
-	String autoSelected;
-	SendableChooser<String> chooser = new SendableChooser<>();
+
+	Joystick joy = new Joystick(0);
+	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+
+	UsbCamera cam = new UsbCamera("camera", 0);
+	MjpegServer server = new MjpegServer("camServer", 8080);
+
+	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -23,9 +33,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		chooser.addDefault("Default Auto", defaultAuto);
-		chooser.addObject("My Auto", customAuto);
-		SmartDashboard.putData("Auto choices", chooser);
+		orangeDrive.addTask(mainExecutor);
+		server.setSource(cam);
 	}
 
 	/**
@@ -41,33 +50,41 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		autoSelected = chooser.getSelected();
-		// autoSelected = SmartDashboard.getString("Auto Selector",
-		// defaultAuto);
-		System.out.println("Auto selected: " + autoSelected);
+		orangeDrive.setRunningState(true);
 	}
-
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		switch (autoSelected) {
-		case customAuto:
-			// Put custom auto code here
-			break;
-		case defaultAuto:
-		default:
-			// Put default auto code here
-			break;
-		}
+
+	}
+
+	@Override
+	public void teleopInit() {
+		orangeDrive.setRunningState(true);
 	}
 
 	/**
 	 * This function is called periodically during operator control
 	 */
+
+	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
+		double moveVal = joy.getRawAxis(1);
+		double turnVal = joy.getRawAxis(4);
+		// TODO: Use Toggle to get only rising edge
+		if (joy.getRawButton(1)) {
+			orangeDrive.setGearPath();
+		} else {
+			orangeDrive.setManualDrive(moveVal, turnVal);
+		}
+	}
+
+	@Override
+	public void disabledInit() {
+		orangeDrive.setRunningState(false);
 	}
 
 	/**
@@ -75,5 +92,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
+
 	}
 }
