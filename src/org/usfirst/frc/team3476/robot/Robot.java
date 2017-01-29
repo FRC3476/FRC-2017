@@ -5,6 +5,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 
@@ -47,7 +49,8 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
 	}
-
+	UsbCamera cam = new UsbCamera("camera", 0);
+	MjpegServer server = new MjpegServer("camServer", 0);
 	/**
 	 * This function is called periodically during autonomous
 	 */
@@ -72,7 +75,7 @@ public class Robot extends IterativeRobot {
 		double turnVal = joy.getRawAxis(4);
 		// TODO: Use Toggle to get only rising edge
 		if (joy.getRawButton(1)) {
-			orangeDrive.centerOnGear();
+			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
 		}
