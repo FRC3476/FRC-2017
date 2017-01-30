@@ -112,13 +112,13 @@ public class OrangeDrive extends Threaded {
 		if(desiredAngle - testGyro.getAngle() > 2 ){
 			// TODO: Angle per sec to inch per sec to rotations per sec
 			// These are arbitrary values
-			DriveVelocity turningSpeed = new DriveVelocity(0, 10);
+			DriveVelocity turningSpeed = new DriveVelocity(0, 2);
 			setWheelVelocity(turningSpeed);
 		} else if (desiredAngle - testGyro.getAngle() < -2) {
-			DriveVelocity turningSpeed = new DriveVelocity(0, -10);
+			DriveVelocity turningSpeed = new DriveVelocity(0, -2);
 			setWheelVelocity(turningSpeed);
 		} else {
-			DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
+			DriveVelocity drivingSpeed = new DriveVelocity(2, 0);
 			setWheelVelocity(drivingSpeed);
 		}
 	}

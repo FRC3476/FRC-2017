@@ -29,9 +29,6 @@ public class SynchronousPid {
 	private double m_totalError = 0.0;
 	// the tolerance object used to check if on target
 	private Tolerance m_tolerance;
-	private int m_bufLength = 1;
-	private Queue<Double> m_buf;
-	private double m_bufTotal = 0.0;
 	private double m_setpoint = 0.0;
 	private double m_prevSetpoint = 0.0;
 	private double m_error = 0.0;
@@ -41,9 +38,15 @@ public class SynchronousPid {
 	java.util.Timer m_controlLoop;
 	Timer m_setpointTimer;
 
-	protected double update(double input) {
+	public double update(double input) {
 		if(m_continuous){
-			
+			if (Math.abs(m_error) > (m_maximumInput - m_minimumInput) / 2) {
+		        if (m_error > 0) {
+		          m_error -= (m_maximumInput - m_minimumInput);
+		        } else {
+		          m_error += (m_maximumInput - m_minimumInput);
+		        }
+		      }
 		}
 		if (m_pidInput.getPIDSourceType().equals(PIDSourceType.kRate)) {
 			if (m_P != 0) {
@@ -84,9 +87,43 @@ public class SynchronousPid {
 		} else if (m_result < m_minimumOutput) {
 			m_result = m_minimumOutput;
 		}
-		return m_result;
-		
+		return m_result;		
 	}
 	
-
+	public void setSetpoint(double setpoint) {
+	    if (m_maximumInput > m_minimumInput) {
+	      if (setpoint > m_maximumInput) {
+	        m_setpoint = m_maximumInput;
+	      } else if (setpoint < m_minimumInput) {
+	        m_setpoint = m_minimumInput;
+	      } else {
+	        m_setpoint = setpoint;
+	      }
+	    } else {
+	      m_setpoint = setpoint;
+	    }
+	}
+	public double getLastResult(){
+		return m_result;
+	}
+	
+	public double getError(){
+		return m_error;
+	}
+	
+	public boolean onTarget(){
+		return true;
+		// TODO: actually do later
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
