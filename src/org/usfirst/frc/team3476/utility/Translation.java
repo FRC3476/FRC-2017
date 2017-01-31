@@ -2,8 +2,8 @@ package org.usfirst.frc.team3476.utility;
 
 public class Translation {
 	
-	double x;
-	double y;
+	private double x;
+	private double y;
 	
 	public Translation(){	
 		x = 0;
@@ -36,7 +36,14 @@ public class Translation {
 		this.y += y;
 	}
 	
-	public void rotateBy(Rotation rotationAngle){
-		// TODO: Multiply that shit
+	// Rotation matrix consists of
+	// cos O -sin O
+	// sin O  cos O
+	// R = rotation matrix T = translation matrix
+	// Rotated coordinates is R * T
+	public void rotateBy(Rotation rotationMat){
+		x = x * rotationMat.cos() - y * rotationMat.sin();
+		y = x * rotationMat.sin() + y * rotationMat.cos();
 	}
+	
 }

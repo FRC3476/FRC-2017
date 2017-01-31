@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.utility;
 
+
 public class Rotation {
 	
 	private double cos;
@@ -24,7 +25,22 @@ public class Rotation {
 		return Math.atan2(sin, cos);
 	}
 	
-	public void rotateBy(double angle){
-		
+	// Rotation matrix consists of
+	// cos O -sin O
+	// sin O  cos O
+	// R = rotation matrix 
+	// Rotated coordinates is R * R
+	// We only need cos O and sin O because the other two can be determined
+	public void rotateBy(Rotation rotationMat){
+		cos = cos * rotationMat.cos - sin * rotationMat.sin;
+		sin = sin * rotationMat.cos + cos * rotationMat.sin;
+	}
+	
+	public double cos(){
+		return cos;
+	}
+	
+	public double sin(){
+		return sin;
 	}
 }

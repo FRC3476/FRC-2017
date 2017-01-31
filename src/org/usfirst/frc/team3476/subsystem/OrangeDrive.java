@@ -10,6 +10,8 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
 
+/* Inspiration from Team 254 */
+
 public class OrangeDrive extends Threaded {
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
@@ -92,7 +94,6 @@ public class OrangeDrive extends Threaded {
 		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
 	}
 	
-	// TODO: Wheel Velocity should be one object sent
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.set(setVelocity.wheelSpeed - setVelocity.deltaSpeed);

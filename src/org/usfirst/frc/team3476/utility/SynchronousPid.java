@@ -1,16 +1,12 @@
 package org.usfirst.frc.team3476.utility;
 
-import java.util.Queue;
 
-import edu.wpi.first.wpilibj.PIDController.Tolerance;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.Timer;
 
 public class SynchronousPid {
 
-	private static int instances = 0;
 	private double m_P; // factor for "proportional" control
 	private double m_I; // factor for "integral" control
 	private double m_D; // factor for "derivative" control
@@ -28,7 +24,7 @@ public class SynchronousPid {
 	// the sum of the errors for use in the integral calc
 	private double m_totalError = 0.0;
 	// the tolerance object used to check if on target
-	private Tolerance m_tolerance;
+	private double m_tolerance;
 	private double m_setpoint = 0.0;
 	private double m_prevSetpoint = 0.0;
 	private double m_error = 0.0;
@@ -36,6 +32,8 @@ public class SynchronousPid {
 	protected PIDSource m_pidInput;
 	protected PIDOutput m_pidOutput;
 
+	
+	// TODO: Polish, set functions, get functions
 	public double update(double input) {
 		if(m_continuous){
 			if (Math.abs(m_error) > (m_maximumInput - m_minimumInput) / 2) {
@@ -110,8 +108,7 @@ public class SynchronousPid {
 	}
 	
 	public boolean onTarget(){
-		return true;
-		// TODO: actually do later
+		return m_error < m_tolerance;
 	}
 }
 
