@@ -35,8 +35,6 @@ public class SynchronousPid {
 	private double m_result = 0.0;
 	protected PIDSource m_pidInput;
 	protected PIDOutput m_pidOutput;
-	java.util.Timer m_controlLoop;
-	Timer m_setpointTimer;
 
 	public double update(double input) {
 		if(m_continuous){

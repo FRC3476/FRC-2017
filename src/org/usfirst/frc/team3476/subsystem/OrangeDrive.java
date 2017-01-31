@@ -34,7 +34,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private OrangeDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor) {
-		RUNNINGSPEED = 50;
+		RUNNINGSPEED = 10;
 		leftWheel = new CANTalon(frontLeftMotor);
 		rightWheel = new CANTalon(frontRightMotor);
 		
@@ -58,7 +58,7 @@ public class OrangeDrive extends Threaded {
 			updateAutoPath();
 			break;		
 		case GEAR:
-			
+			updateGearPath();
 			break;			
 		}
 	}
@@ -74,7 +74,7 @@ public class OrangeDrive extends Threaded {
 	}	
 
 	// TODO: 2D Coordinates
-	public void setWaypoint(double angle, double distance){
+	public void setAutoPath(double angle, double distance){
 		if(currentState != DriveState.AUTO){
 			currentState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
