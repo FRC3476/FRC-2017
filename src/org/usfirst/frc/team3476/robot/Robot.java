@@ -3,6 +3,7 @@ package org.usfirst.frc.team3476.robot;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 
 import edu.wpi.cscore.MjpegServer;
@@ -22,10 +23,12 @@ public class Robot extends IterativeRobot {
 	Joystick joy = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 
+	Flywheel test = new Flywheel(3, 4);
 	// TODO: Camera will go on the jetson so idk :|
+	/*
 	UsbCamera cam = new UsbCamera("camera", 0);
 	MjpegServer server = new MjpegServer("camServer", 8080);
-
+	*/
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
@@ -35,8 +38,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		orangeDrive.addTask(mainExecutor);
-		server.setSource(cam);
+		//orangeDrive.addTask(mainExecutor);
+		//server.setSource(cam);
+		
 	}
 
 	/**
@@ -52,7 +56,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		orangeDrive.setRunningState(true);
+		test.setRunningState(true);
 	}
 	/**
 	 * This function is called periodically during autonomous
@@ -64,7 +68,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
-		orangeDrive.setRunningState(true);
+		test.setRunningState(true);
 	}
 
 	/**
@@ -74,14 +78,19 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
+		/*
 		double moveVal = joy.getRawAxis(1);
 		double turnVal = joy.getRawAxis(4);
 		// TODO: Use Toggle to get only rising edge
+		
 		if (joy.getRawButton(1)) {
 			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
 		}
+		*/
+		
+		
 	}
 
 	@Override
