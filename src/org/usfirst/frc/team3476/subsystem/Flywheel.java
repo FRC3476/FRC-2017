@@ -12,11 +12,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 public class Flywheel extends Threaded {
 	
 	CANTalon masterTalon, slaveTalon;
-	double setpoint;
-	double toleranceRange = 50;
-	double batVolt;
 	
-	LPController specialController = new LPController();
+	private double toleranceRange = 50;
+	private double batVolt;
+	private double motorOutput;
+	private double setpoint;
+	
+	LPController specialController = new LPController(0.035, 0.005, 0.3);
 	DigitalInput ballSensor = new DigitalInput(1);
 	
 	public Flywheel(int masterTalonId, int slaveTalonId){
@@ -36,6 +38,7 @@ public class Flywheel extends Threaded {
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
 		
 		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
+		masterTalon.configEncoderCodesPerRev(3072);
 		/*
 		masterTalon.setP(0.28);
 		masterTalon.setI(0);
@@ -46,12 +49,12 @@ public class Flywheel extends Threaded {
 	}
 	
 	public void update(){
-		masterTalon.setF(specialController.calculate(ballSensor.get()));
+		motorOutput = specialController.calculate(ballSensor.get(), setpoint);
+		masterTalon.set(motorOutput);
 	}
 	
 	public void setSetpoint(double setpoint){
 		this.setpoint = setpoint;
-		masterTalon.setSetpoint(setpoint);
 	}
 	
 	public void setTolerance(double toleranceRange){
@@ -59,7 +62,7 @@ public class Flywheel extends Threaded {
 	}
 	
 	public boolean isAtSpeed(){
-		return Math.abs(setpoint - masterTalon.getSpeed()) < toleranceRange;
+		return Math.abs(getSetpoint() - masterTalon.getSpeed()) < toleranceRange;
 	}
 	
 	public double getRpm(){
@@ -70,4 +73,7 @@ public class Flywheel extends Threaded {
 		return setpoint;
 	}
 	
+	public double getOutput(){
+		return motorOutput;
+	}
 }

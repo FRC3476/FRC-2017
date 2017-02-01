@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.utility.Toggle;
 
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
@@ -24,6 +25,11 @@ public class Robot extends IterativeRobot {
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 
 	Flywheel test = new Flywheel(3, 4);
+	
+	Toggle A = new Toggle();
+	Toggle B = new Toggle();
+	
+	double setpoint = 3000;
 	// TODO: Camera will go on the jetson so idk :|
 	/*
 	UsbCamera cam = new UsbCamera("camera", 0);
@@ -40,6 +46,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		//orangeDrive.addTask(mainExecutor);
 		//server.setSource(cam);
+		test.addTask(mainExecutor);
 		
 	}
 
@@ -69,6 +76,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		test.setRunningState(true);
+		test.setSetpoint(setpoint);
 	}
 
 	/**
@@ -89,13 +97,27 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setManualDrive(moveVal, turnVal);
 		}
 		*/
+		A.input(joy.getRawButton(1));
+		B.input(joy.getRawButton(2));
 		
+		if(A.rising()){
+			setpoint += 50;
+			test.setSetpoint(setpoint);			
+		}
+		
+		if(B.rising()){
+			setpoint -= 50;
+			test.setSetpoint(setpoint);			
+		}
+		
+		System.out.println("Output: " + test.getOutput());
+		System.out.println("RPM: " + test.getRpm());
 		
 	}
 
 	@Override
 	public void disabledInit() {
-		orangeDrive.setRunningState(false);
+		//orangeDrive.setRunningState(false);
 	}
 
 	/**

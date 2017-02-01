@@ -26,7 +26,6 @@ public class SynchronousPid {
 	// the tolerance object used to check if on target
 	private double m_tolerance;
 	private double m_setpoint = 0.0;
-	private double m_prevSetpoint = 0.0;
 	private double m_error = 0.0;
 	private double m_result = 0.0;
 	protected PIDSource m_pidInput;
