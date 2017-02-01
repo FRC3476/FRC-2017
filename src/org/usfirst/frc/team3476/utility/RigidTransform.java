@@ -2,8 +2,8 @@ package org.usfirst.frc.team3476.utility;
 
 public class RigidTransform {
 	
-	private Rotation rotationMat;
-	private Translation translationMat;	
+	public Rotation rotationMat;
+	public Translation translationMat;	
 	
 	public RigidTransform(){
 		rotationMat = new Rotation();
@@ -14,23 +14,10 @@ public class RigidTransform {
 		this.rotationMat = rotation;
 		this.translationMat = translation;
 	}
-	
-	public void setTranslation(Translation translationMat){
-		this.translationMat = translationMat;
-	}
-	
-	public void setRotation(Rotation rotationMat){
-		this.rotationMat = rotationMat;
-	}
-	
-	public Translation getTranslation(){
-		return translationMat;
-	}
-	
-	public Rotation getRotation(){
-		return rotationMat;
-	}
 		
+	public RigidTransform transform(RigidTransform delta){
+				
+	}
 }
 
 

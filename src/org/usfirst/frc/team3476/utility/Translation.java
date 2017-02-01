@@ -31,9 +31,11 @@ public class Translation {
 		return y;
 	}
 	
-	public void translateBy(double x, double y){
-		this.x += x;
-		this.y += y;
+	public Translation translateBy(Translation delta){
+		this.x += delta.getX();
+		this.y += delta.getY();
+		
+		return new Translation(x, y);
 	}
 	
 	// Rotation matrix consists of
@@ -41,9 +43,11 @@ public class Translation {
 	// sin O  cos O
 	// R = rotation matrix T = translation matrix
 	// Rotated coordinates is R * T
-	public void rotateBy(Rotation rotationMat){
+	public Translation rotateBy(Rotation rotationMat){
 		x = x * rotationMat.cos() - y * rotationMat.sin();
 		y = x * rotationMat.sin() + y * rotationMat.cos();
+		
+		return new Translation(x, y);
 	}
 	
 }
