@@ -38,6 +38,10 @@ public class Rotation {
 		return new Rotation(cos, sin);
 	}
 	
+	public Rotation inverse(){
+		return new Rotation(-cos, -sin);
+	}
+	
 	public double cos(){
 		return cos;
 	}

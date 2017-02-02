@@ -16,7 +16,7 @@ public class OrangeDrive extends Threaded {
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
-	private DriveState currentState = DriveState.MANUAL;
+	private DriveState driveState = DriveState.MANUAL;
 	
 	private double moveValue, turnValue;
 	private double desiredAngle;
@@ -26,6 +26,7 @@ public class OrangeDrive extends Threaded {
 	private RobotDrive driveBase;
 	private AnalogGyro testGyro = new AnalogGyro(0);
 	private CANTalon leftWheel, rightWheel;
+	private RobotTracker robotState = RobotTracker.getInstance();
 	
 	// TODO: Make a centralize place to set and get constants
 	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
@@ -53,7 +54,7 @@ public class OrangeDrive extends Threaded {
 
 	@Override
 	public void update() {
-		switch(currentState){
+		switch(driveState){
 		case MANUAL:
 			break;
 		case AUTO:
@@ -66,8 +67,8 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public void setManualDrive(double moveValue, double turnValue) {
-		if(currentState != DriveState.MANUAL){
-			currentState = DriveState.MANUAL;
+		if(driveState != DriveState.MANUAL){
+			driveState = DriveState.MANUAL;
 			configureTalons(TalonControlMode.PercentVbus);
 		}
 		this.moveValue = moveValue;
@@ -75,20 +76,19 @@ public class OrangeDrive extends Threaded {
 		updateArcadeDrive();
 	}	
 
-	// TODO: 2D Coordinates
 	public void setAutoPath(double angle, double distance){
-		if(currentState != DriveState.AUTO){
-			currentState = DriveState.AUTO;
+		if(driveState != DriveState.AUTO){
+			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
 		}
-		// TODO: Code for tracking distance traveled		
-		
+		robotState.getCurrentPosition();
+		// TODO: Setup Pure Pursuit Controller		
 		updateAutoPath();
 	}
 	
 	public void setGearPath() {
-		if(currentState != DriveState.GEAR){
-			currentState = DriveState.GEAR;
+		if(driveState != DriveState.GEAR){
+			driveState = DriveState.GEAR;
 			configureTalons(TalonControlMode.Speed);
 		}
 		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
@@ -140,6 +140,15 @@ public class OrangeDrive extends Threaded {
 	private static double  inchesPerSecondToRpm(double inchesPerSec){
 		return inchesPerSec / (5 * Math.PI) * 60;
 		// 5 should be the wheel diameter
+	}
+	
+	// TODO: Return wheel in distances
+	public double getLeftDistance(){
+		return leftWheel.getPosition();
+	}
+	
+	public double getRightDistance(){
+		return rightWheel.getPosition();
 	}
 	
 	public static class DriveVelocity {

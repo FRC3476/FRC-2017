@@ -5,26 +5,47 @@ import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.usfirst.frc.team3476.utility.Translation;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+
 public class RobotTracker extends Threaded {
 	
-	private RobotTracker trackingInstance = new RobotTracker();
-	private RigidTransform latestPosition;
+	private static RobotTracker trackingInstance = new RobotTracker();
+	private OrangeDrive driveBase = OrangeDrive.getInstance();
+	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro();
 	
-	public RobotTracker getInstance(){
+	private RigidTransform latestState;	
+	private Translation deltaPosition;
+	private Rotation deltaRotation;
+		
+	private double currentDistance, oldDistance;
+	
+	public static RobotTracker getInstance(){
 		return trackingInstance;
 	}
 	
 	private RobotTracker (){
-		latestPosition = new RigidTransform(new Rotation(), new Translation());		
+		latestState = new RigidTransform(new Translation(), new Rotation());	
+	
 	}
 
+	// TODO: Optimize this 
 	@Override
 	public void update() {
+		//Average distance
+		currentDistance = (driveBase.getLeftDistance() - driveBase.getRightDistance()) / 2;
+		//Get change in rotation
+		deltaRotation = latestState.rotationMat.inverse().rotateBy(new Rotation(Math.cos(gyroSensor.getAngle()), Math.sin(gyroSensor.getAngle())));
+		//Get change in distance
+		deltaPosition = new Translation(oldDistance - currentDistance, 0).rotateBy(deltaRotation);
+		//transform the change to compared to the robot's current position/rotation
+		latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
+		//store old distance
+		oldDistance = currentDistance;		
 		
 	}
 	
 	public RigidTransform getCurrentPosition(){
-		return latestPosition;
+		return latestState;
 	}
 	
 	
