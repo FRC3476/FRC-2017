@@ -24,6 +24,7 @@ public class RobotTracker extends Threaded {
 	}
 	
 	private RobotTracker (){
+		RUNNINGSPEED = 10;
 		latestState = new RigidTransform(new Translation(), new Rotation());	
 	
 	}
