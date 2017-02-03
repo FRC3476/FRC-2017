@@ -10,7 +10,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
 
-/* Inspiration from Team 254 */
+	/* Much inspiration from Team 254 */
 
 public class OrangeDrive extends Threaded {
 	public enum DriveState {
@@ -142,7 +142,7 @@ public class OrangeDrive extends Threaded {
 		// 5 should be the wheel diameter
 	}
 	
-	// TODO: Return wheel in distances
+	// TODO: Return wheel in inches or something
 	public double getLeftDistance(){
 		return leftWheel.getPosition();
 	}
