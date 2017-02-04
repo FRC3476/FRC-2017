@@ -15,7 +15,10 @@ public class Rotation {
 		this.cos = cos;
 		this.sin = sin;
 	}
-	
+	public Rotation(double angle){
+		cos = Math.cos(angle);
+		sin = Math.sin(angle);
+	}
 	public double getDegrees(){
 		return Math.toDegrees(getRadians());
 	}
