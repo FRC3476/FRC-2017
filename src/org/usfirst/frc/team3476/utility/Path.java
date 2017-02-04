@@ -20,10 +20,14 @@ public class Path {
 	public double getRadius(Translation robotPosition, double lookAheadDistance){
 		Translation closestPoint = getClosestPoint(robotPosition, lookAheadDistance);
 		double angleOffset = Math.asin(lookAheadDistance / getDistanceTo(closestPoint, robotPosition));
+		Translation leftRight = robotPosition.rotateBy(new Rotation(Math.cos(angleOffset), Math.sin(angleOffset)));
 		Translation pointOnPath = new Translation(lookAheadDistance / Math.tan(angleOffset), 0);
 		Translation lookAheadPoint = pointOnPath.rotateBy(new Rotation(Math.cos(-angleOffset), Math.sin(-angleOffset)));
 		// TODO: turn left or right???
-		return Math.pow(getDistanceTo(lookAheadPoint, robotPosition), 2) / (2 * pointOnPath.getX());
+		if(leftRight.getY() < 0){
+			return Math.pow(getDistanceTo(lookAheadPoint, robotPosition), 2) / (2 * pointOnPath.getX());
+		}
+		return -1 * Math.pow(getDistanceTo(lookAheadPoint, robotPosition), 2) / (2 * pointOnPath.getX());
 	}
 	
 	public double getDistanceTo(Translation pathPoint, Translation robotPosition){

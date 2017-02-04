@@ -10,11 +10,6 @@ public class PurePursuitController {
 	3. Create circle
 	4. Follow circle path
 	*/
-	/*
-	public DriveVelocity update(){
-		
-	}
-	*/
 
 	private double circleRadius;
 	
@@ -41,11 +36,14 @@ public class PurePursuitController {
 		// find distance in path
 		// add lookahead distance ez
 		double radius = robotPath.getRadius(robotState.translationMat, 50);
+		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
 		
+		return new OrangeDrive.DriveVelocity(robotSpeed, deltaSpeed);
 		// why does this work?????
 		// robotdiameter * (speed / radius) / 2
 		// ^ wheel speed delta
 		
+		// TODO: 
 		// scale to max speed
 	}
 }

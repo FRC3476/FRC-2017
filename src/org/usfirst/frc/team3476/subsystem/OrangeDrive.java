@@ -28,7 +28,6 @@ public class OrangeDrive extends Threaded {
 	private CANTalon leftWheel, rightWheel;
 	private RobotTracker robotState = RobotTracker.getInstance();
 	
-	// TODO: Make a centralize place to set and get constants
 	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
 	
 
