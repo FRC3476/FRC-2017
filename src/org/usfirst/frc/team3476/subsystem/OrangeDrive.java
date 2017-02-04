@@ -21,8 +21,6 @@ public class OrangeDrive extends Threaded {
 	
 	private double moveValue, turnValue;
 	private double desiredAngle;
-	private final double TURN_DEAD = .33;
-	private final double MOVE_DEAD = 0;
 
 	private RobotDrive driveBase;
 	private AnalogGyro testGyro = new AnalogGyro(0);

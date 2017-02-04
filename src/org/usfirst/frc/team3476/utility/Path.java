@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 public class Path {
 
-	// TODO: Create Path thing
-	// Needs to be able to interpolate
 	private ArrayList<Translation> pathPoints;
 	
 	

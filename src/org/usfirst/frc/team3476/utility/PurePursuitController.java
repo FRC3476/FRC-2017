@@ -1,7 +1,6 @@
 package org.usfirst.frc.team3476.utility;
 
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
-import org.usfirst.frc.team3476.subsystem.OrangeDrive.DriveVelocity;
 
 public class PurePursuitController {
 	/*
@@ -10,8 +9,6 @@ public class PurePursuitController {
 	3. Create circle
 	4. Follow circle path
 	*/
-
-	private double circleRadius;
 	
 	private double lookAheadDistance;
 	private double robotSpeed;
