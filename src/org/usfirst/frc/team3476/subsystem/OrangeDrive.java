@@ -1,7 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.OrangeUtility;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -99,7 +98,8 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private void updateArcadeDrive() {
-		driveBase.arcadeDrive(OrangeUtility.scalingDonut(moveValue, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turnValue, TURN_DEAD, 1, 1));
+		// TODO: Get rid of deadbands
+		driveBase.arcadeDrive(moveValue, turnValue);
 	}
 	
 	private void updateAutoPath(){		
