@@ -1,6 +1,8 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Path;
+import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -9,7 +11,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
 
-/* Inspiration from Team 254 */
+	/* Much inspiration from Team 254 */
 
 public class OrangeDrive extends Threaded {
 	public enum DriveState {
@@ -19,15 +21,13 @@ public class OrangeDrive extends Threaded {
 	
 	private double moveValue, turnValue;
 	private double desiredAngle;
-	private final double TURN_DEAD = .33;
-	private final double MOVE_DEAD = 0;
 
 	private RobotDrive driveBase;
 	private AnalogGyro testGyro = new AnalogGyro(0);
 	private CANTalon leftWheel, rightWheel;
 	private RobotTracker robotState = RobotTracker.getInstance();
-	
-	// TODO: Make a centralize place to set and get constants
+	private PurePursuitController autonomousDriver;
+	private DriveVelocity autoDriveVelocity;
 	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
 	
 
@@ -75,13 +75,13 @@ public class OrangeDrive extends Threaded {
 		updateArcadeDrive();
 	}	
 
-	public void setAutoPath(double angle, double distance){
+	public void setAutoPath(Path autoPath){
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
 		}
-		robotState.getCurrentPosition();
-		// TODO: Setup Pure Pursuit Controller		
+		// PurePursuitController(double lookAheadDistance, double robotSpeed, double robotDiameter, Path robotPath)
+		autonomousDriver = new PurePursuitController(10, 10, 10, autoPath);		
 		updateAutoPath();
 	}
 	
@@ -104,9 +104,8 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private void updateAutoPath(){		
-		// TODO: Pure Pursuit Controller
-		
-		//setWheelVelocity();
+		autoDriveVelocity = autonomousDriver.calculate(robotState.getCurrentPosition());
+		setWheelVelocity(autoDriveVelocity);
 	}
 	
 	public void updateGearPath(){
@@ -142,7 +141,7 @@ public class OrangeDrive extends Threaded {
 		// 5 should be the wheel diameter
 	}
 	
-	// TODO: Return wheel in distances
+	// TODO: Return wheel in inches or something
 	public double getLeftDistance(){
 		return leftWheel.getPosition();
 	}
