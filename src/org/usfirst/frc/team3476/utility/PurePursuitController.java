@@ -35,7 +35,7 @@ public class PurePursuitController {
 		// calculate angle from path using height
 		// find distance in path
 		// add lookahead distance ez
-		double radius = robotPath.getRadius(robotState.translationMat, 50);
+		double radius = robotPath.getRadius(robotState.translationMat, lookAheadDistance);
 		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
 		
 		return new OrangeDrive.DriveVelocity(robotSpeed, deltaSpeed);

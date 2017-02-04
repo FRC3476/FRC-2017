@@ -1,6 +1,8 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Path;
+import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -26,7 +28,8 @@ public class OrangeDrive extends Threaded {
 	private AnalogGyro testGyro = new AnalogGyro(0);
 	private CANTalon leftWheel, rightWheel;
 	private RobotTracker robotState = RobotTracker.getInstance();
-	
+	private PurePursuitController autonomousDriver;
+	private DriveVelocity autoDriveVelocity;
 	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
 	
 
@@ -74,13 +77,13 @@ public class OrangeDrive extends Threaded {
 		updateArcadeDrive();
 	}	
 
-	public void setAutoPath(double angle, double distance){
+	public void setAutoPath(Path autoPath){
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
 		}
-		robotState.getCurrentPosition();
-		// TODO: Setup Pure Pursuit Controller		
+		// PurePursuitController(double lookAheadDistance, double robotSpeed, double robotDiameter, Path robotPath)
+		autonomousDriver = new PurePursuitController(10, 10, 10, autoPath);		
 		updateAutoPath();
 	}
 	
@@ -103,9 +106,8 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private void updateAutoPath(){		
-		// TODO: Pure Pursuit Controller
-		
-		//setWheelVelocity();
+		autoDriveVelocity = autonomousDriver.calculate(robotState.getCurrentPosition());
+		setWheelVelocity(autoDriveVelocity);
 	}
 	
 	public void updateGearPath(){
