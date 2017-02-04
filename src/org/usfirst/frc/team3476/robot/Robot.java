@@ -22,9 +22,11 @@ public class Robot extends IterativeRobot {
 	Joystick joy = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 
+	// TODO: Camera will go on the jetson so idk :|
 	UsbCamera cam = new UsbCamera("camera", 0);
 	MjpegServer server = new MjpegServer("camServer", 8080);
 
+	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
 	/**

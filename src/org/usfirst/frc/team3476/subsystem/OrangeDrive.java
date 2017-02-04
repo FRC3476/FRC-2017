@@ -1,7 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.OrangeUtility;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -10,11 +9,13 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
 
+/* Inspiration from Team 254 */
+
 public class OrangeDrive extends Threaded {
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
-	private DriveState currentState = DriveState.MANUAL;
+	private DriveState driveState = DriveState.MANUAL;
 	
 	private double moveValue, turnValue;
 	private double desiredAngle;
@@ -24,6 +25,7 @@ public class OrangeDrive extends Threaded {
 	private RobotDrive driveBase;
 	private AnalogGyro testGyro = new AnalogGyro(0);
 	private CANTalon leftWheel, rightWheel;
+	private RobotTracker robotState = RobotTracker.getInstance();
 	
 	// TODO: Make a centralize place to set and get constants
 	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
@@ -34,7 +36,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private OrangeDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor) {
-		RUNNINGSPEED = 50;
+		RUNNINGSPEED = 10;
 		leftWheel = new CANTalon(frontLeftMotor);
 		rightWheel = new CANTalon(frontRightMotor);
 		
@@ -49,57 +51,56 @@ public class OrangeDrive extends Threaded {
 		driveBase = new RobotDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
 	}
 
-	public void setManualDrive(double moveValue, double turnValue) {
-		if(currentState != DriveState.MANUAL){
-			currentState = DriveState.MANUAL;
-			configureTalons(TalonControlMode.PercentVbus);
-		}
-		this.moveValue = moveValue;
-		this.turnValue = turnValue;
-		setArcadeDrive();
-	}
-
 	@Override
 	public void update() {
-		switch(currentState){
+		switch(driveState){
 		case MANUAL:
 			break;
 		case AUTO:
 			updateAutoPath();
 			break;		
 		case GEAR:
-			
+			updateGearPath();
 			break;			
 		}
 	}
 
-	private void setArcadeDrive() {
-		driveBase.arcadeDrive(OrangeUtility.scalingDonut(moveValue, MOVE_DEAD, 1, 1), OrangeUtility.scalingDonut(turnValue, TURN_DEAD, 1, 1));
-	}
+	public void setManualDrive(double moveValue, double turnValue) {
+		if(driveState != DriveState.MANUAL){
+			driveState = DriveState.MANUAL;
+			configureTalons(TalonControlMode.PercentVbus);
+		}
+		this.moveValue = moveValue;
+		this.turnValue = turnValue;
+		updateArcadeDrive();
+	}	
 
-	// TODO: 2D Coordinates
-	public void setWaypoint(double angle, double distance){
-		if(currentState != DriveState.AUTO){
-			currentState = DriveState.AUTO;
+	public void setAutoPath(double angle, double distance){
+		if(driveState != DriveState.AUTO){
+			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
 		}
-		// TODO: Code for tracking distance traveled		
-		
+		robotState.getCurrentPosition();
+		// TODO: Setup Pure Pursuit Controller		
 		updateAutoPath();
 	}
 	
 	public void setGearPath() {
-		if(currentState != DriveState.GEAR){
-			currentState = DriveState.GEAR;
+		if(driveState != DriveState.GEAR){
+			driveState = DriveState.GEAR;
 			configureTalons(TalonControlMode.Speed);
 		}
 		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
 	}
 	
-	// TODO: Wheel Velocity should be one object sent
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.set(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+	}
+	
+	private void updateArcadeDrive() {
+		// TODO: Get rid of deadbands
+		driveBase.arcadeDrive(moveValue, turnValue);
 	}
 	
 	private void updateAutoPath(){		
@@ -112,13 +113,13 @@ public class OrangeDrive extends Threaded {
 		if(desiredAngle - testGyro.getAngle() > 2 ){
 			// TODO: Angle per sec to inch per sec to rotations per sec
 			// These are arbitrary values
-			DriveVelocity turningSpeed = new DriveVelocity(0, 10);
+			DriveVelocity turningSpeed = new DriveVelocity(0, 2);
 			setWheelVelocity(turningSpeed);
 		} else if (desiredAngle - testGyro.getAngle() < -2) {
-			DriveVelocity turningSpeed = new DriveVelocity(0, -10);
+			DriveVelocity turningSpeed = new DriveVelocity(0, -2);
 			setWheelVelocity(turningSpeed);
 		} else {
-			DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
+			DriveVelocity drivingSpeed = new DriveVelocity(2, 0);
 			setWheelVelocity(drivingSpeed);
 		}
 	}
@@ -139,6 +140,15 @@ public class OrangeDrive extends Threaded {
 	private static double  inchesPerSecondToRpm(double inchesPerSec){
 		return inchesPerSec / (5 * Math.PI) * 60;
 		// 5 should be the wheel diameter
+	}
+	
+	// TODO: Return wheel in distances
+	public double getLeftDistance(){
+		return leftWheel.getPosition();
+	}
+	
+	public double getRightDistance(){
+		return rightWheel.getPosition();
 	}
 	
 	public static class DriveVelocity {
