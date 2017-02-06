@@ -19,7 +19,6 @@ public class OrangeDrive extends Threaded {
 	}
 	private DriveState driveState = DriveState.MANUAL;
 	
-	private double moveValue, turnValue;
 	private double desiredAngle;
 	
 	private boolean isDone;
@@ -50,7 +49,7 @@ public class OrangeDrive extends Threaded {
 		rightSlaveWheel.changeControlMode(TalonControlMode.Follower);
 		rightSlaveWheel.set(frontRightMotor);
 		
-		driveBase = new RobotDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
+		driveBase = new RobotDrive(leftWheel, rightWheel);
 	}
 
 	@Override
@@ -72,9 +71,8 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.MANUAL;
 			configureTalons(TalonControlMode.PercentVbus);
 		}
-		this.moveValue = moveValue;
-		this.turnValue = turnValue;
-		updateArcadeDrive();
+
+		driveBase.arcadeDrive(moveValue, turnValue);
 	}	
 
 	public void setAutoPath(Path autoPath){
@@ -111,11 +109,6 @@ public class OrangeDrive extends Threaded {
 			return isDone;
 		}
 		return true;
-	}
-	
-	private void updateArcadeDrive() {
-		// TODO: Get rid of deadbands
-		driveBase.arcadeDrive(moveValue, turnValue);
 	}
 	
 	private void updateAutoPath(){		

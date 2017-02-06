@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  */
 public class Robot extends IterativeRobot {
 
-	Joystick joy = new Joystick(0);
+	Joystick xbox = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 	
 	
@@ -60,7 +60,6 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
-		cam.setExposureManual(0);
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("code", "");
@@ -102,8 +101,9 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
-		double moveVal = joy.getRawAxis(1);
-		double turnVal = joy.getRawAxis(4);
+		double moveVal = xbox.getRawAxis(1);
+		double turnVal = xbox.getRawAxis(4);
+		orangeDrive.setManualDrive(moveVal, turnVal);
 		
 	}
 

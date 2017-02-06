@@ -6,6 +6,7 @@ public class Path {
 
 	private ArrayList<Translation> pathPoints;
 	
+	// TODO: Path should not use translation. New class with points, rotation, and specify if one or both has to be done
 	
 	public Path(Translation initialPoint){
 		pathPoints.add(initialPoint);
@@ -68,5 +69,11 @@ public class Path {
 		return pathPoints.get(pathPoints.size() - 1);
 	}
 	
+	// TODO: finish this yo
+	public static class Waypoint{
+		Translation position;
+		Rotation rotation;
+		boolean pointImportant, rotationImportant;
+	}
 }
 
