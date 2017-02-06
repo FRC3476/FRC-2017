@@ -3,12 +3,18 @@ package org.usfirst.frc.team3476.robot;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.utility.Dashcomm;
 
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -21,10 +27,16 @@ public class Robot extends IterativeRobot {
 
 	Joystick joy = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+	
+	
+	ScriptEngineManager manager;
+	ScriptEngine engine;
+	String code;
+	boolean first;
 
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
-
+	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -48,13 +60,34 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
+		cam.setExposureManual(0);
+		manager = new ScriptEngineManager();
+		engine = manager.getEngineByName("js");
+		code = Dashcomm.get("code", "");
+		
+		//Put all variables for auto here
+		engine.put("orangeDrive", orangeDrive);
+		
+		first = true;
 	}
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-
+		if (first)
+		{
+			try
+			{
+				engine.eval(code);
+			}
+			catch (ScriptException e)
+			{
+				System.out.println(e);
+			}
+			
+			first = false;
+		}
 	}
 
 	@Override
