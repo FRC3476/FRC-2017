@@ -25,13 +25,6 @@ public class PurePursuitController {
 	}
 	
 	public OrangeDrive.DriveVelocity calculate(RigidTransform robotState){
-		// calculate difference from path
-		// find angle of path away from zero (asin(distance to next waypoint / nextwaypoint y))
-		// rotate robotPosition by angle of path away
-		// y should be distance away
-		// calculate angle from path using height
-		// find distance in path
-		// add lookahead distance ez
 		double radius = robotPath.getRadius(robotState, lookAheadDistance);
 		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
 		
@@ -44,7 +37,7 @@ public class PurePursuitController {
 		// scale to max speed
 	}
 	
-	public boolean onTarget(RigidTransform robotState){
+	public boolean isDone(RigidTransform robotState){
 		// 5 is min off in inches
 		if(robotPath.getDistanceTo(robotState.translationMat, robotPath.endPoint()) < 5){
 			return true;
