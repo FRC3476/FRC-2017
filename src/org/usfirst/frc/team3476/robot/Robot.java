@@ -60,7 +60,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
-		cam.setExposureManual(0);
+		//cam.setExposureManual(0);
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("code", "");
