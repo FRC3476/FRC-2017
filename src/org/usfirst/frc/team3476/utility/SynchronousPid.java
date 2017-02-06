@@ -26,7 +26,6 @@ public class SynchronousPid {
 	// the tolerance object used to check if on target
 	private double m_tolerance;
 	private double m_setpoint = 0.0;
-	private double m_prevSetpoint = 0.0;
 	private double m_error = 0.0;
 	private double m_result = 0.0;
 	protected PIDSource m_pidInput;
@@ -34,6 +33,17 @@ public class SynchronousPid {
 
 	
 	// TODO: Polish, set functions, get functions
+	// Input/Output Range
+	// reset
+	// set deadband
+	// get
+	
+	public SynchronousPid(double P, double I, double D){
+		m_P = P;
+		m_I = I;
+		m_D = D;
+	}
+	
 	public double update(double input) {
 		if(m_continuous){
 			if (Math.abs(m_error) > (m_maximumInput - m_minimumInput) / 2) {
@@ -44,38 +54,22 @@ public class SynchronousPid {
 		        }
 		      }
 		}
-		if (m_pidInput.getPIDSourceType().equals(PIDSourceType.kRate)) {
-			if (m_P != 0) {
-				double potentialPGain = (m_totalError + m_error) * m_P;
-				if (potentialPGain < m_maximumOutput) {
-					if (potentialPGain > m_minimumOutput) {
-						m_totalError += m_error;
-					} else {
-						m_totalError = m_minimumOutput / m_P;
-					}
+		if (m_I != 0) {
+			double potentialIGain = (m_totalError + m_error) * m_I;
+			if (potentialIGain < m_maximumOutput) {
+				if (potentialIGain > m_minimumOutput) {
+					m_totalError += m_error;
 				} else {
-					m_totalError = m_maximumOutput / m_P;
+					m_totalError = m_minimumOutput / m_I;
 				}
-
-				m_result = m_P * m_totalError + m_D * m_error + m_setpoint * m_F;
+			} else {
+				m_totalError = m_maximumOutput / m_I;
 			}
-		} else {
-			if (m_I != 0) {
-				double potentialIGain = (m_totalError + m_error) * m_I;
-				if (potentialIGain < m_maximumOutput) {
-					if (potentialIGain > m_minimumOutput) {
-						m_totalError += m_error;
-					} else {
-						m_totalError = m_minimumOutput / m_I;
-					}
-				} else {
-					m_totalError = m_maximumOutput / m_I;
-				}
-			}
-
-			m_result = m_P * m_error + m_I * m_totalError + m_D * (m_error - m_prevError)
-					+ m_setpoint * m_F;
 		}
+
+		m_result = m_P * m_error + m_I * m_totalError + m_D * (m_error - m_prevError)
+				+ m_setpoint * m_F;
+	
 		m_prevError = m_error;
 
 		if (m_result > m_maximumOutput) {
@@ -109,6 +103,12 @@ public class SynchronousPid {
 	
 	public boolean onTarget(){
 		return m_error < m_tolerance;
+	}
+	
+	public void setPID(double P, double I, double D){
+		m_P = P;
+		m_I = I;
+		m_D = D;
 	}
 }
 

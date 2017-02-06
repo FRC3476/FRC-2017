@@ -21,6 +21,8 @@ public class OrangeDrive extends Threaded {
 	
 	private double moveValue, turnValue;
 	private double desiredAngle;
+	
+	private boolean isDone;
 
 	private RobotDrive driveBase;
 	private AnalogGyro testGyro = new AnalogGyro(0);
@@ -90,12 +92,25 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.GEAR;
 			configureTalons(TalonControlMode.Speed);
 		}
+		
+		isDone = false;
 		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
 	}
 	
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.set(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+	}
+	
+	public boolean isDone(){
+		switch(driveState){
+		case AUTO:
+			// check if path is completed
+			return autonomousDriver.isDone(robotState.getCurrentPosition());
+		case GEAR:
+			return isDone;
+		}
+		return true;
 	}
 	
 	private void updateArcadeDrive() {
@@ -112,6 +127,7 @@ public class OrangeDrive extends Threaded {
 		if(desiredAngle - testGyro.getAngle() > 2 ){
 			// TODO: Angle per sec to inch per sec to rotations per sec
 			// These are arbitrary values
+			// Check if it's done
 			DriveVelocity turningSpeed = new DriveVelocity(0, 2);
 			setWheelVelocity(turningSpeed);
 		} else if (desiredAngle - testGyro.getAngle() < -2) {

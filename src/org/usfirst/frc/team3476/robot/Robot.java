@@ -28,10 +28,6 @@ public class Robot extends IterativeRobot {
 	Joystick joy = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
 	
-	// TODO: Camera will go on the jetson so idk :|
-	UsbCamera cam = new UsbCamera("camera", 0);
-	MjpegServer server = new MjpegServer("camServer", 8080);
-	
 	
 	ScriptEngineManager manager;
 	ScriptEngine engine;
@@ -47,8 +43,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		orangeDrive.addTask(mainExecutor);
-		server.setSource(cam);
+		orangeDrive.addTask(mainExecutor);		
 	}
 
 	/**
@@ -109,12 +104,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		double moveVal = joy.getRawAxis(1);
 		double turnVal = joy.getRawAxis(4);
-		// TODO: Use Toggle to get only rising edge
-		if (joy.getRawButton(1)) {
-			orangeDrive.setGearPath();
-		} else {
-			orangeDrive.setManualDrive(moveVal, turnVal);
-		}
+		
 	}
 
 	@Override
