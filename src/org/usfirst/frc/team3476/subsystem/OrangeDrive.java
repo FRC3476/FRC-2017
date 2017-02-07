@@ -29,9 +29,13 @@ public class OrangeDrive extends Threaded {
 	private RobotTracker robotState = RobotTracker.getInstance();
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
-	private static OrangeDrive driveInstance = new OrangeDrive(7, 8, 4, 5);
+	private static OrangeDrive driveInstance = new OrangeDrive(5, 4, 3, 2);
 	
-
+	private double MINIMUM_INPUT = 0.3;
+	private double MAXIMUM_INPUT = 1;
+	private double MINIMUM_OUTPUT = 0;
+	private double MAXIMUM_OUTPUT = 1;
+	
 	public static OrangeDrive getInstance() {
 		return driveInstance;
 	}
@@ -40,6 +44,10 @@ public class OrangeDrive extends Threaded {
 		RUNNINGSPEED = 10;
 		leftWheel = new CANTalon(frontLeftMotor);
 		rightWheel = new CANTalon(frontRightMotor);
+		leftWheel.reverseOutput(true);
+		rightWheel.reverseOutput(true);
+		leftWheel.reverseSensor(true);
+		rightWheel.reverseSensor(true);
 		
 		CANTalon leftSlaveWheel = new CANTalon(rearLeftMotor);
 		CANTalon rightSlaveWheel = new CANTalon(rearRightMotor);
@@ -71,7 +79,15 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.MANUAL;
 			configureTalons(TalonControlMode.PercentVbus);
 		}
-
+		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+		if(Math.abs(moveValue) >= MINIMUM_INPUT){
+			moveValue = moveValue * (Math.abs(moveValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue);
+		}
+		
+		if(Math.abs(turnValue) >= MINIMUM_INPUT){
+			turnValue = turnValue * (Math.abs(turnValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(turnValue);
+		}
+		
 		driveBase.arcadeDrive(moveValue, turnValue);
 	}	
 

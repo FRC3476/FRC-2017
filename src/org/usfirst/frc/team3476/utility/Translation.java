@@ -50,4 +50,12 @@ public class Translation {
 		return new Translation(x, y);
 	}
 	
+	public double getDistanceTo(Translation nextPoint){
+		return Math.sqrt(Math.pow((x - nextPoint.getX()), 2) + Math.pow(y - nextPoint.getY(), 2));
+	}
+	
+	public Rotation getAngle(Translation nextPoint){
+		double angleOffset = Math.asin(y - nextPoint.getY()/this.getDistanceTo(nextPoint));
+		return new Rotation(Math.cos(angleOffset), Math.sin(angleOffset));
+	}
 }
