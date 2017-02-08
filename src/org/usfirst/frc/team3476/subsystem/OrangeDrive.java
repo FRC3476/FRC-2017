@@ -6,6 +6,8 @@ import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
@@ -29,7 +31,7 @@ public class OrangeDrive extends Threaded {
 	private RobotTracker robotState = RobotTracker.getInstance();
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
-	private static OrangeDrive driveInstance = new OrangeDrive(5, 4, 3, 2);
+	private static OrangeDrive driveInstance = new OrangeDrive(4, 5, 2, 3);
 	
 	private double MINIMUM_INPUT = 0.3;
 	private double MAXIMUM_INPUT = 1;
@@ -44,10 +46,17 @@ public class OrangeDrive extends Threaded {
 		RUNNINGSPEED = 10;
 		leftWheel = new CANTalon(frontLeftMotor);
 		rightWheel = new CANTalon(frontRightMotor);
-		leftWheel.reverseOutput(true);
+		
+		leftWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Absolute);
+		rightWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Absolute);
+		
+		// no need to set up codes per rev
+		// Quadrature updates at 20ms
+		leftWheel.setStatusFrameRateMs(StatusFrameRate.Feedback, 10);
+		rightWheel.setStatusFrameRateMs(StatusFrameRate.Feedback, 10);		
+		
 		rightWheel.reverseOutput(true);
 		leftWheel.reverseSensor(true);
-		rightWheel.reverseSensor(true);
 		
 		CANTalon leftSlaveWheel = new CANTalon(rearLeftMotor);
 		CANTalon rightSlaveWheel = new CANTalon(rearRightMotor);
@@ -58,6 +67,7 @@ public class OrangeDrive extends Threaded {
 		rightSlaveWheel.set(frontRightMotor);
 		
 		driveBase = new RobotDrive(leftWheel, rightWheel);
+		// might need to invert some motors
 	}
 
 	@Override
@@ -112,8 +122,8 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private void setWheelVelocity(DriveVelocity setVelocity){
-		leftWheel.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
-		rightWheel.set(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+		leftWheel.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
+		rightWheel.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
 	}
 	
 	public boolean isDone(){
@@ -162,7 +172,7 @@ public class OrangeDrive extends Threaded {
 	*/
 	
 	private static double  inchesPerSecondToRpm(double inchesPerSec){
-		return inchesPerSec / (5 * Math.PI) * 60;
+		return inchesPerSec / (4 * Math.PI) * 60;
 		// 5 should be the wheel diameter
 	}
 	

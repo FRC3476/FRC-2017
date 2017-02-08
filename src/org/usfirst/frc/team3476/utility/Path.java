@@ -7,7 +7,7 @@ public class Path {
 	private ArrayList<Waypoint> pathPoints;
 	
 	// TODO: Path should not use translation. New class with points, rotation, and specify if one or both has to be done
-	
+	// TODO: Remake algo to match new intended behavior
 	public Path(Waypoint initialPoint){
 		pathPoints.add(initialPoint);
 	}
@@ -41,24 +41,30 @@ public class Path {
 		return pathPoints.get(pathPoints.size() - 1).getPosition();
 	}
 	
-	// TODO: finish this yo
 	public static class Waypoint{
 		private Translation position;
 		private Rotation rotation;
-		private boolean pointImportant, rotationImportant;
+		private double drivingSpeed;
 		
-		public Waypoint (Translation setpoint){
-			position = setpoint;
-			rotation = new Rotation();
-			pointImportant = false;
-			rotationImportant = false;
-		}
-		
-		
+		public Waypoint (double x, double y, double speed){
+			position = new Translation(x, y);
+			rotation = null;
+			drivingSpeed = speed;
+		}		
 		
 		public Translation getPosition(){
 			return position;
 		}
+		
+		public double getSpeed(){
+			return drivingSpeed;
+		}
+		
+		//optional rotation
+		public Rotation getRotation(){
+			return rotation;
+		}
+		
 		
 	}
 }
