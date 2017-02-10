@@ -12,6 +12,7 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 
 	/* Much inspiration from Team 254 */
 
@@ -47,16 +48,21 @@ public class OrangeDrive extends Threaded {
 		leftWheel = new CANTalon(frontLeftMotor);
 		rightWheel = new CANTalon(frontRightMotor);
 		
-		leftWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Absolute);
-		rightWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Absolute);
+		leftWheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		rightWheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		
 		// no need to set up codes per rev
 		// Quadrature updates at 20ms
-		leftWheel.setStatusFrameRateMs(StatusFrameRate.Feedback, 10);
-		rightWheel.setStatusFrameRateMs(StatusFrameRate.Feedback, 10);		
+		leftWheel.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+		rightWheel.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);		
 		
-		rightWheel.reverseOutput(true);
+		leftWheel.configEncoderCodesPerRev(1024);
+		rightWheel.configEncoderCodesPerRev(1024);
+
+		leftWheel.reverseOutput(false);
 		leftWheel.reverseSensor(true);
+		rightWheel.reverseOutput(true);
+		rightWheel.reverseSensor(false);
 		
 		CANTalon leftSlaveWheel = new CANTalon(rearLeftMotor);
 		CANTalon rightSlaveWheel = new CANTalon(rearRightMotor);
@@ -66,7 +72,12 @@ public class OrangeDrive extends Threaded {
 		rightSlaveWheel.changeControlMode(TalonControlMode.Follower);
 		rightSlaveWheel.set(frontRightMotor);
 		
+		
+		// drive code default is reversed as it assumes there is one reversal
+		configureTalons(TalonControlMode.Speed);
 		driveBase = new RobotDrive(leftWheel, rightWheel);
+		//driveBase.setInvertedMotor(MotorType.kRearLeft, true);
+		//driveBase.setInvertedMotor(MotorType.kRearRight, true);
 		// might need to invert some motors
 	}
 
@@ -91,14 +102,15 @@ public class OrangeDrive extends Threaded {
 		}
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if(Math.abs(moveValue) >= MINIMUM_INPUT){
-			moveValue = moveValue * (Math.abs(moveValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue);
+			moveValue = (moveValue * (Math.abs(moveValue) - MINIMUM_INPUT)) / ((MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue));
+			setWheelVelocity(new DriveVelocity(60, 0));
 		}
 		
 		if(Math.abs(turnValue) >= MINIMUM_INPUT){
 			turnValue = turnValue * (Math.abs(turnValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(turnValue);
-		}
-		
-		driveBase.arcadeDrive(moveValue, turnValue);
+		}		
+		//System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
+		// driveBase.arcadeDrive(moveValue, turnValue);
 	}	
 
 	public void setAutoPath(Path autoPath){
@@ -124,6 +136,7 @@ public class OrangeDrive extends Threaded {
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+		System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
 	}
 	
 	public boolean isDone(){

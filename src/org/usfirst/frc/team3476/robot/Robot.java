@@ -62,12 +62,14 @@ public class Robot extends IterativeRobot {
 		orangeDrive.setRunningState(true);
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
-		code = Dashcomm.get("code", "");
+		code = Dashcomm.get("Code", "");
 		
 		//Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
 		
 		first = true;
+
+		orangeDrive.setRunningState(true);
 	}
 	/**
 	 * This function is called periodically during autonomous
@@ -103,7 +105,9 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		double moveVal = xbox.getRawAxis(1);
 		double turnVal = xbox.getRawAxis(4);
-		orangeDrive.setManualDrive(moveVal, turnVal);
+		// joystick pushed up gives -1 and down gives 1
+		// it is also switch for turning
+		orangeDrive.setManualDrive(-moveVal, -turnVal);
 		
 	}
 
