@@ -103,14 +103,17 @@ public class OrangeDrive extends Threaded {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if(Math.abs(moveValue) >= MINIMUM_INPUT){
 			moveValue = (moveValue * (Math.abs(moveValue) - MINIMUM_INPUT)) / ((MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue));
-			setWheelVelocity(new DriveVelocity(60, 0));
+			// setWheelVelocity(new DriveVelocity(60, 0));
+			// moveValue * (MINIMUM_OUTPUT + (Math.abs(moveValue) - MINIMUM_INPUT) * (MAXIMUM_OUTPUT - MINIMUM_OUTPUT)) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue);
+			// Correct way but we can take out MINIMUM_OUTPUT in the front because it will be 0 and also the (MAXIMUM_OUTPUT - MINIMUM_OUTPUT) because that will amount to 1
+			
 		}
 		
 		if(Math.abs(turnValue) >= MINIMUM_INPUT){
 			turnValue = turnValue * (Math.abs(turnValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(turnValue);
 		}		
-		//System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
-		// driveBase.arcadeDrive(moveValue, turnValue);
+		System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
+		driveBase.arcadeDrive(moveValue, turnValue);
 	}	
 
 	public void setAutoPath(Path autoPath){
@@ -136,7 +139,7 @@ public class OrangeDrive extends Threaded {
 	private void setWheelVelocity(DriveVelocity setVelocity){
 		leftWheel.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
-		System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
+		//System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
 	}
 	
 	public boolean isDone(){
@@ -153,6 +156,7 @@ public class OrangeDrive extends Threaded {
 	private void updateAutoPath(){		
 		autoDriveVelocity = autonomousDriver.calculate(robotState.getCurrentPosition());
 		setWheelVelocity(autoDriveVelocity);
+		
 	}
 	
 	public void updateGearPath(){

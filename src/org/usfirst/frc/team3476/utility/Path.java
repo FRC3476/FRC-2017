@@ -1,17 +1,22 @@
 package org.usfirst.frc.team3476.utility;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Path {
 
-	private ArrayList<Waypoint> pathPoints;
+	private List<Waypoint> pathPoints;
+	private Rotation endingRotation;
 	
 	// TODO: Path should not use translation. New class with points, rotation, and specify if one or both has to be done
 	// TODO: Remake algo to match new intended behavior
 	public Path(Waypoint initialPoint){
 		pathPoints.add(initialPoint);
 	}
-	
+
+	public Path(Waypoint initialPoint, Rotation endingRotation){
+		pathPoints.add(initialPoint);
+		this.endingRotation = endingRotation;
+	}
 	public void addWaypoint(Waypoint nextPoint){
 		pathPoints.add(nextPoint);
 	}	
@@ -41,14 +46,16 @@ public class Path {
 		return pathPoints.get(pathPoints.size() - 1).getPosition();
 	}
 	
+	public Rotation getRotation(){
+		return endingRotation;
+	}
+	
 	public static class Waypoint{
 		private Translation position;
-		private Rotation rotation;
 		private double drivingSpeed;
 		
 		public Waypoint (double x, double y, double speed){
 			position = new Translation(x, y);
-			rotation = null;
 			drivingSpeed = speed;
 		}		
 		
@@ -58,11 +65,6 @@ public class Path {
 		
 		public double getSpeed(){
 			return drivingSpeed;
-		}
-		
-		//optional rotation
-		public Rotation getRotation(){
-			return rotation;
 		}
 		
 		
