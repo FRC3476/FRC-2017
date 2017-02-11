@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
@@ -12,7 +13,6 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 
 	/* Much inspiration from Team 254 */
 
@@ -32,12 +32,14 @@ public class OrangeDrive extends Threaded {
 	private RobotTracker robotState = RobotTracker.getInstance();
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
-	private static OrangeDrive driveInstance = new OrangeDrive(4, 5, 2, 3);
+	private static OrangeDrive driveInstance = new OrangeDrive(Constants.LEFT_MOTOR, Constants.LEFT_SLAVE,
+			Constants.RIGHT_MOTOR, Constants.RIGHT_SLAVE);
 	
-	private double MINIMUM_INPUT = 0.3;
-	private double MAXIMUM_INPUT = 1;
-	private double MINIMUM_OUTPUT = 0;
-	private double MAXIMUM_OUTPUT = 1;
+	private static double MINIMUM_INPUT = Constants.MINIMUM_INPUT;
+	private static double MAXIMUM_INPUT = Constants.MAXIMUM_INPUT;
+	private static double MINIMUM_OUTPUT = Constants.MINIMUM_OUTPUT;
+	private static double MAXIMUM_OUTPUT = Constants.MAXIMUM_OUTPUT;
+	private static double WHEEL_DIAMETER = Constants.WHEEL_DIAMETER;
 	
 	public static OrangeDrive getInstance() {
 		return driveInstance;
@@ -51,7 +53,6 @@ public class OrangeDrive extends Threaded {
 		leftWheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		rightWheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		
-		// no need to set up codes per rev
 		// Quadrature updates at 20ms
 		leftWheel.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		rightWheel.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);		
@@ -76,6 +77,7 @@ public class OrangeDrive extends Threaded {
 		// drive code default is reversed as it assumes there is one reversal
 		configureTalons(TalonControlMode.Speed);
 		driveBase = new RobotDrive(leftWheel, rightWheel);
+		driveBase.setSafetyEnabled(false);
 		//driveBase.setInvertedMotor(MotorType.kRearLeft, true);
 		//driveBase.setInvertedMotor(MotorType.kRearRight, true);
 		// might need to invert some motors
@@ -85,6 +87,7 @@ public class OrangeDrive extends Threaded {
 	public void update() {
 		switch(driveState){
 		case MANUAL:
+			// check for last setArcadeDrive
 			break;
 		case AUTO:
 			updateAutoPath();
@@ -95,6 +98,7 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
+	
 	public void setManualDrive(double moveValue, double turnValue) {
 		if(driveState != DriveState.MANUAL){
 			driveState = DriveState.MANUAL;
@@ -103,14 +107,14 @@ public class OrangeDrive extends Threaded {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if(Math.abs(moveValue) >= MINIMUM_INPUT){
 			moveValue = (moveValue * (Math.abs(moveValue) - MINIMUM_INPUT)) / ((MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue));
-			setWheelVelocity(new DriveVelocity(60, 0));
+			setWheelVelocity(new DriveVelocity(moveValue * 240, 0));
 		}
 		
 		if(Math.abs(turnValue) >= MINIMUM_INPUT){
 			turnValue = turnValue * (Math.abs(turnValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(turnValue);
 		}		
 		//System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
-		// driveBase.arcadeDrive(moveValue, turnValue);
+		//driveBase.arcadeDrive(moveValue, turnValue);
 	}	
 
 	public void setAutoPath(Path autoPath){
@@ -137,6 +141,7 @@ public class OrangeDrive extends Threaded {
 		leftWheel.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightWheel.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
 		System.out.println("left " + leftWheel.getSpeed() + "right " + rightWheel.getSpeed());
+		System.out.println("setpoint " + setVelocity.wheelSpeed);
 	}
 	
 	public boolean isDone(){
@@ -185,7 +190,7 @@ public class OrangeDrive extends Threaded {
 	*/
 	
 	private static double  inchesPerSecondToRpm(double inchesPerSec){
-		return inchesPerSec / (4 * Math.PI) * 60;
+		return inchesPerSec / (WHEEL_DIAMETER * Math.PI) * 60;
 		// 5 should be the wheel diameter
 	}
 	

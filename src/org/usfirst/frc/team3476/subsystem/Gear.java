@@ -22,6 +22,7 @@ public class Gear {
 		gearMech.set(pushed);
 	}
 	
+	
 	/* if banner sensor
 	public void getGearInPlace(){
 		check if gear is there 
