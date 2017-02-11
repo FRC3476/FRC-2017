@@ -25,6 +25,10 @@ public class PurePursuitController {
 	}
 	
 	public OrangeDrive.DriveVelocity calculate(RigidTransform robotState){
+		
+		if(isDone(robotState)){
+			return new OrangeDrive.DriveVelocity(0, 0);
+		}
 		double radius = getRadius(robotState, lookAheadDistance);
 		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
 		
@@ -40,21 +44,23 @@ public class PurePursuitController {
 	public double getRadius(RigidTransform robotPosition, double lookAheadDistance){
 		// Get point if robot was centered on 0 degrees
 		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPosition.translationMat, lookAheadDistance).rotateBy(robotPosition.rotationMat.inverse());		
-		
+		System.out.println("position " + lookAheadPoint.getX() + " " + lookAheadPoint.getY());
 		// check if it is straight ahead or not
 		if(Math.abs(lookAheadPoint.getX() - robotPosition.translationMat.getX()) < 1){
 			return 0;
 		}
 		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPosition.translationMat), 2) / (2 * lookAheadPoint.getX());
 		if(lookAheadPoint.getX() > 0){
+			System.out.println("radius " + radius);
 			return radius;
 		} else {
+			System.out.println("radius " + -radius);
 			return -radius;
 		}
 	}
 	
 	public boolean isDone(RigidTransform robotState){
-		// 5 is min off in inches
+		// separate to translation and rotational isDone
 		if(robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 5){
 			return true;
 		} else {
