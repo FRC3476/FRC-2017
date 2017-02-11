@@ -8,6 +8,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -29,6 +30,7 @@ public class Robot extends IterativeRobot {
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
+	String helperCode;
 	boolean first;
 
 	// TODO: Determine best number of threads
@@ -40,6 +42,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		Constants.updateConstants();
 		orangeDrive.addTask(mainExecutor);		
 	}
 
@@ -60,6 +63,7 @@ public class Robot extends IterativeRobot {
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("Code", "");
+		helperCode = Dashcomm.get("HelperCode", "");
 		
 		//Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
@@ -77,6 +81,7 @@ public class Robot extends IterativeRobot {
 		{
 			try
 			{
+				engine.eval(helperCode);
 				engine.eval(code);
 			}
 			catch (ScriptException e)
