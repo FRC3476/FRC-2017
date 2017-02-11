@@ -25,8 +25,7 @@ public class Robot extends IterativeRobot {
 
 	Joystick xbox = new Joystick(0);
 	OrangeDrive orangeDrive = OrangeDrive.getInstance();
-	
-	
+
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
@@ -35,7 +34,7 @@ public class Robot extends IterativeRobot {
 
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
-	
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -43,7 +42,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		Constants.updateConstants();
-		orangeDrive.addTask(mainExecutor);		
+		orangeDrive.addTask(mainExecutor);
 	}
 
 	/**
@@ -64,31 +63,28 @@ public class Robot extends IterativeRobot {
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
-		
-		//Put all variables for auto here
+
+		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
-		
+
 		first = true;
 
 		orangeDrive.setRunningState(true);
 	}
+
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		if (first)
-		{
-			try
-			{
+		if (first) {
+			try {
 				engine.eval(helperCode);
 				engine.eval(code);
-			}
-			catch (ScriptException e)
-			{
+			} catch (ScriptException e) {
 				System.out.println(e);
 			}
-			
+
 			first = false;
 		}
 	}
@@ -110,7 +106,7 @@ public class Robot extends IterativeRobot {
 		// joystick pushed up gives -1 and down gives 1
 		// it is also switch for turning
 		orangeDrive.setManualDrive(-moveVal, -turnVal);
-		
+
 	}
 
 	@Override
