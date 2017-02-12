@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -64,6 +65,20 @@ public class Robot extends IterativeRobot {
 		orangeDrive = OrangeDrive.getInstance();
 		shooters = Flywheels.getInstance();
 		orangeDrive.addTask(mainExecutor);
+	}
+	
+	private void startAutomaticCapture() {
+		// TODO Auto-generated method stub
+		UsbCamera usbCamera = new UsbCamera("USB Camera 0", 0);
+		
+        MjpegServer TurretCAM = new MjpegServer("serve_turretCam", 1181);
+		TurretCAM.setSource(usbCamera); 
+		
+		MjpegServer GearCAM = new MjpegServer("serve_gearCam", 1182);
+		GearCAM.setSource(usbCamera);
+		
+		MjpegServer DashCam = new MjpegServer("serve_DashCam", 1183);
+		DashCam.setSource(usbCamera);
 	}
 
 	/**
