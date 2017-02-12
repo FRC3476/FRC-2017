@@ -7,13 +7,18 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.usfirst.frc.team3476.subsystem.Flywheels;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Toggle;
 
-import edu.wpi.cscore.MjpegServer;
-import edu.wpi.cscore.UsbCamera;
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.CameraServer;
 
@@ -26,27 +31,40 @@ import edu.wpi.first.wpilibj.CameraServer;
  */
 public class Robot extends IterativeRobot {
 
-	Joystick joy = new Joystick(0);
-	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+	Joystick xbox = new Joystick(0);
 	
+	Toggle A = new Toggle();
+	Toggle B = new Toggle();
+	Toggle C = new Toggle();
+	
+	double speed = 2000;
+	
+	OrangeDrive orangeDrive;	
+	Flywheels shooters;
+	
+	CANTalon feeder = new CANTalon(7);
+
+	NetworkTable table = NetworkTable.getTable("SmartDashboard");
 	
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
+	String helperCode;
 	boolean first;
 
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
-	
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	@Override
 	public void robotInit() {
+		Constants.updateConstants();
+		orangeDrive = OrangeDrive.getInstance();
+		shooters = Flywheels.getInstance();
 		orangeDrive.addTask(mainExecutor);
-		CameraServer.getInstance().startAutomaticCapture();
-	startAutomaticCapture();
 	}
 	
 	private void startAutomaticCapture() {
@@ -77,32 +95,32 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		orangeDrive.setRunningState(true);
-		//cam.setExposureManual(0);
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
-		code = Dashcomm.get("code", "");
-		
-		//Put all variables for auto here
+		code = Dashcomm.get("Code", "");
+		helperCode = Dashcomm.get("HelperCode", "");
+
+		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
-		
+
 		first = true;
+
+		orangeDrive.setRunningState(true);
 	}
+
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		if (first)
-		{
-			try
-			{
+		if (first) {
+			try {
+				engine.eval(helperCode);
 				engine.eval(code);
-			}
-			catch (ScriptException e)
-			{
+			} catch (ScriptException e) {
 				System.out.println(e);
 			}
-			
+
 			first = false;
 		}
 	}
@@ -119,9 +137,53 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
-		double moveVal = joy.getRawAxis(1);
-		double turnVal = joy.getRawAxis(4);
 		
+		feeder.changeControlMode(TalonControlMode.PercentVbus);
+		
+		A.input(xbox.getRawButton(1));
+		B.input(xbox.getRawButton(2));
+		C.input(xbox.getRawButton(3));
+
+		if (B.rising()) {
+			speed += 50;
+		//	tbhController.setSetpoint(speed);
+		}
+
+		if (C.rising()) {
+			speed -= 50;
+		}
+		if (xbox.getRawButton(1)) 
+		{
+			shooters.setLeftSetpoint(speed);
+			feeder.set(-.5);
+		}
+		else
+		{
+			shooters.setLeftSetpoint(0);
+			feeder.set(0);
+		}
+		
+		table.putNumber("rpms", shooters.getLeftSpeed());
+		table.putNumber("setpoint", speed);	
+		NetworkTable.flush();
+
+		//System.out.println("Setpoint:" + speed);
+		//System.out.println("Actual:" + shooters.getLeftSpeed());
+		
+		double moveVal = xbox.getRawAxis(1);
+		double turnVal = xbox.getRawAxis(4);
+		// joystick pushed up gives -1 and down gives 1
+		// it is also switch for turning
+		orangeDrive.setManualDrive(-moveVal, -turnVal);
+		
+		shooters.setLeftSetpoint(speed);
+		
+		if(xbox.getRawButton(1)) {
+			shooters.leftEnable();
+		} else {
+			shooters.leftDisable();
+		}
+
 	}
 
 	@Override
