@@ -21,9 +21,8 @@ public class Intake {
 	
 	private IntakeState currentState;
 
-	public static Intake getInstance()
-	{
-		return intakeInstance
+	public static Intake getInstance() {
+		return intakeInstance;
 	}
 	
 	private Intake () {
