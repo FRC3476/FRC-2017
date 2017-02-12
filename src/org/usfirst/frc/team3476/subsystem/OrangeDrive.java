@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 
 /* Much inspiration from Team 254 */
 
-public class OrangeDrive extends Threaded  implements Action{
+public class OrangeDrive extends Threaded{
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
@@ -147,7 +147,6 @@ public class OrangeDrive extends Threaded  implements Action{
 		//System.out.println("setpoint " + setVelocity.wheelSpeed);
 	}
 
-	@Override
 	public boolean isDone() {
 		switch (driveState) {
 		case AUTO:
