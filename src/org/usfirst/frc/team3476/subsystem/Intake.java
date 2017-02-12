@@ -15,20 +15,27 @@ public class Intake {
 	private Solenoid Lift1;
 	private Solenoid Lift2;
 	
+	private static Intake intakeInstance = new Intake();
+	
 	CANTalon masterTalon, slaveTalon;
 	
 	private IntakeState currentState;
 
-	private Intake (int Channel1,int Channel2, int masterTalonId, int slaveTalonId) {
-	  Lift1 = new Solenoid(Channel1);
-	  Lift2 = new Solenoid(Channel2);
+	public static Intake getInstance()
+	{
+		return intakeInstance
+	}
+	
+	private Intake () {
+	  Lift1 = new Solenoid(Constants.Solenoid1);
+	  Lift2 = new Solenoid(Constants.Solenoid2);
 	  
-	  masterTalon = new CANTalon(masterTalonId);
+	  masterTalon = new CANTalon(Constants.IntakeMasterId);
 	  masterTalon.changeControlMode(TalonControlMode.PercentVbus);
-	  slaveTalon = new CANTalon(slaveTalonId);
+	  slaveTalon = new CANTalon(Constants.IntakeSlaveId);
 	  
 	  slaveTalon.changeControlMode(TalonControlMode.Follower);
-	  slaveTalon.set(masterTalonId);				
+	  slaveTalon.set(Constants.IntakeMasterId);
 	}
 	
 	public void setState(IntakeState setState){
