@@ -4,12 +4,12 @@ import edu.wpi.first.wpilibj.Joystick;
 
 public class Controller extends Joystick{
 	//instantiates array of button values
-	boolean buttons[] = new boolean[ super.getButtonCount() ];
-	boolean lastButtons[] = new boolean[ buttons.length ];
+	boolean buttons[] = new boolean[super.getButtonCount()];
+	boolean lastButtons[] = new boolean[buttons.length];
 	
 	//instantiates array of axes values
-	double axes[] = new double[ super.getAxisCount() ];
-	double lastAxes[] = new double[ axes.length ];
+	double axes[] = new double[super.getAxisCount()];
+	double lastAxes[] = new double[axes.length];
 	
 	
 	public Controller(int port) {
