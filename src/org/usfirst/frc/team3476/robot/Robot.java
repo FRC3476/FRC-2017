@@ -149,10 +149,11 @@ public class Robot extends IterativeRobot {
 		}
 		
 		table.putNumber("rpms", shooters.getLeftSpeed());
-		table.putNumber("setpoint", speed);
+		table.putNumber("setpoint", speed);	
+		NetworkTable.flush();
 
-		System.out.println("Setpoint:" + speed);
-		System.out.println("Actual:" + shooters.getLeftSpeed());
+		//System.out.println("Setpoint:" + speed);
+		//System.out.println("Actual:" + shooters.getLeftSpeed());
 		
 		double moveVal = xbox.getRawAxis(1);
 		double turnVal = xbox.getRawAxis(4);
