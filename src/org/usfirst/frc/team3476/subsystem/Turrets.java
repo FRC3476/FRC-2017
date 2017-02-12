@@ -1,8 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Rotation;
-import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.StatusFrameRate;
@@ -41,9 +39,11 @@ public class Turrets {
 		return setAngle;
 	}
 	
+	/*
 	public boolean isDone(){
 		
 	}
+	*/
 	
 	public void setTolerance(double tolerance){
 		this.tolerance = tolerance;

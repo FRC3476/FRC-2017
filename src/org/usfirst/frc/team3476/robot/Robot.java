@@ -7,12 +7,19 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.usfirst.frc.team3476.subsystem.Flywheels;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Toggle;
+
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -24,8 +31,20 @@ import edu.wpi.first.wpilibj.Joystick;
 public class Robot extends IterativeRobot {
 
 	Joystick xbox = new Joystick(0);
-	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+	
+	Toggle A = new Toggle();
+	Toggle B = new Toggle();
+	Toggle C = new Toggle();
+	
+	double speed = 2000;
+	
+	OrangeDrive orangeDrive;	
+	Flywheels shooters;
+	
+	CANTalon feeder = new CANTalon(7);
 
+	NetworkTable table = NetworkTable.getTable("SmartDashboard");
+	
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
@@ -42,6 +61,8 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		Constants.updateConstants();
+		orangeDrive = OrangeDrive.getInstance();
+		shooters = Flywheels.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
 
@@ -101,11 +122,51 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
+		
+		feeder.changeControlMode(TalonControlMode.PercentVbus);
+		
+		A.input(xbox.getRawButton(1));
+		B.input(xbox.getRawButton(2));
+		C.input(xbox.getRawButton(3));
+
+		if (B.rising()) {
+			speed += 50;
+		//	tbhController.setSetpoint(speed);
+		}
+
+		if (C.rising()) {
+			speed -= 50;
+		}
+		if (xbox.getRawButton(1)) 
+		{
+			shooters.setLeftSetpoint(speed);
+			feeder.set(-.5);
+		}
+		else
+		{
+			shooters.setLeftSetpoint(0);
+			feeder.set(0);
+		}
+		
+		table.putNumber("rpms", shooters.getLeftSpeed());
+		table.putNumber("setpoint", speed);
+
+		System.out.println("Setpoint:" + speed);
+		System.out.println("Actual:" + shooters.getLeftSpeed());
+		
 		double moveVal = xbox.getRawAxis(1);
 		double turnVal = xbox.getRawAxis(4);
 		// joystick pushed up gives -1 and down gives 1
 		// it is also switch for turning
 		orangeDrive.setManualDrive(-moveVal, -turnVal);
+		
+		shooters.setLeftSetpoint(speed);
+		
+		if(xbox.getRawButton(1)) {
+			shooters.leftEnable();
+		} else {
+			shooters.leftDisable();
+		}
 
 	}
 

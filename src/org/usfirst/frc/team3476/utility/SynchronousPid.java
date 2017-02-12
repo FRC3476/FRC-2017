@@ -11,9 +11,9 @@ public class SynchronousPid {
 	private double m_F; // factor for feedforward term
 	private double m_maximumOutput = 1.0; // |maximum output|
 	private double m_minimumOutput = -1.0; // |minimum output|
-	private double m_maximumInput = 0.0; // maximum input - limit setpoint to
+	private double m_maximumInput = 0.0; // maximum input - limit leftSetpoint to
 											// this
-	private double m_minimumInput = 0.0; // minimum input - limit setpoint to
+	private double m_minimumInput = 0.0; // minimum input - limit leftSetpoint to
 											// this
 	// do the endpoints wrap around? eg. Absolute encoder
 	private boolean m_continuous = false;

@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.Action;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
@@ -16,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 
 /* Much inspiration from Team 254 */
 
-public class OrangeDrive extends Threaded {
+public class OrangeDrive extends Threaded  implements Action{
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
@@ -33,48 +34,46 @@ public class OrangeDrive extends Threaded {
 	private RobotTracker robotState = RobotTracker.getInstance();
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
-	private static OrangeDrive driveInstance = new OrangeDrive(Constants.LEFT_MOTOR, Constants.LEFT_SLAVE, Constants.RIGHT_MOTOR, Constants.RIGHT_SLAVE);
+	private static OrangeDrive driveInstance = new OrangeDrive();
 
-	private static double MINIMUM_INPUT = Constants.MINIMUM_INPUT;
-	private static double MAXIMUM_INPUT = Constants.MAXIMUM_INPUT;
-	private static double MINIMUM_OUTPUT = Constants.MINIMUM_OUTPUT;
-	private static double MAXIMUM_OUTPUT = Constants.MAXIMUM_OUTPUT;
-	private static double WHEEL_DIAMETER = Constants.WHEEL_DIAMETER;
+	// Do not do private static double MINIMUM_INPUT = Constants.MinimumControllerInput; 
+	// just use Constants.X
 
 	public static OrangeDrive getInstance() {
 		return driveInstance;
 	}
 
-	private OrangeDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor) {
+	private OrangeDrive() {
 		RUNNINGSPEED = 10;
-		leftTalon = new CANTalon(frontLeftMotor);
-		rightTalon = new CANTalon(frontRightMotor);
+		leftTalon = new CANTalon(Constants.LeftMasterDriveId);
+		rightTalon = new CANTalon(Constants.RightMasterDriveId);
 
 		leftTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		rightTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 
 		// Quadrature updates at 20ms
+		
 		leftTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		rightTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 
 		leftTalon.configEncoderCodesPerRev(1024);
 		rightTalon.configEncoderCodesPerRev(1024);
-
+		
 		leftTalon.reverseOutput(false);
 		leftTalon.reverseSensor(true);
 		rightTalon.reverseOutput(true);
 		rightTalon.reverseSensor(false);
 
-		CANTalon leftSlaveTalon = new CANTalon(rearLeftMotor);
-		CANTalon rightSlaveTalon = new CANTalon(rearRightMotor);
+		CANTalon leftSlaveTalon = new CANTalon(Constants.LeftSlaveDriveId);
+		CANTalon rightSlaveTalon = new CANTalon(Constants.RightSlaveDriveId);
 
 		leftSlaveTalon.changeControlMode(TalonControlMode.Follower);
-		leftSlaveTalon.set(frontLeftMotor);
+		leftSlaveTalon.set(Constants.LeftMasterDriveId);
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
-		rightSlaveTalon.set(frontRightMotor);
+		rightSlaveTalon.set(Constants.RightMasterDriveId);
 
 		// drive code default is reversed as it assumes there is one reversal
-		configureTalons(TalonControlMode.Speed);
+		configureTalons(TalonControlMode.PercentVbus);
 		driveBase = new RobotDrive(leftTalon, rightTalon);
 		driveBase.setSafetyEnabled(false);
 		// driveBase.setInvertedMotor(MotorType.kRearLeft, true);
@@ -103,24 +102,21 @@ public class OrangeDrive extends Threaded {
 			configureTalons(TalonControlMode.PercentVbus);
 		}
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
-		if (Math.abs(moveValue) >= MINIMUM_INPUT) {
-			moveValue = (moveValue * (Math.abs(moveValue) - MINIMUM_INPUT))
-					/ ((MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue));
-			// setWheelVelocity(new DriveVelocity(60, 0));
-			// moveValue * (MINIMUM_OUTPUT + (Math.abs(moveValue) -
-			// MINIMUM_INPUT) * (MAXIMUM_OUTPUT - MINIMUM_OUTPUT)) /
-			// (MAXIMUM_INPUT - MINIMUM_INPUT) * Math.abs(moveValue);
-			// Correct way but we can take out MINIMUM_OUTPUT in the front
-			// because it will be 0 and also the (MAXIMUM_OUTPUT -
-			// MINIMUM_OUTPUT) because that will amount to 1
-
+		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
+			//moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(moveValue));
+			moveValue = (moveValue * (Math.abs(moveValue) - 0.3)) / ((0.7) * Math.abs(moveValue));
+			// moveValue * (MinimumControllerOutput + (Math.abs(moveValue) -
+			// MinimumControllerInput) * (MaximumControllerOutput - MinimumControllerOutput)) / (MaximumControllerInput - MinimumControllerInput) * Math.abs(moveValue);
+			// Correct way but we can take out MinimumControllerOutput in the front
+			// because it will be 0 and also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
 		}
 
-		if (Math.abs(turnValue) >= MINIMUM_INPUT) {
-			turnValue = turnValue * (Math.abs(turnValue) - MINIMUM_INPUT) / (MAXIMUM_INPUT - MINIMUM_INPUT)
-					* Math.abs(turnValue);
+		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
+			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput) / (Constants.MaximumControllerInput - Constants.MinimumControllerInput)	* Math.abs(turnValue);
 		}
-		System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
+
+		//setWheelVelocity(new DriveVelocity(moveValue * 240, 0));
+		//System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
 		driveBase.arcadeDrive(moveValue, turnValue);
 	}
 
@@ -148,10 +144,10 @@ public class OrangeDrive extends Threaded {
 	private void setWheelVelocity(DriveVelocity setVelocity) {
 		leftTalon.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightTalon.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
-		System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
-		System.out.println("setpoint " + setVelocity.wheelSpeed);
+		//System.out.println("setpoint " + setVelocity.wheelSpeed);
 	}
 
+	@Override
 	public boolean isDone() {
 		switch (driveState) {
 		case AUTO:
@@ -197,7 +193,7 @@ public class OrangeDrive extends Threaded {
 	 * } */
 
 	private static double inchesPerSecondToRpm(double inchesPerSec) {
-		return inchesPerSec / (WHEEL_DIAMETER * Math.PI) * 60;
+		return inchesPerSec / (Constants.WheelDiameter * Math.PI) * 60;
 		// 5 should be the wheel diameter
 	}
 
