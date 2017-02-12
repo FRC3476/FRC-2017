@@ -18,35 +18,33 @@ public class Controller extends Joystick{
 
 	public void update() {
 		//update buttons
-		for(int i=0; i<buttons.length; i++) {
+		for(int i = 0; i < buttons.length; i++) {
 			lastButtons[i] = buttons[i];
 			buttons[i] = super.getRawButton(i);
 		}
 		
 		//update axes
-		for(int i=0; i<axes.length; i++) {
+		for(int i = 0; i < axes.length; i++) {
 			lastAxes[i] = axes[i];
 			axes[i] = -super.getRawAxis(i);
 		}
 	}
 	
-	public boolean GetRisingEdge(int button) {
+	public boolean getRisingEdge(int button) {
 		//returns true when the value of the button changes from false to true
-		if(lastButtons[button] == false && buttons[button] == true ) {
+		if(lastButtons[button] == false && buttons[button] == true )
 			return true;
-		}
 		return false;
 	}
 	
-	public boolean GetFallingEdge(int button) {
+	public boolean getFallingEdge(int button) {
 		//returns true when the value of the button changes from true to false
-		if(lastButtons[button] == true && buttons[button] == false) {
+		if(lastButtons[button] == true && buttons[button] == false)
 			return true;
-		}
 		return false;
 	}
 	
-	public double getRawAxis(final int axis) {
+	public double getRawAxis(int axis) {
 		//new method as the original method returned values inverted
 		return axes[axis];
 	}
