@@ -6,19 +6,21 @@ import edu.wpi.first.wpilibj.Joystick;
 public class Controller extends Joystick{
 	
 	private int oldButtons;	
+	private int currentButtons;
 	
 	public Controller(int port) {
 		super(port);
 	}
 
-	public void updateOldValues() {
-		oldButtons = DriverStation.getInstance().getStickButtons(getPort());
+	public void update() {
+		oldButtons = currentButtons;
+		currentButtons = DriverStation.getInstance().getStickButtons(getPort());
 	}
 	
 	public boolean getRisingEdge(int button) {
 		if(button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())){
 			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
-			boolean currentVal = getRawButton(button);
+			boolean currentVal = ((0x1 << (button - 1)) & currentButtons) != 0;
 			
 			if(oldVal == false && currentVal == true ){
 				return true;
@@ -32,7 +34,7 @@ public class Controller extends Joystick{
 	public boolean getFallingEdge(int button) {
 		if(button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())){
 			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
-			boolean currentVal = getRawButton(button);
+			boolean currentVal = ((0x1 << (button - 1)) & currentButtons) != 0;
 			
 			if(oldVal == true && currentVal == false){
 				return true;
