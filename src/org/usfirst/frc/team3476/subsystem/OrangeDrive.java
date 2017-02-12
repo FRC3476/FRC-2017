@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Action;
+import org.usfirst.frc.team3476.auto.Action;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 
 /* Much inspiration from Team 254 */
 
-public class OrangeDrive extends Threaded  implements Action{
+public class OrangeDrive extends Threaded{
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
@@ -147,7 +147,6 @@ public class OrangeDrive extends Threaded  implements Action{
 		//System.out.println("setpoint " + setVelocity.wheelSpeed);
 	}
 
-	@Override
 	public boolean isDone() {
 		switch (driveState) {
 		case AUTO:
