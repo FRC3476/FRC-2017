@@ -1,4 +1,4 @@
-package org.usfirst.frc.team3476.utility;
+package org.usfirst.frc.team3476.auto;
 
 import java.util.List;
 import java.util.function.Consumer;
