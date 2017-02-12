@@ -1,51 +1,47 @@
 package org.usfirst.frc.team3476.utility;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class Controller extends Joystick{
-	//instantiates array of button values
-	boolean buttons[] = new boolean[super.getButtonCount()];
-	boolean lastButtons[] = new boolean[buttons.length];
 	
-	//instantiates array of axes values
-	double axes[] = new double[super.getAxisCount()];
-	double lastAxes[] = new double[axes.length];
-	
+	private int oldButtons;	
 	
 	public Controller(int port) {
 		super(port);
 	}
 
-	public void update() {
-		//update buttons
-		for(int i = 0; i < buttons.length; i++) {
-			lastButtons[i] = buttons[i];
-			buttons[i] = super.getRawButton(i);
-		}
-		
-		//update axes
-		for(int i = 0; i < axes.length; i++) {
-			lastAxes[i] = axes[i];
-			axes[i] = -super.getRawAxis(i);
-		}
+	public void updateOldValues() {
+		oldButtons = DriverStation.getInstance().getStickButtons(getPort());
 	}
 	
 	public boolean getRisingEdge(int button) {
-		//returns true when the value of the button changes from false to true
-		if(lastButtons[button] == false && buttons[button] == true )
-			return true;
+		if(button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())){
+			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
+			boolean currentVal = getRawButton(button);
+			
+			if(oldVal == false && currentVal == true ){
+				return true;
+			} else {
+				return false;
+			}
+		}	
 		return false;
 	}
 	
 	public boolean getFallingEdge(int button) {
-		//returns true when the value of the button changes from true to false
-		if(lastButtons[button] == true && buttons[button] == false)
-			return true;
+		if(button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())){
+			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
+			boolean currentVal = getRawButton(button);
+			
+			if(oldVal == true && currentVal == false){
+				return true;
+			} else {
+				return false;
+			}
+		}
 		return false;
 	}
-	
-	public double getRawAxis(int axis) {
-		//new method as the original method returned values inverted
-		return axes[axis];
-	}
+
+
 }
