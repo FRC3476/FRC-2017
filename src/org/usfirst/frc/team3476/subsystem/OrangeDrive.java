@@ -216,5 +216,6 @@ public class OrangeDrive extends Threaded{
 		}
 
 	}
+	public void drive(){}
 
 }

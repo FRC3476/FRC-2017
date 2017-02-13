@@ -4,6 +4,7 @@ import org.usfirst.frc.team3476.utility.Constants;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -44,6 +45,7 @@ public class Flywheels {
 		leftMasterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		leftMasterTalon.configEncoderCodesPerRev(1024);
 		leftMasterTalon.configPeakOutputVoltage(12, 0);
+		leftMasterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
@@ -73,6 +75,7 @@ public class Flywheels {
 		rightMasterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		rightMasterTalon.configEncoderCodesPerRev(1024);
 		rightMasterTalon.configPeakOutputVoltage(12, 0);
+		rightMasterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 	}
 
 	public void setLeftSetpoint(double setpoint) {
