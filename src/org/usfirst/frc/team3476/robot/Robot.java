@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -62,9 +63,9 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		Constants.updateConstants();
 		orangeDrive = OrangeDrive.getInstance();
-		shooters = Flywheel.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
+	
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select

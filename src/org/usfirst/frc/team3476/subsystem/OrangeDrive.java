@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 
 /* Much inspiration from Team 254 */
 
-public class OrangeDrive extends Threaded{
+public class OrangeDrive extends Threaded implements Action{
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
@@ -257,5 +257,11 @@ public class OrangeDrive extends Threaded{
 
 	}
 	public void drive(){}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
