@@ -1,11 +1,15 @@
 package org.usfirst.frc.team3476.utility;
 
-public final class AutoUtility {
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
 
-	private AutoUtility() {
-	}
+public final class AutoUtility
+{
 
-	public static void Sequential() {
+	private AutoUtility(){}
+	
+	public static void Sequential(){
 
 	}
 

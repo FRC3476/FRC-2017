@@ -1,9 +1,9 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Action;
+import org.usfirst.frc.team3476.auto.Action;
 import org.usfirst.frc.team3476.utility.Threaded;
 
-public class VisionTracking extends Threaded  implements Action{
+public class VisionTracking extends Threaded implements Action{
 
 	
 	
@@ -12,11 +12,15 @@ public class VisionTracking extends Threaded  implements Action{
 		
 	}
 
-	@Override
 	public boolean isDone()
 	{
-		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
