@@ -62,7 +62,6 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		Constants.updateConstants();
 		orangeDrive = OrangeDrive.getInstance();
-		shooters = Flywheel.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
 
