@@ -5,29 +5,25 @@ import org.usfirst.frc.team3476.utility.Rotation;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.StatusFrameRate;
 
-public class Turrets {
+public class Turret {
 
 	private double tolerance;
 	
 	
 	private Rotation setAngle;
-	private CANTalon leftTalon;
-	private CANTalon rightTalon;
+	private CANTalon turretTalon;
 	
-	public Turrets(int leftTurretTalonId, int rightTurretTalonId) {
-		leftTalon = new CANTalon(leftTurretTalonId);
-		rightTalon = new CANTalon(rightTurretTalonId);
+	public Turret(int turretTalonId) {
+		turretTalon = new CANTalon(turretTalonId);
 		
-		leftTalon.enableBrakeMode(true);
-		rightTalon.enableBrakeMode(true);
+		turretTalon.enableBrakeMode(true);
 		
-		leftTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
-		rightTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+		turretTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		
 		// set PID
 	}
 
-	private void setAngle(Rotation setAngle){
+	public void setAngle(Rotation setAngle){
 		// setsetpoint 
 		// rotations per degree
 		// :( add special case for turning 90
@@ -35,7 +31,11 @@ public class Turrets {
 		this.setAngle = setAngle;
 	}
 	
-	private Rotation getAngle(){
+	public Rotation getAngle(){
+
+	}
+	
+	public Rotation getSetpoint(){
 		return setAngle;
 	}
 	

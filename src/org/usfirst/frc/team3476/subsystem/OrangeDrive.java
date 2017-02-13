@@ -204,6 +204,46 @@ public class OrangeDrive extends Threaded{
 	public double getRightDistance() {
 		return rightTalon.getPosition();
 	}
+	
+	public void arcadeDrive(double moveValue, double rotateValue){
+				
+		double leftMotorSpeed;
+		double rightMotorSpeed;  
+
+		 if(moveValue >= 0.0) {
+			 moveValue = moveValue * moveValue;
+		 } else {
+		   moveValue = -(moveValue * moveValue);
+		 }
+		 if(rotateValue >= 0.0) {
+			 rotateValue = rotateValue * rotateValue;
+		 } else {
+			 rotateValue = -(rotateValue * rotateValue);
+		 }
+
+		if (moveValue > 0.0) {
+			if (rotateValue > 0.0) {
+				leftMotorSpeed = moveValue - rotateValue;
+				rightMotorSpeed = Math.max(moveValue, rotateValue);
+			} else {
+			    leftMotorSpeed = Math.max(moveValue, -rotateValue);
+			    rightMotorSpeed = moveValue + rotateValue;
+			}
+		} else {
+			if (rotateValue > 0.0) {
+			    leftMotorSpeed = -Math.max(-moveValue, rotateValue);
+			    rightMotorSpeed = moveValue + rotateValue;
+			} else {
+			    leftMotorSpeed = moveValue - rotateValue;
+			    rightMotorSpeed = -Math.max(-moveValue, -rotateValue);
+			}
+		}
+		// 18 ft per sec
+		leftMotorSpeed *= 240;
+		rightMotorSpeed *= 240;
+		
+		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
+	}
 
 	public static class DriveVelocity {
 

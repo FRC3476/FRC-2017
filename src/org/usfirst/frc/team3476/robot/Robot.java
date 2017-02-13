@@ -7,7 +7,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.usfirst.frc.team3476.subsystem.Flywheels;
+import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
@@ -39,7 +39,7 @@ public class Robot extends IterativeRobot {
 	double speed = 2000;
 	
 	OrangeDrive orangeDrive;	
-	Flywheels shooters;
+	Flywheel shooters;
 	
 	CANTalon feeder = new CANTalon(7);
 
@@ -62,7 +62,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		Constants.updateConstants();
 		orangeDrive = OrangeDrive.getInstance();
-		shooters = Flywheels.getInstance();
+		shooters = Flywheel.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
 
@@ -139,16 +139,16 @@ public class Robot extends IterativeRobot {
 		}
 		if (xbox.getRawButton(1)) 
 		{
-			shooters.setLeftSetpoint(speed);
+			shooters.setSetpoint(speed);
 			feeder.set(-.5);
 		}
 		else
 		{
-			shooters.setLeftSetpoint(0);
+			shooters.setSetpoint(0);
 			feeder.set(0);
 		}
 		
-		table.putNumber("rpms", shooters.getLeftSpeed());
+		table.putNumber("rpms", shooters.getSpeed());
 		table.putNumber("setpoint", speed);	
 		NetworkTable.flush();
 
@@ -161,12 +161,12 @@ public class Robot extends IterativeRobot {
 		// it is also switch for turning
 		orangeDrive.setManualDrive(-moveVal, -turnVal);
 		
-		shooters.setLeftSetpoint(speed);
+		shooters.setSetpoint(speed);
 		
 		if(xbox.getRawButton(1)) {
-			shooters.leftEnable();
+			shooters.enable();
 		} else {
-			shooters.leftDisable();
+			shooters.disable();
 		}
 
 	}
