@@ -4,18 +4,20 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 
 public class Gear implements Action{
 	
+	OrangeDrive drive = OrangeDrive.getInstance();
+	
 	public Gear() {
 	}
 	
 	@Override
 	public void start() {
-		OrangeDrive.getInstance().setGearPath();
+		drive.setGearPath();
 		
 	}
 
 	@Override
 	public boolean isDone() {
-		return OrangeDrive.getInstance().isDone();
+		return drive.isDone();
 	}
 
 }
