@@ -5,6 +5,7 @@ import org.usfirst.frc.team3476.utility.Path;
 
 public class Drive implements Action{
 	Path setPath;
+	OrangeDrive drive = new OrangeDrive.getInstance();
 	
 	public Drive(Path path) {
 		setPath = path;
@@ -12,13 +13,13 @@ public class Drive implements Action{
 	
 	@Override
 	public void start() {
-		OrangeDrive.getInstance().setAutoPath(setPath);
+		drive.setAutoPath(setPath);
 		
 	}
 
 	@Override
 	public boolean isDone() {
-		return OrangeDrive.getInstance().isDone();
+		return drive.isDone();
 	}
 
 }
