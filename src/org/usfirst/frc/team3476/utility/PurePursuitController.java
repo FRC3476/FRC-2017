@@ -28,7 +28,10 @@ public class PurePursuitController {
 		}
 		double radius = getRadius(robotState, lookAheadDistance);
 		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
-
+		
+		// TODO: Lower wheel speed as you get closer to endpoint
+		// get distance to next point and subtract distance
+		// if it is positive past the endpoint slow down
 		return new OrangeDrive.DriveVelocity(robotSpeed, deltaSpeed);
 		// why does this work?????
 		// robotdiameter * (speed / radius) / 2

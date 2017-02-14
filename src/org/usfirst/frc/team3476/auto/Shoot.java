@@ -21,7 +21,7 @@ public class Shoot implements Action{
 
 	@Override
 	public boolean isDone() {
-		
+		return false;
 	}
 
 }
