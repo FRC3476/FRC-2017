@@ -3,7 +3,7 @@ package org.usfirst.frc.team3476.subsystem;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Threaded;
 
-public class VisionTracking extends Threaded implements Action{
+public class VisionTracking extends Threaded {
 
 	private Turret leftTurret;
 	private Turret rightTurret;
@@ -18,13 +18,5 @@ public class VisionTracking extends Threaded implements Action{
 	public boolean isDone()
 	{
 		return false;
-	}
-
-	@Override
-	public void start() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
+	}	
 }

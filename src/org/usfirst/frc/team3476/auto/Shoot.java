@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.auto;
 
-import org.usfirst.frc.team3476.subsystem.Flywheels;
+import org.usfirst.frc.team3476.subsystem.Flywheel;
 
 public class Shoot implements Action{
 	int speedleft;
@@ -16,13 +16,12 @@ public class Shoot implements Action{
 	
 	@Override
 	public void start() {
-		Flywheels.getInstance().setLeftSetpoint(speedleft);
-		Flywheels.getInstance().setRightSetpoint(speedright);
+		
 	}
 
 	@Override
 	public boolean isDone() {
-		return Flywheels.getInstance().isDone();
+		
 	}
 
 }
