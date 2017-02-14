@@ -5,7 +5,7 @@ import org.usfirst.frc.team3476.utility.Path;
 
 public class Drive implements Action{
 	Path setPath;
-	OrangeDrive drive = new OrangeDrive.getInstance();
+	OrangeDrive drive = OrangeDrive.getInstance();
 	
 	public Drive(Path path) {
 		setPath = path;

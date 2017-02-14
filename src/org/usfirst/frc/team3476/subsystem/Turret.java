@@ -31,9 +31,11 @@ public class Turret {
 		this.setAngle = setAngle;
 	}
 	
+	/*
 	public Rotation getAngle(){
 
 	}
+	*/
 	
 	public Rotation getSetpoint(){
 		return setAngle;
