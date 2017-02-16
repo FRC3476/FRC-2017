@@ -14,6 +14,7 @@ public final class Constants
 	public static double MinimumControllerOutput;
 	public static double MaximumControllerOutput; 
 	
+	public static double GearAngleTolerance;
 	public static double WheelDiameter; 
 	public static int LeftMasterDriveId; 
 	public static int LeftSlaveDriveId; 
@@ -25,6 +26,8 @@ public final class Constants
 	public static int RightMasterFlywheelId;
 	public static int RightSlaveFlywheelId;
 	
+	public static double TurretTicksPerRotations;
+	
 	public static void updateConstants()
 	{
 		MinimumControllerInput = Dashcomm.get("Constants/MinimumControllerInput", 0.3);
@@ -32,6 +35,7 @@ public final class Constants
 		MinimumControllerOutput = Dashcomm.get("Constants/MinimumControllerOutput", 0);
 		MaximumControllerOutput = Dashcomm.get("Constants/MaximumControllerOutput", 1); 
 		
+		GearAngleTolerance = Dashcomm.get("Constants/GearAngleTolerance", 2);
 		WheelDiameter = Dashcomm.get("Constants/WheelDiameter", 4); 
 		LeftMasterDriveId = (int) Dashcomm.get("Constants/LeftMasterDriveId", 4); 
 		LeftSlaveDriveId = (int) Dashcomm.get("Constants/LeftSlaveDriveId", 5); 
@@ -42,5 +46,7 @@ public final class Constants
 		LeftSlaveFlywheelId = 11;//(int) Dashcomm.get("Constants/LeftSlaveFlywheelId", 11);
 		RightMasterFlywheelId = (int) Dashcomm.get("Constants/RightMasterFlywheelId", 0);
 		RightSlaveFlywheelId = (int) Dashcomm.get("Constants/RightSlaveFlywheelId", 0);
+		
+		TurretTicksPerRotations = Dashcomm.get("Constants/TurretTicksPerRotations", 20000);
 	}
 }

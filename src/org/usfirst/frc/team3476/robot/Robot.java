@@ -10,17 +10,14 @@ import javax.script.ScriptException;
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Toggle;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -31,12 +28,8 @@ import edu.wpi.first.wpilibj.CameraServer;
  */
 public class Robot extends IterativeRobot {
 
-	Joystick xbox = new Joystick(0);
-	
-	Toggle A = new Toggle();
-	Toggle B = new Toggle();
-	Toggle C = new Toggle();
-	
+	Controller xbox = new Controller(0);
+
 	double speed = 2000;
 	
 	OrangeDrive orangeDrive;	
@@ -123,19 +116,15 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
-		
+		xbox.update();
 		feeder.changeControlMode(TalonControlMode.PercentVbus);
-		
-		A.input(xbox.getRawButton(1));
-		B.input(xbox.getRawButton(2));
-		C.input(xbox.getRawButton(3));
 
-		if (B.rising()) {
+		if (xbox.getRisingEdge(2)) {
 			speed += 50;
 		//	tbhController.setSetpoint(speed);
 		}
 
-		if (C.rising()) {
+		if (xbox.getRisingEdge(3)) {
 			speed -= 50;
 		}
 		if (xbox.getRawButton(1)) 

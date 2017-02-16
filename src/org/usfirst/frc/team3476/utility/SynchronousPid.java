@@ -34,14 +34,16 @@ public class SynchronousPid {
 	// reset
 	// set deadband
 	// get
-
-	public SynchronousPid(double P, double I, double D) {
+	
+	public SynchronousPid(double P, double I, double D, double F) {
 		m_P = P;
 		m_I = I;
 		m_D = D;
+		m_F = F;
 	}
 
 	public double update(double input) {
+		m_error = m_setpoint - input;
 		if (m_continuous) {
 			if (Math.abs(m_error) > (m_maximumInput - m_minimumInput) / 2) {
 				if (m_error > 0) {
@@ -89,7 +91,17 @@ public class SynchronousPid {
 			m_setpoint = setpoint;
 		}
 	}
-
+	
+	public void setInputRange(double maximumInput, double minimumInput){
+		m_maximumInput = maximumInput;
+		m_minimumInput = minimumInput;
+	}
+	
+	public void setOutputRange(double maximumOutput, double minimumOutput){
+		m_maximumOutput = maximumOutput;
+		m_minimumOutput = minimumOutput;
+	}
+	
 	public double getLastResult() {
 		return m_result;
 	}
@@ -98,13 +110,31 @@ public class SynchronousPid {
 		return m_error;
 	}
 
-	public boolean onTarget() {
+	public boolean isDone() {
 		return m_error < m_tolerance;
 	}
 
-	public void setPID(double P, double I, double D) {
+	public void setPIDF(double P, double I, double D, double F) {
 		m_P = P;
 		m_I = I;
 		m_D = D;
+		m_F = F;
 	}
+	
+	public void setP(double P){
+		m_P = P;
+	}
+	
+	public void setI(double I){
+		m_I = I;
+	}
+	
+	public void setD(double D){
+		m_D = D;
+	}
+	
+	public void setF(double F){
+		m_F = F;
+	}
+
 }

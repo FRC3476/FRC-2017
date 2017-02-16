@@ -5,6 +5,7 @@ import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
+import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -15,7 +16,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.RobotDrive;
 
-/* Much inspiration from Team 254 */
+/* Inspiration from Team 254 */
 
 public class OrangeDrive extends Threaded implements Action{
 	public enum DriveState {
@@ -33,6 +34,7 @@ public class OrangeDrive extends Threaded implements Action{
 	private CANTalon leftTalon, rightTalon;
 	private RobotTracker robotState = RobotTracker.getInstance();
 	private PurePursuitController autonomousDriver;
+	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
 	private DriveVelocity autoDriveVelocity;
 	private static OrangeDrive driveInstance = new OrangeDrive();
 
@@ -139,6 +141,8 @@ public class OrangeDrive extends Threaded implements Action{
 
 		isDone = false;
 		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
+		gearDriver.setSetpoint(desiredAngle);
+		updateGearPath();
 	}
 
 	private void setWheelVelocity(DriveVelocity setVelocity) {
@@ -149,6 +153,8 @@ public class OrangeDrive extends Threaded implements Action{
 
 	public boolean isDone() {
 		switch (driveState) {
+		case MANUAL:
+			return true;
 		case AUTO:
 			// check if path is completed
 			return autonomousDriver.isDone(robotState.getCurrentPosition());
@@ -161,21 +167,13 @@ public class OrangeDrive extends Threaded implements Action{
 	private void updateAutoPath() {
 		autoDriveVelocity = autonomousDriver.calculate(robotState.getCurrentPosition());
 		setWheelVelocity(autoDriveVelocity);
-
 	}
 
 	public void updateGearPath() {
-		if (desiredAngle - testGyro.getAngle() > 2) {
-			// TODO: Angle per sec to inch per sec to rotations per sec
-			// These are arbitrary values
-			// Check if it's done
-			DriveVelocity turningSpeed = new DriveVelocity(0, 2);
-			setWheelVelocity(turningSpeed);
-		} else if (desiredAngle - testGyro.getAngle() < -2) {
-			DriveVelocity turningSpeed = new DriveVelocity(0, -2);
-			setWheelVelocity(turningSpeed);
+		if (Math.abs(desiredAngle - testGyro.getAngle()) > Constants.GearAngleTolerance) {
+			setWheelVelocity(new DriveVelocity(0, gearDriver.update(testGyro.getAngle())));
 		} else {
-			DriveVelocity drivingSpeed = new DriveVelocity(2, 0);
+			DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
 			setWheelVelocity(drivingSpeed);
 		}
 	}
@@ -183,17 +181,6 @@ public class OrangeDrive extends Threaded implements Action{
 	public void configureTalons(TalonControlMode mode) {
 		leftTalon.changeControlMode(mode);
 		rightTalon.changeControlMode(mode);
-	}
-
-	/* private static double angleToInchesPerSecond(){
-	 * // diameter * pi
-	 * // times angle per sec
-	 * // divided by 360
-	 * } */
-
-	private static double inchesPerSecondToRpm(double inchesPerSec) {
-		return inchesPerSec / (Constants.WheelDiameter * Math.PI) * 60;
-		// 5 should be the wheel diameter
 	}
 
 	// TODO: Return wheel in inches or something
