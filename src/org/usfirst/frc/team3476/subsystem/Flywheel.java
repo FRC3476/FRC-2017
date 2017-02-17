@@ -23,6 +23,8 @@ public class Flywheel {
 		slaveTalon.changeControlMode(TalonControlMode.Follower);
 		slaveTalon.set(masterTalonId);
 
+		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+		
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
 		
@@ -77,5 +79,7 @@ public class Flywheel {
 	{
 		masterTalon.disable();
 	}
-
+	public double getCurrent(){
+		return masterTalon.getOutputCurrent();
+	}
 }

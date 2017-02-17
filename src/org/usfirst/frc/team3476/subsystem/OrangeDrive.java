@@ -75,9 +75,9 @@ public class OrangeDrive extends Threaded implements Action{
 		rightSlaveTalon.set(Constants.RightMasterDriveId);
 
 		// drive code default is reversed as it assumes there is one reversal
-		configureTalons(TalonControlMode.PercentVbus);
-		driveBase = new RobotDrive(leftTalon, rightTalon);
-		driveBase.setSafetyEnabled(false);
+		configureTalons(TalonControlMode.Speed);
+	//	driveBase = new RobotDrive(leftTalon, rightTalon);
+		//driveBase.setSafetyEnabled(false);
 		// driveBase.setInvertedMotor(MotorType.kRearLeft, true);
 		// driveBase.setInvertedMotor(MotorType.kRearRight, true);
 		// might need to invert some motors
@@ -117,9 +117,10 @@ public class OrangeDrive extends Threaded implements Action{
 			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput) / (Constants.MaximumControllerInput - Constants.MinimumControllerInput)	* Math.abs(turnValue);
 		}
 
+		setWheelVelocity(new DriveVelocity(moveValue * 10, 0));
 		//setWheelVelocity(new DriveVelocity(moveValue * 240, 0));
 		//System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
-		driveBase.arcadeDrive(moveValue, turnValue);
+		//arcadeDrive(moveValue, turnValue);
 	}
 
 	public void setAutoPath(Path autoPath) {
@@ -148,7 +149,8 @@ public class OrangeDrive extends Threaded implements Action{
 	private void setWheelVelocity(DriveVelocity setVelocity) {
 		leftTalon.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
 		rightTalon.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
-		//System.out.println("setpoint " + setVelocity.wheelSpeed);
+		System.out.println("setpoint " + setVelocity.wheelSpeed);
+		System.out.println("delta " + setVelocity.deltaSpeed);
 	}
 
 	public boolean isDone() {
@@ -226,8 +228,8 @@ public class OrangeDrive extends Threaded implements Action{
 			}
 		}
 		// 18 ft per sec
-		leftMotorSpeed *= 240;
-		rightMotorSpeed *= 240;
+		leftMotorSpeed *= 10;
+		rightMotorSpeed *= 10;
 		
 		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
 	}

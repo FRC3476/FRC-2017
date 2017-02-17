@@ -1,7 +1,9 @@
 package org.usfirst.frc.team3476.robot;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -16,6 +18,7 @@ import org.usfirst.frc.team3476.utility.Dashcomm;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -36,8 +39,13 @@ public class Robot extends IterativeRobot {
 	Flywheel shooters;
 	
 	CANTalon feeder = new CANTalon(7);
-
-	NetworkTable table = NetworkTable.getTable("SmartDashboard");
+	CANTalon intake = new CANTalon(8);
+	CANTalon intake2 = new CANTalon(9);
+	
+	DigitalInput test = new DigitalInput(22);
+	DigitalInput test2 = new DigitalInput(23);
+	NetworkTable table = NetworkTable.getTable("");
+	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
 	
 	ScriptEngineManager manager;
 	ScriptEngine engine;
@@ -55,6 +63,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		Constants.updateConstants();
+		shooters = new Flywheel(10, 11);
 		orangeDrive = OrangeDrive.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
@@ -104,9 +113,30 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
+	Future<?> shooter;
 	@Override
 	public void teleopInit() {
 		orangeDrive.setRunningState(true);
+		shooter = mainExecutor.scheduleAtFixedRate(new Runnable(){
+			@Override
+			public void run(){
+				table.putNumber("rpms", shooters.getSpeed());
+				table.putNumber("current", shooters.getCurrent());
+				if(test.get()){
+					table.putNumber("enter", 1);
+				} else {
+					table.putNumber("enter", 0);
+				}
+
+				if(test2.get()){
+					table.putNumber("exit", 1);
+				} else {
+					table.putNumber("exit", 0);
+				}
+				NetworkTable.flush();
+				
+			}
+		}, 0, 10, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -137,10 +167,6 @@ public class Robot extends IterativeRobot {
 			shooters.setSetpoint(0);
 			feeder.set(0);
 		}
-		
-		table.putNumber("rpms", shooters.getSpeed());
-		table.putNumber("setpoint", speed);	
-		NetworkTable.flush();
 
 		//System.out.println("Setpoint:" + speed);
 		//System.out.println("Actual:" + shooters.getLeftSpeed());
@@ -149,7 +175,7 @@ public class Robot extends IterativeRobot {
 		double turnVal = xbox.getRawAxis(4);
 		// joystick pushed up gives -1 and down gives 1
 		// it is also switch for turning
-		orangeDrive.setManualDrive(-moveVal, -turnVal);
+		//orangeDrive.setManualDrive(-moveVal, -turnVal);
 		
 		shooters.setSetpoint(speed);
 		
@@ -159,11 +185,24 @@ public class Robot extends IterativeRobot {
 			shooters.disable();
 		}
 
+		if(xbox.getRawButton(4)){
+			intake.set(0.5);
+			intake2.set(0.5);
+		} else {
+			intake.set(0);
+			intake2.set(0);
+		}
+		
+		graph.putNumber("rpms", shooters.getSpeed());
+		graph.putNumber("setpoint", speed);
+		
 	}
 
 	@Override
 	public void disabledInit() {
 		orangeDrive.setRunningState(false);
+		if(shooter != null){
+			shooter.cancel(true);		}
 	}
 
 	/**
