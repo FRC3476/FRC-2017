@@ -1,12 +1,15 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.LPController;
+import org.usfirst.frc.team3476.utility.Threaded;
+
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-
 public class Flywheel {
 
 	private CANTalon masterTalon, slaveTalon;
@@ -42,7 +45,6 @@ public class Flywheel {
 
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
-
 		/* leftMasterTalon.setP(0.28);
 		 * leftMasterTalon.setI(0);
 		 * leftMasterTalon.setD(7);
@@ -52,7 +54,6 @@ public class Flywheel {
 
 	public void setSetpoint(double setpoint) {
 		this.setpoint = setpoint;
-		masterTalon.setSetpoint(setpoint);
 	}
 
 	public void setTolerance(double toleranceRange) {
