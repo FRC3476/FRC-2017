@@ -1,49 +1,82 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Threaded;
+import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.utility.Rotation;
 
-public class Turret extends Threaded {
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.StatusFrameRate;
+
+public class Turret {
+
+	private double tolerance;
 	
-	public enum TurretState {
-		IDLE, PASSIVE, ACTIVE, LOCKED
+	private Rotation setAngle;
+	private CANTalon turretTalon;
+	
+	public Turret(int turretTalonId) {
+		turretTalon = new CANTalon(turretTalonId);
+		
+		turretTalon.enableBrakeMode(true);
+		
+		turretTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+		
+		// set PID
+	}
+
+	// Discuss doing everything in radians
+	public void setAngle(Rotation setAngle){
+		// setsetpoint 
+		// rotations per degree
+		// :( add special case for turning 90
+		turretTalon.setSetpoint((setAngle.getDegrees()/360) * Constants.TurretTicksPerRotations);
+		this.setAngle = setAngle;
 	}
 	
-	TurretState currentState;
 	
-	public Turret(int turretTalonId){
-		RUNNINGSPEED = 5;
-		currentState = TurretState.IDLE;
+	public Rotation getAngle(){
+		return new Rotation(turretTalon.getPosition() / Constants.TurretTicksPerRotations);
 	}
 	
-	public void update(){
-		switch(currentState){
-		case IDLE:
-			break;
-		case PASSIVE:
-			// Normal aim at goal first
-			//
-			break;
-		case ACTIVE:
-			// Search for goal if it isn't found
-			break;
-		case LOCKED:
-			// After finding goal
-			// Aim at it while moving
-			break;
-		}
+	
+	public Rotation getSetpoint(){
+		return setAngle;
 	}
 	
-	public void passiveAim(){
+	/*
+	public boolean isDone(){
 		
 	}
+	*/
 	
-	public void activeAim(){
+	public void setTolerance(double tolerance){
 		
+		this.tolerance = tolerance;
 	}
-	
-	public void lockedAim(){
-		// Might need calibration during match
-	}
-	
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

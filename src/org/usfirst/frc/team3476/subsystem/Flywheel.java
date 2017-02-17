@@ -4,76 +4,83 @@ import org.usfirst.frc.team3476.utility.LPController;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+public class Flywheel {
 
-public class Flywheel extends Threaded {
+	private CANTalon masterTalon, slaveTalon;
 	
-	CANTalon masterTalon, slaveTalon;
+	private double setpoint;
 	
 	private double toleranceRange = 50;
 	private double batVolt;
-	private double motorOutput;
-	private double setpoint;
-	
-	LPController specialController = new LPController(0.035, 0.005, 0.3);
-	DigitalInput ballSensor = new DigitalInput(1);
-	
-	public Flywheel(int masterTalonId, int slaveTalonId){
-		RUNNINGSPEED = 10;
-		masterTalon = new CANTalon(masterTalonId);
+
+	public Flywheel(int masterTalonId, int slaveTalonId) {
+		masterTalon = new CANTalon(masterTalonId, 1);
+		masterTalon.changeControlMode(TalonControlMode.Speed);
 		slaveTalon = new CANTalon(slaveTalonId);
 		slaveTalon.changeControlMode(TalonControlMode.Follower);
-		slaveTalon.set(masterTalonId);		
+		slaveTalon.set(masterTalonId);
+
+		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
 		
+		masterTalon.reverseOutput(false);
+		masterTalon.reverseSensor(true);
+		slaveTalon.reverseOutput(true);
+
 		masterTalon.clearStickyFaults();
 		slaveTalon.clearStickyFaults();
 		
+		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		masterTalon.configEncoderCodesPerRev(1024);
+		masterTalon.configPeakOutputVoltage(12, 0);
+		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
-		
-		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
-		masterTalon.configEncoderCodesPerRev(3072);
-		/*
-		masterTalon.setP(0.28);
-		masterTalon.setI(0);
-		masterTalon.setD(7);
-		masterTalon.setF(0.0125);
-		Constants TBD
-		*/		
+		/* leftMasterTalon.setP(0.28);
+		 * leftMasterTalon.setI(0);
+		 * leftMasterTalon.setD(7);
+		 * leftMasterTalon.setF(0.0125);
+		 * Constants TBD */
 	}
-	
-	public void update(){
-		motorOutput = specialController.calculate(ballSensor.get(), setpoint);
-		masterTalon.set(motorOutput);
-	}
-	
-	public void setSetpoint(double setpoint){
+
+	public void setSetpoint(double setpoint) {
 		this.setpoint = setpoint;
 	}
-	
-	public void setTolerance(double toleranceRange){
+
+	public void setTolerance(double toleranceRange) {
 		this.toleranceRange = toleranceRange;
 	}
-	
-	public boolean isAtSpeed(){
-		return Math.abs(getSetpoint() - masterTalon.getSpeed()) < toleranceRange;
+
+	public boolean isDone() {
+		return (Math.abs(setpoint - masterTalon.getSpeed()) < toleranceRange);
 	}
-	
-	public double getRpm(){
+
+	public double getSpeed() {
 		return masterTalon.getSpeed();
 	}
-	
-	public double getSetpoint(){
+
+	public double getSetpoint() {
 		return setpoint;
 	}
 	
-	public double getOutput(){
-		return motorOutput;
+	public void enable()
+	{
+		masterTalon.enable();
+	}
+	public void disable()
+	{
+		masterTalon.disable();
+	}
+	public double getCurrent(){
+		return masterTalon.getOutputCurrent();
 	}
 }

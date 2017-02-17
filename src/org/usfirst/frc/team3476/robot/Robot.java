@@ -1,16 +1,26 @@
 package org.usfirst.frc.team3476.robot;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
-import org.usfirst.frc.team3476.utility.Toggle;
+import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.utility.Controller;
+import org.usfirst.frc.team3476.utility.Dashcomm;
 
-import edu.wpi.cscore.MjpegServer;
-import edu.wpi.cscore.UsbCamera;
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -21,20 +31,28 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class Robot extends IterativeRobot {
 
-	Joystick joy = new Joystick(0);
-	OrangeDrive orangeDrive = OrangeDrive.getInstance();
+	Controller xbox = new Controller(0);
 
-	Flywheel test = new Flywheel(3, 4);
+	double speed = 2000;
 	
-	Toggle A = new Toggle();
-	Toggle B = new Toggle();
+	OrangeDrive orangeDrive;	
+	Flywheel shooters;
 	
-	double setpoint = 3000;
-	// TODO: Camera will go on the jetson so idk :|
-	/*
-	UsbCamera cam = new UsbCamera("camera", 0);
-	MjpegServer server = new MjpegServer("camServer", 8080);
-	*/
+	CANTalon feeder = new CANTalon(7);
+	CANTalon intake = new CANTalon(8);
+	CANTalon intake2 = new CANTalon(9);
+	
+	DigitalInput test = new DigitalInput(22);
+	DigitalInput test2 = new DigitalInput(23);
+	NetworkTable table = NetworkTable.getTable("");
+	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
+	
+	ScriptEngineManager manager;
+	ScriptEngine engine;
+	String code;
+	String helperCode;
+	boolean first;
+
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
@@ -44,11 +62,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		//orangeDrive.addTask(mainExecutor);
-		//server.setSource(cam);
-		test.addTask(mainExecutor);
-		
+		Constants.updateConstants();
+		shooters = new Flywheel(10, 11);
+		orangeDrive = OrangeDrive.getInstance();
+		orangeDrive.addTask(mainExecutor);
 	}
+	
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
@@ -63,20 +82,61 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		test.setRunningState(true);
+		orangeDrive.setRunningState(true);
+		manager = new ScriptEngineManager();
+		engine = manager.getEngineByName("js");
+		code = Dashcomm.get("Code", "");
+		helperCode = Dashcomm.get("HelperCode", "");
+
+		// Put all variables for auto here
+		engine.put("orangeDrive", orangeDrive);
+
+		first = true;
+
+		orangeDrive.setRunningState(true);
 	}
+
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		if (first) {
+			try {
+				engine.eval(helperCode);
+				engine.eval(code);
+			} catch (ScriptException e) {
+				System.out.println(e);
+			}
 
+			first = false;
+		}
 	}
 
+	Future<?> shooter;
 	@Override
 	public void teleopInit() {
-		test.setRunningState(true);
-		test.setSetpoint(setpoint);
+		orangeDrive.setRunningState(true);
+		shooter = mainExecutor.scheduleAtFixedRate(new Runnable(){
+			@Override
+			public void run(){
+				table.putNumber("rpms", shooters.getSpeed());
+				table.putNumber("current", shooters.getCurrent());
+				if(test.get()){
+					table.putNumber("enter", 1);
+				} else {
+					table.putNumber("enter", 0);
+				}
+
+				if(test2.get()){
+					table.putNumber("exit", 1);
+				} else {
+					table.putNumber("exit", 0);
+				}
+				NetworkTable.flush();
+				
+			}
+		}, 0, 10, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -86,38 +146,63 @@ public class Robot extends IterativeRobot {
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
-		/*
-		double moveVal = joy.getRawAxis(1);
-		double turnVal = joy.getRawAxis(4);
-		// TODO: Use Toggle to get only rising edge
+		xbox.update();
+		feeder.changeControlMode(TalonControlMode.PercentVbus);
+
+		if (xbox.getRisingEdge(2)) {
+			speed += 50;
+		//	tbhController.setSetpoint(speed);
+		}
+
+		if (xbox.getRisingEdge(3)) {
+			speed -= 50;
+		}
+		if (xbox.getRawButton(1)) 
+		{
+			shooters.setSetpoint(speed);
+			feeder.set(-.5);
+		}
+		else
+		{
+			shooters.setSetpoint(0);
+			feeder.set(0);
+		}
+
+		//System.out.println("Setpoint:" + speed);
+		//System.out.println("Actual:" + shooters.getLeftSpeed());
 		
-		if (joy.getRawButton(1)) {
-			orangeDrive.setGearPath();
+		double moveVal = xbox.getRawAxis(1);
+		double turnVal = xbox.getRawAxis(4);
+		// joystick pushed up gives -1 and down gives 1
+		// it is also switch for turning
+		//orangeDrive.setManualDrive(-moveVal, -turnVal);
+		
+		shooters.setSetpoint(speed);
+		
+		if(xbox.getRawButton(1)) {
+			shooters.enable();
 		} else {
-			orangeDrive.setManualDrive(moveVal, turnVal);
+			shooters.disable();
 		}
-		*/
-		A.input(joy.getRawButton(1));
-		B.input(joy.getRawButton(2));
-		
-		if(A.rising()){
-			setpoint += 50;
-			test.setSetpoint(setpoint);			
-		}
-		
-		if(B.rising()){
-			setpoint -= 50;
-			test.setSetpoint(setpoint);			
+
+		if(xbox.getRawButton(4)){
+			intake.set(0.5);
+			intake2.set(0.5);
+		} else {
+			intake.set(0);
+			intake2.set(0);
 		}
 		
-		System.out.println("Output: " + test.getOutput());
-		System.out.println("RPM: " + test.getRpm());
+		graph.putNumber("rpms", shooters.getSpeed());
+		graph.putNumber("setpoint", speed);
 		
 	}
 
 	@Override
 	public void disabledInit() {
-		//orangeDrive.setRunningState(false);
+		orangeDrive.setRunningState(false);
+		if(shooter != null){
+			shooter.cancel(true);		}
 	}
 
 	/**

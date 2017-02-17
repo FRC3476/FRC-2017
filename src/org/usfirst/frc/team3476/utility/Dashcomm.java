@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /**
  * Parses NetworkTables data into usable form for the robot.
- * 
+ *
  * @author Anthony Demetrescu
  *
  */
@@ -21,7 +21,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -35,7 +35,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -49,7 +49,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -63,7 +63,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -77,7 +77,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -91,7 +91,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -105,7 +105,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
@@ -123,7 +123,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param value
@@ -136,7 +136,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param value
@@ -149,7 +149,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param value
@@ -162,7 +162,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param value
@@ -175,7 +175,7 @@ public class Dashcomm {
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
-	 * 
+	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param value

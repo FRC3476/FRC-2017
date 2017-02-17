@@ -173,6 +173,24 @@ public class OrangeUtility {
 	}
 
 	/**
+	 * Extracts the int value from a string.
+	 * 
+	 * @param mess
+	 *            the string to be parsed
+	 * @return the int value extracted from the string
+	 */
+	public static int cleanIntParse(String mess)// TODO: encapsulate special
+												// replaceall
+	{
+		String result = mess;
+		result = result.toUpperCase();
+		result = result.replaceAll("[^\\d]", "");// remove all illegal
+													// characters
+
+		return Integer.parseInt(result);
+	}
+
+	/**
 	 * Removes all instances of toReplace after the first.
 	 * If toReplace does not occur, input is returned unchanged.
 	 * 
@@ -268,23 +286,6 @@ public class OrangeUtility {
 			ret += ",\nOutput Range: " + Arrays.toString(new double[] { outlow, outhigh });
 		}
 		ret += ",\nIn Tolerance: " + tol;
-		ret += "\n==============";
-		return ret;
-	}
-
-	/**
-	 * Returns a string with all the parameters of the passed PID.
-	 * 
-	 * @param control
-	 *            the PIDController to get info from.
-	 * @return the info of the PIDController.
-	 */
-	public static String ControlLoopData(ControlLoop control, double process) {
-		double error = control.getError(process), conval = control.output(process);
-		String ret = "==============";
-		ret += "\nError: " + error;
-		ret += ",\nProcess: " + process;
-		ret += ",\nControl Value: " + conval;
 		ret += "\n==============";
 		return ret;
 	}
