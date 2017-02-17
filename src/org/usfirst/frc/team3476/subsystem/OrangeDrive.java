@@ -53,7 +53,7 @@ public class OrangeDrive extends Threaded implements Action{
 		leftTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		rightTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 
-		// Quadrature updates at 20ms
+		// Quadrature updates at 100ms
 		
 		leftTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		rightTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
@@ -73,14 +73,9 @@ public class OrangeDrive extends Threaded implements Action{
 		leftSlaveTalon.set(Constants.LeftMasterDriveId);
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		rightSlaveTalon.set(Constants.RightMasterDriveId);
-
-		// drive code default is reversed as it assumes there is one reversal
+		
+		
 		configureTalons(TalonControlMode.Speed);
-	//	driveBase = new RobotDrive(leftTalon, rightTalon);
-		//driveBase.setSafetyEnabled(false);
-		// driveBase.setInvertedMotor(MotorType.kRearLeft, true);
-		// driveBase.setInvertedMotor(MotorType.kRearRight, true);
-		// might need to invert some motors
 	}
 
 	@Override
@@ -101,26 +96,22 @@ public class OrangeDrive extends Threaded implements Action{
 	public void setManualDrive(double moveValue, double turnValue) {
 		if (driveState != DriveState.MANUAL) {
 			driveState = DriveState.MANUAL;
-			configureTalons(TalonControlMode.PercentVbus);
+			configureTalons(TalonControlMode.Speed);
 		}
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
 			//moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(moveValue));
 			moveValue = (moveValue * (Math.abs(moveValue) - 0.3)) / ((0.7) * Math.abs(moveValue));
-			// moveValue * (MinimumControllerOutput + (Math.abs(moveValue) -
-			// MinimumControllerInput) * (MaximumControllerOutput - MinimumControllerOutput)) / (MaximumControllerInput - MinimumControllerInput) * Math.abs(moveValue);
-			// Correct way but we can take out MinimumControllerOutput in the front
-			// because it will be 0 and also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
+			// moveValue * (MinimumControllerOutput + (Math.abs(moveValue) - MinimumControllerInput) * (MaximumControllerOutput - MinimumControllerOutput)) / (MaximumControllerInput - MinimumControllerInput) * Math.abs(moveValue);
+			// ^ is the correct way but we can take out MinimumControllerOutput in the front because it will be 0 and also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
 		}
 
 		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
-			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput) / (Constants.MaximumControllerInput - Constants.MinimumControllerInput)	* Math.abs(turnValue);
+			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput) / (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
 		}
 
-		setWheelVelocity(new DriveVelocity(moveValue * 10, 0));
-		//setWheelVelocity(new DriveVelocity(moveValue * 240, 0));
 		//System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
-		//arcadeDrive(moveValue, turnValue);
+		arcadeDrive(moveValue, turnValue);
 	}
 
 	public void setAutoPath(Path autoPath) {
@@ -146,9 +137,10 @@ public class OrangeDrive extends Threaded implements Action{
 		updateGearPath();
 	}
 
-	private void setWheelVelocity(DriveVelocity setVelocity) {
-		leftTalon.setSetpoint(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
-		rightTalon.setSetpoint(setVelocity.wheelSpeed - setVelocity.deltaSpeed);
+	private void setWheelVelocity(DriveVelocity setVelocity) {		
+		// inches per sec to rotations per min
+		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
+		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);
 		System.out.println("setpoint " + setVelocity.wheelSpeed);
 		System.out.println("delta " + setVelocity.deltaSpeed);
 	}
@@ -227,9 +219,10 @@ public class OrangeDrive extends Threaded implements Action{
 			    rightMotorSpeed = -Math.max(-moveValue, -rotateValue);
 			}
 		}
-		// 18 ft per sec
-		leftMotorSpeed *= 10;
-		rightMotorSpeed *= 10;
+		
+		// 18 ft per sec -> 216 inches per sec
+		leftMotorSpeed *= 216;
+		rightMotorSpeed *= 216;
 		
 		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
 	}

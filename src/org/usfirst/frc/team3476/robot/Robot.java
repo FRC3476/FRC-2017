@@ -51,8 +51,8 @@ public class Robot extends IterativeRobot {
 	ScriptEngine engine;
 	String code;
 	String helperCode;
-	boolean first;
 
+	Future<?> logger;
 	// TODO: Determine best number of threads
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
@@ -63,7 +63,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		Constants.updateConstants();
-		shooters = new Flywheel(10, 11);
+		shooters = new Flywheel(10, 11, 22);
 		orangeDrive = OrangeDrive.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
@@ -91,9 +91,16 @@ public class Robot extends IterativeRobot {
 		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
 
-		first = true;
-
+		// make function to set all running states
 		orangeDrive.setRunningState(true);
+		
+		try {
+			engine.eval(helperCode);
+			engine.eval(code);
+		} catch (ScriptException e) {
+			System.out.println(e);
+		}
+		
 	}
 
 	/**
@@ -101,23 +108,14 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		if (first) {
-			try {
-				engine.eval(helperCode);
-				engine.eval(code);
-			} catch (ScriptException e) {
-				System.out.println(e);
-			}
-
-			first = false;
-		}
+		
 	}
 
-	Future<?> shooter;
 	@Override
 	public void teleopInit() {
 		orangeDrive.setRunningState(true);
-		shooter = mainExecutor.scheduleAtFixedRate(new Runnable(){
+		shooters.setRunningState(true);
+		logger = mainExecutor.scheduleAtFixedRate(new Runnable(){
 			@Override
 			public void run(){
 				table.putNumber("rpms", shooters.getSpeed());
@@ -133,10 +131,13 @@ public class Robot extends IterativeRobot {
 				} else {
 					table.putNumber("exit", 0);
 				}
+				
+				graph.putNumber("rpms", shooters.getSpeed());
+				graph.putNumber("setpoint", speed);
 				NetworkTable.flush();
 				
 			}
-		}, 0, 10, TimeUnit.MILLISECONDS);
+		}, 0, 5, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -151,7 +152,6 @@ public class Robot extends IterativeRobot {
 
 		if (xbox.getRisingEdge(2)) {
 			speed += 50;
-		//	tbhController.setSetpoint(speed);
 		}
 
 		if (xbox.getRisingEdge(3)) {
@@ -167,18 +167,12 @@ public class Robot extends IterativeRobot {
 			shooters.setSetpoint(0);
 			feeder.set(0);
 		}
-
-		//System.out.println("Setpoint:" + speed);
-		//System.out.println("Actual:" + shooters.getLeftSpeed());
 		
 		double moveVal = xbox.getRawAxis(1);
 		double turnVal = xbox.getRawAxis(4);
 		// joystick pushed up gives -1 and down gives 1
 		// it is also switch for turning
 		//orangeDrive.setManualDrive(-moveVal, -turnVal);
-		
-		shooters.setSetpoint(speed);
-		
 		if(xbox.getRawButton(1)) {
 			shooters.enable();
 		} else {
@@ -191,18 +185,17 @@ public class Robot extends IterativeRobot {
 		} else {
 			intake.set(0);
 			intake2.set(0);
-		}
-		
-		graph.putNumber("rpms", shooters.getSpeed());
-		graph.putNumber("setpoint", speed);
+		}	
 		
 	}
 
 	@Override
 	public void disabledInit() {
 		orangeDrive.setRunningState(false);
-		if(shooter != null){
-			shooter.cancel(true);		}
+		if(logger != null){
+			logger.cancel(true);		
+		}
+		shooters.setRunningState(false);
 	}
 
 	/**

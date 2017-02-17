@@ -5,10 +5,12 @@ import org.usfirst.frc.team3476.utility.Threaded;
 
 public class VisionTracking extends Threaded {
 
-	private Turret leftTurret;
-	private Turret rightTurret;
+	private Turret rightTurret;	
+	private Flywheel leftFlywheel;
 	
-	private Flywheel leftFlywheel = new Flywheel(Constants.LeftMasterFlywheelId, Constants.LeftSlaveFlywheelId);
+	private VisionTracking(){
+		leftFlywheel = new Flywheel(Constants.LeftMasterFlywheelId, Constants.LeftSlaveFlywheelId, Constants.LeftBallSensorId);
+	}
 	
 	@Override
 	public void update() {
@@ -18,5 +20,5 @@ public class VisionTracking extends Threaded {
 	public boolean isDone()
 	{
 		return false;
-	}	
+	}
 }

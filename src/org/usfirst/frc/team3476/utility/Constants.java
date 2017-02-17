@@ -25,6 +25,8 @@ public final class Constants
 	public static int LeftSlaveFlywheelId;
 	public static int RightMasterFlywheelId;
 	public static int RightSlaveFlywheelId;
+	public static int LeftBallSensorId;
+	public static int RightBallSensorId;
 	
 	public static double TurretTicksPerRotations;
 	
@@ -41,7 +43,10 @@ public final class Constants
 		LeftSlaveDriveId = (int) Dashcomm.get("Constants/LeftSlaveDriveId", 5); 
 		RightMasterDriveId = (int) Dashcomm.get("Constants/RightMasterDriveId", 2); 
 		RightSlaveDriveId = (int) Dashcomm.get("Constants/RightSlaveDriveId", 3);		
-
+		LeftBallSensorId = (int) Dashcomm.get("Constants/LeftBallSensorId", 22);
+		RightBallSensorId = (int) Dashcomm.get("Constants/RightBallSensorId", 23);
+		
+		
 		LeftMasterFlywheelId = 10;//(int) Dashcomm.get("Constants/LeftMasterFlywheelId", 10);
 		LeftSlaveFlywheelId = 11;//(int) Dashcomm.get("Constants/LeftSlaveFlywheelId", 11);
 		RightMasterFlywheelId = (int) Dashcomm.get("Constants/RightMasterFlywheelId", 0);

@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.LPController;
+import org.usfirst.frc.team3476.utility.LoadController;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -10,16 +10,23 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-public class Flywheel {
 
+public class Flywheel extends Threaded {
+	
 	private CANTalon masterTalon, slaveTalon;
 	
-	private double setpoint;
-	
+	private double setpoint;	
 	private double toleranceRange = 50;
 	private double batVolt;
-
-	public Flywheel(int masterTalonId, int slaveTalonId) {
+	
+	private boolean isEnabled;
+	// public for testing until Constants are found
+	public LoadController loadCompensator;
+	
+	private DigitalInput ballSensor;
+	
+	public Flywheel(int masterTalonId, int slaveTalonId, int ballSensorId) {
+		RUNNINGSPEED = 5;
 		masterTalon = new CANTalon(masterTalonId, 1);
 		masterTalon.changeControlMode(TalonControlMode.Speed);
 		slaveTalon = new CANTalon(slaveTalonId);
@@ -45,6 +52,10 @@ public class Flywheel {
 
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
+		
+		ballSensor = new DigitalInput(ballSensorId);
+		
+		// loadCompensator = new LoadController();
 		/* leftMasterTalon.setP(0.28);
 		 * leftMasterTalon.setI(0);
 		 * leftMasterTalon.setD(7);
@@ -52,8 +63,16 @@ public class Flywheel {
 		 * Constants TBD */
 	}
 
+	@Override
+	public void update() {
+		if(isEnabled){
+			masterTalon.setF(loadCompensator.calculate(ballSensor.get(), setpoint));
+		}
+	}
+	
 	public void setSetpoint(double setpoint) {
 		this.setpoint = setpoint;
+		masterTalon.setSetpoint(setpoint);
 	}
 
 	public void setTolerance(double toleranceRange) {
@@ -75,12 +94,17 @@ public class Flywheel {
 	public void enable()
 	{
 		masterTalon.enable();
+		isEnabled = true;
 	}
+	
 	public void disable()
 	{
 		masterTalon.disable();
+		isEnabled = false;
 	}
+	
 	public double getCurrent(){
 		return masterTalon.getOutputCurrent();
 	}
+
 }
