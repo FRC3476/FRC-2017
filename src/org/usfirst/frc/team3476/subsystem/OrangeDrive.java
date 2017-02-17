@@ -1,6 +1,5 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.auto.Action;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
@@ -18,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 
 /* Inspiration from Team 254 */
 
-public class OrangeDrive extends Threaded implements Action{
+public class OrangeDrive extends Threaded {
 	public enum DriveState {
 		MANUAL, AUTO, GEAR
 	}
@@ -38,7 +37,7 @@ public class OrangeDrive extends Threaded implements Action{
 	private DriveVelocity autoDriveVelocity;
 	private static OrangeDrive driveInstance = new OrangeDrive();
 
-	// Do not do private static double MINIMUM_INPUT = Constants.MinimumControllerInput; 
+	// Do not do private static double MINIMUM_INPUT = Constants.MinimumControllerInput;
 	// just use Constants.X
 
 	public static OrangeDrive getInstance() {
@@ -54,13 +53,13 @@ public class OrangeDrive extends Threaded implements Action{
 		rightTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 
 		// Quadrature updates at 100ms
-		
+
 		leftTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		rightTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 
 		leftTalon.configEncoderCodesPerRev(1024);
 		rightTalon.configEncoderCodesPerRev(1024);
-		
+
 		leftTalon.reverseOutput(false);
 		leftTalon.reverseSensor(true);
 		rightTalon.reverseOutput(true);
@@ -73,8 +72,7 @@ public class OrangeDrive extends Threaded implements Action{
 		leftSlaveTalon.set(Constants.LeftMasterDriveId);
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		rightSlaveTalon.set(Constants.RightMasterDriveId);
-		
-		
+
 		configureTalons(TalonControlMode.Speed);
 	}
 
@@ -100,17 +98,22 @@ public class OrangeDrive extends Threaded implements Action{
 		}
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
-			//moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(moveValue));
+			// moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) /
+			// ((Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(moveValue));
 			moveValue = (moveValue * (Math.abs(moveValue) - 0.3)) / ((0.7) * Math.abs(moveValue));
-			// moveValue * (MinimumControllerOutput + (Math.abs(moveValue) - MinimumControllerInput) * (MaximumControllerOutput - MinimumControllerOutput)) / (MaximumControllerInput - MinimumControllerInput) * Math.abs(moveValue);
-			// ^ is the correct way but we can take out MinimumControllerOutput in the front because it will be 0 and also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
+			// moveValue * (MinimumControllerOutput + (Math.abs(moveValue) - MinimumControllerInput) *
+			// (MaximumControllerOutput - MinimumControllerOutput)) / (MaximumControllerInput - MinimumControllerInput)
+			// * Math.abs(moveValue);
+			// ^ is the correct way but we can take out MinimumControllerOutput in the front because it will be 0 and
+			// also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
 		}
 
 		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
-			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput) / (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
+			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput)
+					/ (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
 		}
 
-		//System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
+		// System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
 		arcadeDrive(moveValue, turnValue);
 	}
 
@@ -137,7 +140,7 @@ public class OrangeDrive extends Threaded implements Action{
 		updateGearPath();
 	}
 
-	private void setWheelVelocity(DriveVelocity setVelocity) {		
+	private void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
 		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);
@@ -185,46 +188,47 @@ public class OrangeDrive extends Threaded implements Action{
 	public double getRightDistance() {
 		return rightTalon.getPosition();
 	}
-	
-	public void arcadeDrive(double moveValue, double rotateValue){
-				
-		double leftMotorSpeed;
-		double rightMotorSpeed;  
 
-		 if(moveValue >= 0.0) {
-			 moveValue = moveValue * moveValue;
-		 } else {
-		   moveValue = -(moveValue * moveValue);
-		 }
-		 if(rotateValue >= 0.0) {
-			 rotateValue = rotateValue * rotateValue;
-		 } else {
-			 rotateValue = -(rotateValue * rotateValue);
-		 }
+	public void arcadeDrive(double moveValue, double rotateValue) {
+
+		double leftMotorSpeed;
+		double rightMotorSpeed;
+
+		if (moveValue >= 0.0) {
+			moveValue = moveValue * moveValue;
+		} else {
+			moveValue = -(moveValue * moveValue);
+		}
+		if (rotateValue >= 0.0) {
+			rotateValue = rotateValue * rotateValue;
+		} else {
+			rotateValue = -(rotateValue * rotateValue);
+		}
 
 		if (moveValue > 0.0) {
 			if (rotateValue > 0.0) {
 				leftMotorSpeed = moveValue - rotateValue;
 				rightMotorSpeed = Math.max(moveValue, rotateValue);
 			} else {
-			    leftMotorSpeed = Math.max(moveValue, -rotateValue);
-			    rightMotorSpeed = moveValue + rotateValue;
+				leftMotorSpeed = Math.max(moveValue, -rotateValue);
+				rightMotorSpeed = moveValue + rotateValue;
 			}
 		} else {
 			if (rotateValue > 0.0) {
-			    leftMotorSpeed = -Math.max(-moveValue, rotateValue);
-			    rightMotorSpeed = moveValue + rotateValue;
+				leftMotorSpeed = -Math.max(-moveValue, rotateValue);
+				rightMotorSpeed = moveValue + rotateValue;
 			} else {
-			    leftMotorSpeed = moveValue - rotateValue;
-			    rightMotorSpeed = -Math.max(-moveValue, -rotateValue);
+				leftMotorSpeed = moveValue - rotateValue;
+				rightMotorSpeed = -Math.max(-moveValue, -rotateValue);
 			}
 		}
-		
+
 		// 18 ft per sec -> 216 inches per sec
 		leftMotorSpeed *= 216;
 		rightMotorSpeed *= 216;
-		
-		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
+
+		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed)
+				/ 2));
 	}
 
 	public static class DriveVelocity {
@@ -238,12 +242,4 @@ public class OrangeDrive extends Threaded implements Action{
 		}
 
 	}
-	public void drive(){}
-
-	@Override
-	public void start() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

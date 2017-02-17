@@ -42,7 +42,6 @@ public class RobotTracker extends Threaded {
 		latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
 		// store old distance
 		oldDistance = currentDistance;
-
 	}
 
 	public RigidTransform getCurrentPosition() {

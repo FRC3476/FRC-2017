@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.PIDController;
 public class OrangeUtility {
 	/**
 	 * Keeps a value in a range by truncating it.
-	 * 
+	 *
 	 * @param toCoerce
 	 *            the value to coerce
 	 * @param high
@@ -84,7 +84,7 @@ public class OrangeUtility {
 
 	/**
 	 * Checks if it is legal to start a thread.
-	 * 
+	 *
 	 * @param testing
 	 *            the Thread to test
 	 * @return if the Thread can be started
@@ -96,7 +96,7 @@ public class OrangeUtility {
 	/**
 	 * Donuts an input value so that a control loop can overcome backlash or
 	 * friction.
-	 * 
+	 *
 	 * @param toDonut
 	 *            the input value
 	 * @param threshold
@@ -142,7 +142,7 @@ public class OrangeUtility {
 
 	/**
 	 * Extracts the double value from a string.
-	 * 
+	 *
 	 * @param mess
 	 *            the string to be parsed
 	 * @return the double value extracted from the string
@@ -174,7 +174,7 @@ public class OrangeUtility {
 
 	/**
 	 * Extracts the int value from a string.
-	 * 
+	 *
 	 * @param mess
 	 *            the string to be parsed
 	 * @return the int value extracted from the string
@@ -193,7 +193,7 @@ public class OrangeUtility {
 	/**
 	 * Removes all instances of toReplace after the first.
 	 * If toReplace does not occur, input is returned unchanged.
-	 * 
+	 *
 	 * @param input
 	 *            the String to operate on
 	 * @param replaceRegex
@@ -212,7 +212,7 @@ public class OrangeUtility {
 	/**
 	 * Calls input.replaceAll() on everything after the index
 	 * Precondition: 0 <= index < input.length
-	 * 
+	 *
 	 * @param input
 	 *            the input String
 	 * @param regex
@@ -229,7 +229,7 @@ public class OrangeUtility {
 
 	/**
 	 * Removes single line comments
-	 * 
+	 *
 	 * @param input
 	 *            the String to operate on
 	 * @param commentDelimiter
@@ -255,7 +255,7 @@ public class OrangeUtility {
 
 	/**
 	 * Returns a string with all the parameters of the passed PID.
-	 * 
+	 *
 	 * @param control
 	 *            the PIDController to get info from.
 	 * @return the info of the PIDController.
@@ -266,7 +266,7 @@ public class OrangeUtility {
 
 	/**
 	 * Returns a string with all the parameters of the passed PID.
-	 * 
+	 *
 	 * @param control
 	 *            the PIDController to get info from.
 	 * @return the info of the PIDController.
@@ -301,7 +301,7 @@ public class OrangeUtility {
 
 	/**
 	 * Encapsulates Thread.sleep to make code more readable.
-	 * 
+	 *
 	 * @param millis
 	 *            the time to sleep
 	 */

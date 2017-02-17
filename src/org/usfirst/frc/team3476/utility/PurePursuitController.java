@@ -3,10 +3,12 @@ package org.usfirst.frc.team3476.utility;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 
 public class PurePursuitController {
-	/* 1. Translation delta compared to robot
+	/*
+	 * 1. Translation delta compared to robot
 	 * 2. Check x offset * angle to see if past tolerance
 	 * 3. Create circle
-	 * 4. Follow circle path */
+	 * 4. Follow circle path
+	 */
 
 	private double lookAheadDistance;
 	private double robotSpeed;
@@ -28,7 +30,7 @@ public class PurePursuitController {
 		}
 		double radius = getRadius(robotState, lookAheadDistance);
 		double deltaSpeed = robotDiameter * (robotSpeed / radius) / 2;
-		
+
 		// TODO: Lower wheel speed as you get closer to endpoint
 		// get distance to next point and subtract distance
 		// if it is positive past the endpoint slow down

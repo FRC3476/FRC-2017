@@ -34,19 +34,19 @@ public class Robot extends IterativeRobot {
 	Controller xbox = new Controller(0);
 
 	double speed = 2000;
-	
-	OrangeDrive orangeDrive;	
+
+	OrangeDrive orangeDrive;
 	Flywheel shooters;
-	
+
 	CANTalon feeder = new CANTalon(7);
 	CANTalon intake = new CANTalon(8);
 	CANTalon intake2 = new CANTalon(9);
-	
+
 	DigitalInput test = new DigitalInput(22);
 	DigitalInput test2 = new DigitalInput(23);
 	NetworkTable table = NetworkTable.getTable("");
 	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
-	
+
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
@@ -67,7 +67,6 @@ public class Robot extends IterativeRobot {
 		orangeDrive = OrangeDrive.getInstance();
 		orangeDrive.addTask(mainExecutor);
 	}
-	
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
@@ -93,14 +92,14 @@ public class Robot extends IterativeRobot {
 
 		// make function to set all running states
 		orangeDrive.setRunningState(true);
-		
+
 		try {
 			engine.eval(helperCode);
 			engine.eval(code);
 		} catch (ScriptException e) {
 			System.out.println(e);
 		}
-		
+
 	}
 
 	/**
@@ -108,34 +107,33 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		
+
 	}
 
 	@Override
 	public void teleopInit() {
 		orangeDrive.setRunningState(true);
 		shooters.setRunningState(true);
-		logger = mainExecutor.scheduleAtFixedRate(new Runnable(){
+		logger = mainExecutor.scheduleAtFixedRate(new Runnable() {
 			@Override
-			public void run(){
+			public void run() {
 				table.putNumber("rpms", shooters.getSpeed());
 				table.putNumber("current", shooters.getCurrent());
-				if(test.get()){
+				if (test.get()) {
 					table.putNumber("enter", 1);
 				} else {
 					table.putNumber("enter", 0);
 				}
 
-				if(test2.get()){
+				if (test2.get()) {
 					table.putNumber("exit", 1);
 				} else {
 					table.putNumber("exit", 0);
 				}
-				
+
 				graph.putNumber("rpms", shooters.getSpeed());
 				graph.putNumber("setpoint", speed);
 				NetworkTable.flush();
-				
 			}
 		}, 0, 5, TimeUnit.MILLISECONDS);
 	}
@@ -157,43 +155,41 @@ public class Robot extends IterativeRobot {
 		if (xbox.getRisingEdge(3)) {
 			speed -= 50;
 		}
-		if (xbox.getRawButton(1)) 
-		{
+
+		if (xbox.getRawButton(1)) {
 			shooters.setSetpoint(speed);
 			feeder.set(-.5);
-		}
-		else
-		{
+		} else {
 			shooters.setSetpoint(0);
 			feeder.set(0);
 		}
-		
+
 		double moveVal = xbox.getRawAxis(1);
 		double turnVal = xbox.getRawAxis(4);
-		// joystick pushed up gives -1 and down gives 1
-		// it is also switch for turning
-		//orangeDrive.setManualDrive(-moveVal, -turnVal);
-		if(xbox.getRawButton(1)) {
+		
+		// orangeDrive.setManualDrive(-moveVal, -turnVal);
+		
+		if (xbox.getRawButton(1)) {
 			shooters.enable();
 		} else {
 			shooters.disable();
 		}
 
-		if(xbox.getRawButton(4)){
+		if (xbox.getRawButton(4)) {
 			intake.set(0.5);
 			intake2.set(0.5);
 		} else {
 			intake.set(0);
 			intake2.set(0);
-		}	
-		
+		}
+
 	}
 
 	@Override
 	public void disabledInit() {
 		orangeDrive.setRunningState(false);
-		if(logger != null){
-			logger.cancel(true);		
+		if (logger != null) {
+			logger.cancel(true);
 		}
 		shooters.setRunningState(false);
 	}

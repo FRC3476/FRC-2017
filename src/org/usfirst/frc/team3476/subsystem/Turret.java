@@ -9,74 +9,45 @@ import com.ctre.CANTalon.StatusFrameRate;
 public class Turret {
 
 	private double tolerance;
-	
+
 	private Rotation setAngle;
 	private CANTalon turretTalon;
-	
+
 	public Turret(int turretTalonId) {
 		turretTalon = new CANTalon(turretTalonId);
-		
+
 		turretTalon.enableBrakeMode(true);
-		
+
 		turretTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
-		
+
 		// set PID
 	}
 
 	// Discuss doing everything in radians
-	public void setAngle(Rotation setAngle){
-		// setsetpoint 
+	public void setAngle(Rotation setAngle) {
+		// setsetpoint
 		// rotations per degree
 		// :( add special case for turning 90
-		turretTalon.setSetpoint((setAngle.getDegrees()/360) * Constants.TurretTicksPerRotations);
+		turretTalon.setSetpoint((setAngle.getDegrees() / 360) * Constants.TurretTicksPerRotations);
 		this.setAngle = setAngle;
 	}
-	
-	
-	public Rotation getAngle(){
+
+	public Rotation getAngle() {
 		return new Rotation(turretTalon.getPosition() / Constants.TurretTicksPerRotations);
 	}
-	
-	
-	public Rotation getSetpoint(){
+
+	public Rotation getSetpoint() {
 		return setAngle;
 	}
-	
+
 	/*
-	public boolean isDone(){
-		
-	}
-	*/
-	
-	public void setTolerance(double tolerance){
-		
+	 * public boolean isDone(){
+	 * }
+	 */
+
+	public void setTolerance(double tolerance) {
+
 		this.tolerance = tolerance;
 	}
-	
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

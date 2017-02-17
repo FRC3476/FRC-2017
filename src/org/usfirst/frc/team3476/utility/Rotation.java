@@ -36,7 +36,8 @@ public class Rotation {
 	// Rotated coordinates is R * R
 	// We only need cos O and sin O because the other two can be determined
 	public Rotation rotateBy(Rotation rotationMat) {
-		return new Rotation(cos * rotationMat.cos - sin * rotationMat.sin, sin * rotationMat.cos + cos * rotationMat.sin);
+		return new Rotation(cos * rotationMat.cos - sin * rotationMat.sin, sin * rotationMat.cos
+				+ cos * rotationMat.sin);
 	}
 
 	public Rotation inverse() {
