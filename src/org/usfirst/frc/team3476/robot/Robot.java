@@ -66,6 +66,7 @@ public class Robot extends IterativeRobot {
 		shooters = new Flywheel(10, 11, 22);
 		orangeDrive = OrangeDrive.getInstance();
 		orangeDrive.addTask(mainExecutor);
+		shooters.addTask(mainExecutor);
 	}
 
 	/**
@@ -92,7 +93,7 @@ public class Robot extends IterativeRobot {
 
 		// make function to set all running states
 		orangeDrive.setRunningState(true);
-
+		shooters.setRunningState(true);
 		try {
 			engine.eval(helperCode);
 			engine.eval(code);
@@ -135,7 +136,7 @@ public class Robot extends IterativeRobot {
 				graph.putNumber("setpoint", speed);
 				NetworkTable.flush();
 			}
-		}, 0, 5, TimeUnit.MILLISECONDS);
+		}, 0, 1, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -176,13 +177,12 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (xbox.getRawButton(4)) {
-			intake.set(0.5);
-			intake2.set(0.5);
+			shooters.loadCompensator.setBaseF(graph.getNumber("F", 0));
+			shooters.loadCompensator.setDecayRate(graph.getNumber("R", 0));
+			shooters.loadCompensator.setLoadIncrease(graph.getNumber("L", 0));			
 		} else {
-			intake.set(0);
-			intake2.set(0);
+			
 		}
-
 	}
 
 	@Override

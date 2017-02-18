@@ -27,10 +27,10 @@ public class Flywheel extends Threaded {
 	private DigitalInput ballSensor;
 
 	public Flywheel(int masterTalonId, int slaveTalonId, int ballSensorId) {
-		// temporary fast update rate
-		RUNNINGSPEED = 5;
+		// temporary? fast update rate
+		RUNNINGSPEED = 1;
 		masterTalon = new CANTalon(masterTalonId, 1);
-		masterTalon.changeControlMode(TalonControlMode.Speed);
+		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
 		slaveTalon = new CANTalon(slaveTalonId);
 		slaveTalon.changeControlMode(TalonControlMode.Follower);
 		slaveTalon.set(masterTalonId);
@@ -50,32 +50,25 @@ public class Flywheel extends Threaded {
 		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		masterTalon.configEncoderCodesPerRev(1024);
 		masterTalon.configPeakOutputVoltage(12, 0);
-		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
+		//masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		
-		//CTRE advice for tuning is to increase period until it is granular 
+		//CTRE advice for tuning is to increase period until it is NOT as granular 
 		//then increase the rolling average until it is smooth enough but still responsive
-		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_1Ms);
-		masterTalon.SetVelocityMeasurementWindow(0);
+		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_10Ms);
+		masterTalon.SetVelocityMeasurementWindow(64);
 		
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
 
 		ballSensor = new DigitalInput(ballSensorId);
 
-		// loadCompensator = new LoadController();
-		/*
-		 * leftMasterTalon.setP(0.28);
-		 * leftMasterTalon.setI(0);
-		 * leftMasterTalon.setD(7);
-		 * leftMasterTalon.setF(0.0125);
-		 * Constants TBD
-		 */
+		loadCompensator = new LoadController(0.00025, 2, 0.05);
 	}
 
 	@Override
 	public void update() {
 		if (isEnabled) {
-			masterTalon.setF(loadCompensator.calculate(ballSensor.get(), setpoint));
+			masterTalon.set(loadCompensator.calculate(ballSensor.get(), setpoint));
 		}
 	}
 

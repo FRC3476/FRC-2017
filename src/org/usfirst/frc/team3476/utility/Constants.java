@@ -28,6 +28,8 @@ public final class Constants {
 	public static int RightBallSensorId;
 
 	public static double TurretTicksPerRotations;
+	public static int RightTurretId;
+	public static int LeftTurretId;
 
 	public static void updateConstants() {
 		MinimumControllerInput = Dashcomm.get("Constants/MinimumControllerInput", 0.3);
@@ -50,5 +52,7 @@ public final class Constants {
 		RightSlaveFlywheelId = (int) Dashcomm.get("Constants/RightSlaveFlywheelId", 0);
 
 		TurretTicksPerRotations = Dashcomm.get("Constants/TurretTicksPerRotations", 20000);
+		RightTurretId = (int) Dashcomm.get("Constants/RightTurretId", 0);		
+		LeftTurretId = (int) Dashcomm.get("Constants/LeftTurretId", 0);		
 	}
 }

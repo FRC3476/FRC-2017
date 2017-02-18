@@ -18,11 +18,16 @@ public class LoadController {
 
 	public double calculate(boolean input, double setpoint) {
 		lastShoot = shoot;
-		// look for rising edge
 		shoot = input;
-		// decay before
-		loadAccum = loadAccum * decayRate;
+		// hoping this will make the algorithm more linear than the previous version
+		// I noticed that the sawtooth pattern was more similar to a pid where
+		// it was slowing down the recovery rate
+		loadAccum = loadAccum - decayRate;
 
+		if(loadAccum < 0){
+			loadAccum = 0;
+		}
+		
 		if (shoot && !lastShoot) {
 			loadAccum += loadIncrease;
 		}
@@ -31,7 +36,8 @@ public class LoadController {
 		if (setpoint == 0) {
 			return 0;
 		}
-		return correctedOutput / setpoint;
+		//return correctedOutput / setpoint;
+		return correctedOutput;
 	}
 
 	public void setBaseF(double baseF) {
