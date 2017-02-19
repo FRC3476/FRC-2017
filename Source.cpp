@@ -32,13 +32,12 @@ void processImage(Mat &frame){
 	//	Scalar LOWER = {65, 60, 40};
 	//	Scalar UPPER = {75, 255, 255};
 	split(frame, bgr);
-	//green = bgr[1];
 	vector<vector<Point> > contours, allContours;
 	vector<Vec4i> hierarchy;	
 	
 	
 	//GaussianBlur(green, green, Size(3, 3), 0, 0, 0);
-	threshold(bgr[1], green, 255, 255, THRESH_BINARY_INV);	
+	threshold(bgr[1], green, 100, 255, THRESH_BINARY);
 	
 	
 	//cvtColor(frame, thres, COLOR_BGR2HSV);
@@ -48,20 +47,22 @@ void processImage(Mat &frame){
 	/*
 	morphologyEx(thres, thres, MORPH_OPEN, Mat(3, 3, CV_8UC1, Scalar(10)), Point(-1, -1), 1);
 	*/
+	imshow("b", green);
 	
 	findContours(green, allContours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point(0, 0));	
 	
 	contours.clear();
 	for(auto contour : allContours){
-		if(contourArea(contour) < 0){
+		if(contourArea(contour) > 200 && contourArea(contour) < 40000){
 			contours.push_back(contour);	
 		} 
 	}
 	
 	sort(contours.begin(), contours.end(), sortByArea);
 
+	cout << "0" << endl;
 	if (contours.size() > 0) {
-		vector<vector<Point> > hulls(1);
+		vector<vector<Point> > hulls(2);
 		
 		Moments mu = moments(contours[0], false);
 		int cX = mu.m10 / mu.m00;
@@ -70,54 +71,50 @@ void processImage(Mat &frame){
 		int midX = cX;
 		int midY = cY;
 		// Maximum of three correct contours
-		/*
+
 		if(contours.size() > 1){
 			Moments mus = moments(contours[1], false);
-			Moments mut = moments(contours[2], false);
 			
 			int scX = mus.m10 / mus.m00;
 			int scY = mus.m01 / mus.m00;
 
-			int tcX = mut.m10 / mut.m00;
-			int tcY = mut.m01 / mut.m00;
-
 			if(contours.size() > 2){
 				// combine em
 			
-				if(pow(cY - tcY, 2) > pow(scY - tcY, 2)){
+				Moments mut = moments(contours[2], false);
+				int tcX = mut.m10 / mut.m00;
+				int tcY = mut.m01 / mut.m00;
+
+				if(pow(cX - tcX, 2) > pow(scX - tcX, 2)){
 					contours[1].insert(contours[1].end(), contours[2].begin(), contours[2].end());
-					
+					// fix to find only tl tr bl br
+					// lul
 					Moments mus = moments(contours[1], false);					
-					int scX = mus.m10 / mus.m00;
-					int scY = mus.m01 / mus.m00;
+					scX = mus.m10 / mus.m00;
+					scY = mus.m01 / mus.m00;
 				} else {
 					contours[0].insert(contours[0].end(), contours[2].begin(), contours[2].end());
 						
 					Moments mu = moments(contours[0], false);
-					int cX = mu.m10 / mu.m00;
-					int cY = mu.m01 / mu.m00;
+					cX = mu.m10 / mu.m00;
+					cY = mu.m01 / mu.m00;
 		
 				}				
-				
-				double secondEps = 0.05 * arcLength(contours[1], true);
-				approxPolyDP(contours[1], hulls[1], secondEps, true);
-				
-				int midX = cX + (scX-cX)/2;
-				int midY = cY + (scY-cY)/2;
+				midX = cX + (scX-cX)/2;
+				midY = cY + (scY-cY)/2;
 
 			}
-			*/
-				
-			/*
-			
-			
-			
-			//drawContours(frame, hulls, 1, Scalar(0, 0, 255), 2);		
 
-	double firstEps = 0.0001 * arcLength(contours[0], true);
+			double secondEps = 0.000001 * arcLength(contours[1], true);
+			approxPolyDP(contours[1], hulls[1], secondEps, true);
+			drawContours(frame, hulls, 1, Scalar(255, 255, 255), 2);
+		}
+
+	double firstEps = 0.001 * arcLength(contours[0], true);
 	approxPolyDP(contours[0], hulls[0], firstEps, true);	
-	drawContours(frame, hulls, 0, Scalar(0, 0, 0), 2);
-	*/
+	drawContours(frame, hulls, 0, Scalar(255, 255, 255), 2);
+
+	imshow("a", frame);
 		//}
 	
 	
@@ -139,7 +136,7 @@ int main(int argc, char *argv[]){
 	//cam.open(1);
 	//cam.read(frame);
 	//cam.open("aot.mp4");
-	frame = imread("b.jpg", CV_LOAD_IMAGE_COLOR);
+	frame = imread("testing.jpg", CV_LOAD_IMAGE_COLOR);
 	 
 	while(1){
 		//frame = imread("http://10.84.76.20:8080/stream.mjpg", CV_LOAD_IMAGE_COLOR
@@ -147,13 +144,15 @@ int main(int argc, char *argv[]){
 		//cam.read(frame);
 		processImage(frame);
 		
-		//imshow("a", frame);
+		frame = imread("testing.jpg", CV_LOAD_IMAGE_COLOR);
 		auto end = chrono::high_resolution_clock::now();    
 		auto dur = end - begin;
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
 		cout << ms << endl;
+		if(waitKey(1) == 27){
+			break;
+		}
 	}
 }
-
 
 

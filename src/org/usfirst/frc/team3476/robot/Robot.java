@@ -17,8 +17,10 @@ import org.usfirst.frc.team3476.utility.Dashcomm;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.CANTalon.VelocityMeasurementPeriod;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -46,7 +48,8 @@ public class Robot extends IterativeRobot {
 	DigitalInput test2 = new DigitalInput(23);
 	NetworkTable table = NetworkTable.getTable("");
 	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
-
+	DigitalOutput test3 = new DigitalOutput(20);
+	
 	ScriptEngineManager manager;
 	ScriptEngine engine;
 	String code;
@@ -67,6 +70,16 @@ public class Robot extends IterativeRobot {
 		orangeDrive = OrangeDrive.getInstance();
 		orangeDrive.addTask(mainExecutor);
 		shooters.addTask(mainExecutor);
+		/*
+		test3.set(true);
+		double initialTime = System.currentTimeMillis();
+		while((System.currentTimeMillis() - initialTime) < 2000){
+			// do nothing
+		}
+		test3.set(false);
+		if the pulse doesn't work
+		*/
+		test3.pulse(2);
 	}
 
 	/**
@@ -136,7 +149,7 @@ public class Robot extends IterativeRobot {
 				graph.putNumber("setpoint", speed);
 				NetworkTable.flush();
 			}
-		}, 0, 1, TimeUnit.MILLISECONDS);
+		}, 0, 10, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -176,12 +189,13 @@ public class Robot extends IterativeRobot {
 			shooters.disable();
 		}
 
+		// test one variable at a time
 		if (xbox.getRawButton(4)) {
-			shooters.loadCompensator.setBaseF(graph.getNumber("F", 0));
-			shooters.loadCompensator.setDecayRate(graph.getNumber("R", 0));
-			shooters.loadCompensator.setLoadIncrease(graph.getNumber("L", 0));			
+			shooters.setVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_10Ms);
+			shooters.setVelocityMeasurementWindow(1);
 		} else {
-			
+			shooters.setVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_100Ms);
+			shooters.setVelocityMeasurementWindow(1);
 		}
 	}
 

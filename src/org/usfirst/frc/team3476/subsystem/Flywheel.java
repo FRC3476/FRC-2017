@@ -21,8 +21,6 @@ public class Flywheel extends Threaded {
 	private double batVolt;
 
 	private boolean isEnabled;
-	// public for testing until Constants are found
-	public LoadController loadCompensator;
 
 	private DigitalInput ballSensor;
 
@@ -30,7 +28,7 @@ public class Flywheel extends Threaded {
 		// temporary? fast update rate
 		RUNNINGSPEED = 1;
 		masterTalon = new CANTalon(masterTalonId, 1);
-		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
+		masterTalon.changeControlMode(TalonControlMode.Speed);
 		slaveTalon = new CANTalon(slaveTalonId);
 		slaveTalon.changeControlMode(TalonControlMode.Follower);
 		slaveTalon.set(masterTalonId);
@@ -40,8 +38,8 @@ public class Flywheel extends Threaded {
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
 
-		masterTalon.reverseOutput(false);
-		masterTalon.reverseSensor(true);
+		masterTalon.reverseOutput(true);
+		masterTalon.reverseSensor(false);
 		slaveTalon.reverseOutput(true);
 
 		masterTalon.clearStickyFaults();
@@ -49,26 +47,23 @@ public class Flywheel extends Threaded {
 
 		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		masterTalon.configEncoderCodesPerRev(1024);
-		masterTalon.configPeakOutputVoltage(12, 0);
+		masterTalon.configPeakOutputVoltage(0, -12);
 		//masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		
 		//CTRE advice for tuning is to increase period until it is NOT as granular 
 		//then increase the rolling average until it is smooth enough but still responsive
-		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_10Ms);
-		masterTalon.SetVelocityMeasurementWindow(64);
 		
 		// TODO: Voltage Compensation (Probably change feedforward)
 		batVolt = DriverStation.getInstance().getBatteryVoltage();
 
 		ballSensor = new DigitalInput(ballSensorId);
 
-		loadCompensator = new LoadController(0.00025, 2, 0.05);
 	}
 
 	@Override
 	public void update() {
 		if (isEnabled) {
-			masterTalon.set(loadCompensator.calculate(ballSensor.get(), setpoint));
+			
 		}
 	}
 
@@ -105,6 +100,15 @@ public class Flywheel extends Threaded {
 
 	public double getCurrent() {
 		return masterTalon.getOutputCurrent();
+	}
+	
+	public void setVelocityMeasurementPeriod(VelocityMeasurementPeriod periodMs){
+		masterTalon.SetVelocityMeasurementPeriod(periodMs);
+	}
+	
+
+	public void setVelocityMeasurementWindow(int periodMs){
+		masterTalon.SetVelocityMeasurementWindow(periodMs);
 	}
 
 }
