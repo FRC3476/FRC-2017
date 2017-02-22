@@ -1,6 +1,9 @@
 package org.usfirst.frc.team3476.utility;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 public class Path {
 
@@ -9,6 +12,7 @@ public class Path {
 
 	// TODO: Remake algo to match new intended behavior
 	public Path(Waypoint initialPoint) {
+		pathPoints =  new ArrayList<Waypoint>();
 		pathPoints.add(initialPoint);
 	}
 

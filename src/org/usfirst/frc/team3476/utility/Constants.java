@@ -1,58 +1,46 @@
 package org.usfirst.frc.team3476.utility;
 
 public final class Constants {
+	
 	private Constants() {
-		updateConstants();
 	}
 
 	// Constants
 	// Make these public
 
-	public static double MinimumControllerInput;
-	public static double MaximumControllerInput;
-	public static double MinimumControllerOutput;
-	public static double MaximumControllerOutput;
+	public static double MinimumControllerInput = 0.15;
+	public static double MaximumControllerInput = 1;
+	public static double MinimumControllerOutput = 0;
+	public static double MaximumControllerOutput = 1;
 
-	public static double GearAngleTolerance;
-	public static double WheelDiameter;
-	public static int LeftMasterDriveId;
-	public static int LeftSlaveDriveId;
-	public static int RightMasterDriveId;
-	public static int RightSlaveDriveId;
+	public static double GearAngleTolerance = 2;
+	public static double WheelDiameter = 4;
+	public static int LeftMasterDriveId = 2;
+	public static int LeftSlaveDriveId = 3;
+	public static int RightMasterDriveId = 4;
+	public static int RightSlaveDriveId = 5;
+	public static int ShifterSolenoidId = 3;
 
-	public static int LeftMasterFlywheelId;
-	public static int LeftSlaveFlywheelId;
-	public static int RightMasterFlywheelId;
-	public static int RightSlaveFlywheelId;
-	public static int LeftBallSensorId;
-	public static int RightBallSensorId;
+	public static int LeftMasterFlywheelId = 34; //CHANGE THE MOTORS IN THE CODE
+	public static int LeftSlaveFlywheelId = 35;
+	public static int RightMasterFlywheelId = 12;
+	public static int RightSlaveFlywheelId = 13;
+	public static int LeftBallSensorId = 22;
+	public static int RightBallSensorId = 23;
+	
+	public static int IntakeFeederId = 7;
+	public static int UNUSEDFEEDER = 7;
+	public static int MasterIntakeId = 8;
+	public static int SlaveIntakeId = 9;
+	public static int ForwardIntakeSolenoidId = 5;
+	public static int ReverseIntakeSolenoidId = 6;
 
-	public static double TurretTicksPerRotations;
-	public static int RightTurretId;
-	public static int LeftTurretId;
-
-	public static void updateConstants() {
-		MinimumControllerInput = Dashcomm.get("Constants/MinimumControllerInput", 0.3);
-		MaximumControllerInput = Dashcomm.get("Constants/MaximumControllerInput", 1);
-		MinimumControllerOutput = Dashcomm.get("Constants/MinimumControllerOutput", 0);
-		MaximumControllerOutput = Dashcomm.get("Constants/MaximumControllerOutput", 1);
-
-		GearAngleTolerance = Dashcomm.get("Constants/GearAngleTolerance", 2);
-		WheelDiameter = Dashcomm.get("Constants/WheelDiameter", 4);
-		LeftMasterDriveId = (int) Dashcomm.get("Constants/LeftMasterDriveId", 4);
-		LeftSlaveDriveId = (int) Dashcomm.get("Constants/LeftSlaveDriveId", 5);
-		RightMasterDriveId = (int) Dashcomm.get("Constants/RightMasterDriveId", 2);
-		RightSlaveDriveId = (int) Dashcomm.get("Constants/RightSlaveDriveId", 3);
-		LeftBallSensorId = (int) Dashcomm.get("Constants/LeftBallSensorId", 22);
-		RightBallSensorId = (int) Dashcomm.get("Constants/RightBallSensorId", 23);
-
-		LeftMasterFlywheelId = (int) Dashcomm.get("Constants/LeftMasterFlywheelId", 10);
-		LeftSlaveFlywheelId = (int) Dashcomm.get("Constants/LeftSlaveFlywheelId", 11);
-		RightMasterFlywheelId = (int) Dashcomm.get("Constants/RightMasterFlywheelId", 0);
-		RightSlaveFlywheelId = (int) Dashcomm.get("Constants/RightSlaveFlywheelId", 0);
-
-		TurretTicksPerRotations = Dashcomm.get("Constants/TurretTicksPerRotations", 20000);
-		RightTurretId = (int) Dashcomm.get("Constants/RightTurretId", 0);		
-		LeftTurretId = (int) Dashcomm.get("Constants/LeftTurretId", 0);		
-	}
+	public static int GearSolenoidId = 2;
+	public static int PegSensorId = 1;
+	
+	public static int ClimberId = 10;
+	
+	public static double TurretTicksPerRotations = 20000;
+	public static int LeftTurretId = 11;
+	public static int RightTurretId = 12;
 }

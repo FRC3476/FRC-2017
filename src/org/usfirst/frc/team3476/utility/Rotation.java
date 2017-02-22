@@ -7,7 +7,7 @@ public class Rotation {
 
 	public Rotation() {
 		cos = 1;
-		sin = 1;
+		sin = 0;
 	}
 
 	public Rotation(double cos, double sin) {

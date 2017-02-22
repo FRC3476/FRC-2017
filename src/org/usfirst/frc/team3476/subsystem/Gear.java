@@ -1,11 +1,19 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.utility.Threaded;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 
-public class Gear {
+public class Gear extends Threaded {
 
-	private Solenoid gearMech = new Solenoid(1);
+	private Solenoid gearMech;
 	private static Gear gearInstance = new Gear();
+	private DigitalInput pegSensor;
+	private boolean oldSensorValue;
+	private boolean isWaiting;
+	private double initialTime;
 
 	// Maybe check air pressure
 	// Is this subsystem useless? We only need one or two pneumatic
@@ -15,11 +23,24 @@ public class Gear {
 	}
 
 	private Gear() {
-		// TODO: add stuffs here
+		RUNNINGSPEED = 50;
+		gearMech = new Solenoid(Constants.GearSolenoidId);
+		pegSensor = new DigitalInput(Constants.PegSensorId);
+		oldSensorValue = false;
+		isWaiting = false;
 	}
 
 	public void setGearMech(boolean pushed) {
 		gearMech.set(pushed);
+	}
+	
+	@Override
+	public void update(){
+		if(pegSensor.get()){
+			setGearMech(false);
+		} else {
+			setGearMech(true);
+		}
 	}
 
 	/*

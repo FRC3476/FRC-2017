@@ -7,7 +7,7 @@ public final class ActionRunner {
 	private ActionRunner() {
 	}
 
-	public static void waitTillDone(List<Action> actions) {
+	public static void waitTillDone(Action... actions) {
 		for (Action action : actions) {
 			action.start();
 		}
@@ -20,7 +20,7 @@ public final class ActionRunner {
 		}
 	}
 
-	public static void sequential(List<Action> actions) {
+	public static void sequential(Action...actions) {
 		for (Action action : actions) {
 			action.start();
 			while (!action.isDone()) {
@@ -36,7 +36,7 @@ public final class ActionRunner {
 		}
 	}
 
-	public static void parallel(List<Action> actions) {
+	public static void parallel(Action...actions) {
 		for (Action action : actions) {
 			action.start();
 		}

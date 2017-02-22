@@ -12,7 +12,7 @@ import com.ctre.CANTalon.VelocityMeasurementPeriod;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 
-public class Flywheel extends Threaded {
+public class Flywheel {
 
 	private CANTalon masterTalon, slaveTalon;
 
@@ -20,21 +20,21 @@ public class Flywheel extends Threaded {
 	private double toleranceRange = 50;
 	private double batVolt;
 
-	private boolean isEnabled;
 
 	private DigitalInput ballSensor;
 
 	public Flywheel(int masterTalonId, int slaveTalonId, int ballSensorId) {
-		// temporary? fast update rate
-		RUNNINGSPEED = 1;
-		masterTalon = new CANTalon(masterTalonId, 1);
+		masterTalon = new CANTalon(masterTalonId);
 		masterTalon.changeControlMode(TalonControlMode.Speed);
 		slaveTalon = new CANTalon(slaveTalonId);
 		slaveTalon.changeControlMode(TalonControlMode.Follower);
 		slaveTalon.set(masterTalonId);
 
 		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
-
+		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		masterTalon.configEncoderCodesPerRev(1024);
+		//masterTalon.configPeakOutputVoltage(0, -12);
+		
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
 
@@ -44,11 +44,6 @@ public class Flywheel extends Threaded {
 
 		masterTalon.clearStickyFaults();
 		slaveTalon.clearStickyFaults();
-
-		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-		masterTalon.configEncoderCodesPerRev(1024);
-		masterTalon.configPeakOutputVoltage(0, -12);
-		//masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		
 		//CTRE advice for tuning is to increase period until it is NOT as granular 
 		//then increase the rolling average until it is smooth enough but still responsive
@@ -58,13 +53,6 @@ public class Flywheel extends Threaded {
 
 		ballSensor = new DigitalInput(ballSensorId);
 
-	}
-
-	@Override
-	public void update() {
-		if (isEnabled) {
-			
-		}
 	}
 
 	public void setSetpoint(double setpoint) {
@@ -90,18 +78,21 @@ public class Flywheel extends Threaded {
 
 	public void enable() {
 		masterTalon.enable();
-		isEnabled = true;
 	}
 
 	public void disable() {
 		masterTalon.disable();
-		isEnabled = false;
 	}
 
 	public double getCurrent() {
 		return masterTalon.getOutputCurrent();
 	}
 	
+	public void setPIDF(double P, double I, double D, double F){
+		masterTalon.setPID(P, I, D);
+		masterTalon.setF(F);
+	}
+
 	public void setVelocityMeasurementPeriod(VelocityMeasurementPeriod periodMs){
 		masterTalon.SetVelocityMeasurementPeriod(periodMs);
 	}
@@ -109,6 +100,11 @@ public class Flywheel extends Threaded {
 
 	public void setVelocityMeasurementWindow(int periodMs){
 		masterTalon.SetVelocityMeasurementWindow(periodMs);
+	}
+	
+	public boolean get()
+	{
+		return ballSensor.get();
 	}
 
 }

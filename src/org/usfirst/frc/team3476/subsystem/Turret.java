@@ -5,6 +5,7 @@ import org.usfirst.frc.team3476.utility.Rotation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.StatusFrameRate;
+import com.ctre.CANTalon.TalonControlMode;
 
 public class Turret {
 
@@ -48,6 +49,14 @@ public class Turret {
 	public void setTolerance(double tolerance) {
 
 		this.tolerance = tolerance;
+	}
+	
+	
+	//THIS IS FOR TESTING ONLY -- DELETE AFTERWARDS
+	public void setManual(double power)
+	{
+		turretTalon.changeControlMode(TalonControlMode.PercentVbus);
+		turretTalon.setSetpoint(power);
 	}
 
 }

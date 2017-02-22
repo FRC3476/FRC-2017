@@ -6,12 +6,14 @@ import org.usfirst.frc.team3476.utility.Threaded;
 import org.usfirst.frc.team3476.utility.Translation;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SPI.Port;
 
 public class RobotTracker extends Threaded {
 
 	private static RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase = OrangeDrive.getInstance();
-	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro();
+	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
 	private RigidTransform latestState;
 	private Translation deltaPosition;
@@ -20,6 +22,7 @@ public class RobotTracker extends Threaded {
 	private double currentDistance, oldDistance;
 
 	public static RobotTracker getInstance() {
+		System.out.println("tracking instance: " + trackingInstance);
 		return trackingInstance;
 	}
 

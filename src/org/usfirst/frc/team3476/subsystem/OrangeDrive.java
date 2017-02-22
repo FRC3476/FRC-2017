@@ -9,11 +9,16 @@ import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.MotionProfileStatus;
 import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /* Inspiration from Team 254 */
 
@@ -28,24 +33,31 @@ public class OrangeDrive extends Threaded {
 
 	private boolean isDone;
 
-	private RobotDrive driveBase;
-	private AnalogGyro testGyro = new AnalogGyro(0);
+	//private RobotDrive driveBase;
+	private Gyro testGyro = new AnalogGyro(0);
 	private CANTalon leftTalon, rightTalon;
-	private RobotTracker robotState = RobotTracker.getInstance();
+	private RobotTracker robotState;
 	private PurePursuitController autonomousDriver;
 	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
 	private DriveVelocity autoDriveVelocity;
 	private static OrangeDrive driveInstance = new OrangeDrive();
-
+	private NetworkTable graph = NetworkTable.getTable("SmartDashboard");
+	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);
+	//private RobotDrive driveBase;
 	// Do not do private static double MINIMUM_INPUT = Constants.MinimumControllerInput;
 	// just use Constants.X
-
+	
+	
 	public static OrangeDrive getInstance() {
 		return driveInstance;
 	}
 
 	private OrangeDrive() {
 		RUNNINGSPEED = 10;
+		
+		robotState = RobotTracker.getInstance();
+		System.out.println(robotState);
+		
 		leftTalon = new CANTalon(Constants.LeftMasterDriveId);
 		rightTalon = new CANTalon(Constants.RightMasterDriveId);
 
@@ -69,10 +81,10 @@ public class OrangeDrive extends Threaded {
 		CANTalon rightSlaveTalon = new CANTalon(Constants.RightSlaveDriveId);
 
 		leftSlaveTalon.changeControlMode(TalonControlMode.Follower);
-		leftSlaveTalon.set(Constants.LeftMasterDriveId);
+		leftSlaveTalon.set(leftTalon.getDeviceID());
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
-		rightSlaveTalon.set(Constants.RightMasterDriveId);
-
+		rightSlaveTalon.set(rightTalon.getDeviceID());
+	//	driveBase = new RobotDrive(leftTalon, rightTalon);
 		configureTalons(TalonControlMode.Speed);
 	}
 
@@ -106,13 +118,16 @@ public class OrangeDrive extends Threaded {
 			// * Math.abs(moveValue);
 			// ^ is the correct way but we can take out MinimumControllerOutput in the front because it will be 0 and
 			// also the (MaximumControllerOutput - MinimumControllerOutput) because that will amount to 1
+		} else {
+			moveValue = 0;
 		}
 
 		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
 			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput)
 					/ (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
+		} else {
+			turnValue = 0;
 		}
-
 		// System.out.println("left " + leftTalon.getSpeed() + "right " + rightTalon.getSpeed());
 		arcadeDrive(moveValue, turnValue);
 	}
@@ -122,6 +137,7 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
 		}
+		//robotState = RobotTracker.getInstance();
 		// PurePursuitController(double lookAheadDistance, double robotSpeed,
 		// double robotDiameter, Path robotPath)
 		autonomousDriver = new PurePursuitController(10, 10, 10, autoPath);
@@ -144,8 +160,15 @@ public class OrangeDrive extends Threaded {
 		// inches per sec to rotations per min
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
 		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);
-		System.out.println("setpoint " + setVelocity.wheelSpeed);
-		System.out.println("delta " + setVelocity.deltaSpeed);
+		/*
+		graph.putNumber("RightRPM", rightTalon.getSpeed());
+		graph.putNumber("LeftRPM", leftTalon.getSpeed());
+		graph.putNumber("RightSetpoint", rightTalon.getSetpoint());
+		graph.putNumber("LeftSetpoint", leftTalon.getSetpoint());
+		*/
+		System.out.println("left setpoint: " + leftTalon.getSetpoint() + " speed: " + leftTalon.getSpeed());
+		System.out.println("right setpoint: " + rightTalon.getSetpoint() + " speed: " + rightTalon.getSpeed());
+		
 	}
 
 	public boolean isDone() {
@@ -224,13 +247,41 @@ public class OrangeDrive extends Threaded {
 		}
 
 		// 18 ft per sec -> 216 inches per sec
-		leftMotorSpeed *= 216;
-		rightMotorSpeed *= 216;
+		leftMotorSpeed *= 25;
+		rightMotorSpeed *= 25;
 
-		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed)
-				/ 2));
+		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
 	}
+	
+	
+	public void drive(double moveValue, double turnValue)
+	{
+		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
+			moveValue = (moveValue * (Math.abs(moveValue) - 0.3)) / ((0.7) * Math.abs(moveValue));
+		} else {
+			moveValue = 0;
+		}
 
+		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
+			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput)
+					/ (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
+		} else {
+			turnValue = 0;
+		}
+		/*
+		driveBase.setSafetyEnabled(false);
+		driveBase.arcadeDrive(moveValue, turnValue);
+		*/
+	}
+	 
+	
+	public void shiftDown(){
+		driveShifters.set(false);
+	}
+	public void shiftUp(){
+		driveShifters.set(true);
+	}
+	
 	public static class DriveVelocity {
 
 		public double wheelSpeed;
