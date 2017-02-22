@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.SPI;
 
 public class RobotTracker extends Threaded {
 
-	private static RobotTracker trackingInstance = new RobotTracker();
+	private static final RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase = OrangeDrive.getInstance();
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 

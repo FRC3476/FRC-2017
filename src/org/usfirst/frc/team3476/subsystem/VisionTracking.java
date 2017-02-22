@@ -10,6 +10,7 @@ public class VisionTracking extends Threaded {
 	private Flywheel leftFlywheel;
 	private Flywheel rightFlywheel;
 
+	//fix to use singleton pattern
 	private VisionTracking() {
 		rightTurret = new Turret(Constants.RightTurretId);
 		leftTurret = new Turret(Constants.LeftTurretId);

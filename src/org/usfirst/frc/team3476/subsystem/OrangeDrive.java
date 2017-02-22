@@ -39,7 +39,7 @@ public class OrangeDrive extends Threaded {
 	private PurePursuitController autonomousDriver;
 	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
 	private DriveVelocity autoDriveVelocity;
-	private static OrangeDrive driveInstance = new OrangeDrive();
+	private static final OrangeDrive driveInstance = new OrangeDrive();
 	private NetworkTable graph = NetworkTable.getTable("SmartDashboard");
 	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);
 	//private RobotDrive driveBase;

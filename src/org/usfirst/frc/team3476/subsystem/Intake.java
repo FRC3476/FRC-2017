@@ -15,7 +15,7 @@ public class Intake {
   
 	private DoubleSolenoid intakeSolenoids;
 	
-	private static Intake intakeInstance = new Intake();
+	private static final Intake intakeInstance = new Intake();
 	
 	CANTalon masterTalon, slaveTalon, feederTalon;
 	
