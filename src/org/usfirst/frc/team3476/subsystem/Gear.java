@@ -11,9 +11,6 @@ public class Gear extends Threaded {
 	private Solenoid gearMech;
 	private static Gear gearInstance = new Gear();
 	private DigitalInput pegSensor;
-	private boolean oldSensorValue;
-	private boolean isWaiting;
-	private double initialTime;
 
 	// Maybe check air pressure
 	// Is this subsystem useless? We only need one or two pneumatic
@@ -26,8 +23,6 @@ public class Gear extends Threaded {
 		RUNNINGSPEED = 50;
 		gearMech = new Solenoid(Constants.GearSolenoidId);
 		pegSensor = new DigitalInput(Constants.PegSensorId);
-		oldSensorValue = false;
-		isWaiting = false;
 	}
 
 	public void setGearMech(boolean pushed) {

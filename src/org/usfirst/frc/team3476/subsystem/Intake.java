@@ -39,7 +39,7 @@ public class Intake {
 	  slaveTalon.set(masterTalon.getDeviceID());
 	}
 	
-	public void setState(IntakeState setState){
+	public synchronized void setState(IntakeState setState){
 		if(setState == IntakeState.DOWN){
 			intakeSolenoids.set(Value.kForward);
 			currentState = setState;
@@ -49,7 +49,7 @@ public class Intake {
 		}
 	}
 	
-	public IntakeState getState(){
+	public synchronized IntakeState getState(){
 		return currentState;
 	}
 	

@@ -1,7 +1,5 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.LoadController;
-import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -55,12 +53,12 @@ public class Flywheel {
 
 	}
 
-	public void setSetpoint(double setpoint) {
+	public synchronized void setSetpoint(double setpoint) {
 		this.setpoint = setpoint;
 		masterTalon.setSetpoint(setpoint);
 	}
 
-	public void setTolerance(double toleranceRange) {
+	public synchronized void setTolerance(double toleranceRange) {
 		this.toleranceRange = toleranceRange;
 	}
 
@@ -72,7 +70,7 @@ public class Flywheel {
 		return masterTalon.getSpeed();
 	}
 
-	public double getSetpoint() {
+	public synchronized double getSetpoint() {
 		return setpoint;
 	}
 

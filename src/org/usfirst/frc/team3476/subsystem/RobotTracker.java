@@ -7,7 +7,6 @@ import org.usfirst.frc.team3476.utility.Translation;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SPI.Port;
 
 public class RobotTracker extends Threaded {
 
@@ -33,7 +32,7 @@ public class RobotTracker extends Threaded {
 
 	// TODO: Optimize this
 	@Override
-	public void update() {
+	public synchronized void update() {
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() - driveBase.getRightDistance()) / 2;
 		// Get change in rotation
@@ -47,7 +46,7 @@ public class RobotTracker extends Threaded {
 		oldDistance = currentDistance;
 	}
 
-	public RigidTransform getCurrentPosition() {
+	public synchronized RigidTransform getCurrentPosition() {
 		return latestState;
 	}
 

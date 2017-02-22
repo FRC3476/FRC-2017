@@ -30,24 +30,28 @@ public class Turret {
 		// rotations per degree
 		// :( add special case for turning 90
 		turretTalon.setSetpoint((setAngle.getDegrees() / 360) * Constants.TurretTicksPerRotations);
-		this.setAngle = setAngle;
+		synchronized (this){
+			this.setAngle = setAngle;
+		}
 	}
 
 	public Rotation getAngle() {
 		return new Rotation(turretTalon.getPosition() / Constants.TurretTicksPerRotations);
 	}
 
-	public Rotation getSetpoint() {
+	public synchronized Rotation getSetAngle() {
 		return setAngle;
 	}
-
+	
+	public double getSetpoint(){
+		return turretTalon.getSetpoint();
+	}
 	/*
 	 * public boolean isDone(){
 	 * }
 	 */
 
-	public void setTolerance(double tolerance) {
-
+	public synchronized void setTolerance(double tolerance) {
 		this.tolerance = tolerance;
 	}
 	

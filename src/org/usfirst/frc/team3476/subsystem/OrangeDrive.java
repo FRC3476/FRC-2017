@@ -15,7 +15,6 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -89,7 +88,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	@Override
-	public void update() {
+	public synchronized void update() {
 		switch (driveState) {
 		case MANUAL:
 			// check for last setArcadeDrive
@@ -103,7 +102,7 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	public void setManualDrive(double moveValue, double turnValue) {
+	public synchronized void setManualDrive(double moveValue, double turnValue) {
 		if (driveState != DriveState.MANUAL) {
 			driveState = DriveState.MANUAL;
 			configureTalons(TalonControlMode.Speed);
@@ -132,7 +131,7 @@ public class OrangeDrive extends Threaded {
 		arcadeDrive(moveValue, turnValue);
 	}
 
-	public void setAutoPath(Path autoPath) {
+	public synchronized void setAutoPath(Path autoPath) {
 		if (driveState != DriveState.AUTO) {
 			driveState = DriveState.AUTO;
 			configureTalons(TalonControlMode.Speed);
@@ -144,7 +143,7 @@ public class OrangeDrive extends Threaded {
 		updateAutoPath();
 	}
 
-	public void setGearPath() {
+	public synchronized void setGearPath() {
 		if (driveState != DriveState.GEAR) {
 			driveState = DriveState.GEAR;
 			configureTalons(TalonControlMode.Speed);
@@ -156,7 +155,7 @@ public class OrangeDrive extends Threaded {
 		updateGearPath();
 	}
 
-	private void setWheelVelocity(DriveVelocity setVelocity) {
+	private synchronized void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
 		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);
@@ -189,7 +188,7 @@ public class OrangeDrive extends Threaded {
 		setWheelVelocity(autoDriveVelocity);
 	}
 
-	public void updateGearPath() {
+	private void updateGearPath() {
 		if (Math.abs(desiredAngle - testGyro.getAngle()) > Constants.GearAngleTolerance) {
 			setWheelVelocity(new DriveVelocity(0, gearDriver.update(testGyro.getAngle())));
 		} else {
@@ -198,7 +197,7 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	public void configureTalons(TalonControlMode mode) {
+	private void configureTalons(TalonControlMode mode) {
 		leftTalon.changeControlMode(mode);
 		rightTalon.changeControlMode(mode);
 	}
@@ -212,7 +211,7 @@ public class OrangeDrive extends Threaded {
 		return rightTalon.getPosition();
 	}
 
-	public void arcadeDrive(double moveValue, double rotateValue) {
+	private void arcadeDrive(double moveValue, double rotateValue) {
 
 		double leftMotorSpeed;
 		double rightMotorSpeed;
