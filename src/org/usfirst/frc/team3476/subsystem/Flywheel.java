@@ -16,7 +16,6 @@ public class Flywheel {
 
 	private double setpoint;
 	private double toleranceRange = 50;
-	private double batVolt;
 
 
 	private DigitalInput ballSensor;
@@ -31,7 +30,6 @@ public class Flywheel {
 		masterTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);
 		masterTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		masterTalon.configEncoderCodesPerRev(1024);
-		//masterTalon.configPeakOutputVoltage(0, -12);
 		
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
@@ -42,13 +40,7 @@ public class Flywheel {
 
 		masterTalon.clearStickyFaults();
 		slaveTalon.clearStickyFaults();
-		
-		//CTRE advice for tuning is to increase period until it is NOT as granular 
-		//then increase the rolling average until it is smooth enough but still responsive
-		
-		// TODO: Voltage Compensation (Probably change feedforward)
-		batVolt = DriverStation.getInstance().getBatteryVoltage();
-
+	
 		ballSensor = new DigitalInput(ballSensorId);
 
 	}
