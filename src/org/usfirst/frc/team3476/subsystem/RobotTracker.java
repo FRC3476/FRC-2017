@@ -33,7 +33,7 @@ public class RobotTracker extends Threaded {
 	@Override
 	public synchronized void update() {
 		// Average distance
-		currentDistance = (driveBase.getLeftDistance() - driveBase.getRightDistance()) / 2;
+		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		// Get change in rotation
 		deltaRotation = latestState.rotationMat.inverse().rotateBy(new Rotation(Math.cos(gyroSensor.getAngle()), Math.sin(gyroSensor.getAngle())));
 		// Get change in distance
@@ -53,6 +53,10 @@ public class RobotTracker extends Threaded {
 
 	public synchronized RigidTransform getCurrentPosition() {
 		return latestState;
+	}
+	
+	public synchronized Rotation getCurrentAngle(){
+		return latestState.rotationMat;
 	}
 }
 
