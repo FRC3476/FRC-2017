@@ -37,6 +37,10 @@ public class Gear extends Threaded {
 			setGearMech(true);
 		}
 	}
+	
+	public boolean isPushed(){
+		return gearMech.get();
+	}
 
 	/*
 	 * if banner sensor

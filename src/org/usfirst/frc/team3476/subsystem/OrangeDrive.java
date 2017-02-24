@@ -4,6 +4,7 @@ import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
+import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
 
@@ -13,9 +14,11 @@ import com.ctre.CANTalon.MotionProfileStatus;
 import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -34,7 +37,7 @@ public class OrangeDrive extends Threaded {
 	private boolean isDone;
 
 	//private RobotDrive driveBase;
-	private Gyro testGyro = new AnalogGyro(0);
+	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private CANTalon leftTalon, rightTalon;
 	private RobotTracker robotState;
 	private PurePursuitController autonomousDriver;
@@ -121,16 +124,22 @@ public class OrangeDrive extends Threaded {
 		//robotState = RobotTracker.getInstance();
 		// PurePursuitController(double lookAheadDistance, double robotSpeed,
 		// double robotDiameter, Path robotPath)
+		if(driveState != DriveState.AUTO){
+			driveState = DriveState.AUTO;
+		}
 		autonomousDriver = new PurePursuitController(10, 10, 10, autoPath);
 		shiftUp();
 		updateAutoPath();
 	}
 
 	public synchronized void setGearPath() {
-		isDone = false;
-		desiredAngle = testGyro.getAngle() + Dashcomm.get("angle", 0);
-		gearDriver.setSetpoint(desiredAngle);
-		updateGearPath();
+		if(driveState != DriveState.GEAR){
+			driveState = DriveState.GEAR;
+			isDone = false;
+			desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
+			gearDriver.setSetpoint(desiredAngle);
+			updateGearPath();
+		}
 	}
 
 	private synchronized void setWheelVelocity(DriveVelocity setVelocity) {
@@ -163,11 +172,22 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private void updateGearPath() {
-		if (Math.abs(desiredAngle - testGyro.getAngle()) > Constants.GearAngleTolerance) {
-			setWheelVelocity(new DriveVelocity(0, gearDriver.update(testGyro.getAngle())));
+		if (Math.abs(desiredAngle - gyroSensor.getAngle()) > Constants.GearAngleTolerance) {
+			setWheelVelocity(new DriveVelocity(0, gearDriver.update(gyroSensor.getAngle())));
 		} else {
-			DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
-			setWheelVelocity(drivingSpeed);
+			if(isDone = true){
+				DriveVelocity drivingSpeed = new DriveVelocity(-10, 0);
+				setWheelVelocity(drivingSpeed);
+			} else {
+				DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
+				setWheelVelocity(drivingSpeed);
+				if(Math.abs(Dashcomm.get("angle", 0)) < 2){
+					desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
+				}
+				if(Gear.getInstance().isPushed()){
+					isDone = true;
+				}
+			}
 		}
 	}
 
@@ -185,6 +205,10 @@ public class OrangeDrive extends Threaded {
 		return rightTalon.getPosition() * Constants.WheelDiameter;
 	}
 
+	public Rotation getGyroAngle(){
+		return new Rotation(gyroSensor.getAngle());
+	}
+	
 	private void arcadeDrive(double moveValue, double rotateValue) {
 
 		double leftMotorSpeed;

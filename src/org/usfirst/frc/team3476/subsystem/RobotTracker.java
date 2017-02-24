@@ -12,7 +12,6 @@ public class RobotTracker extends Threaded {
 
 	private static final RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase = OrangeDrive.getInstance();
-	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
 	private RigidTransform latestState;
 	private Translation deltaPosition;
@@ -35,17 +34,23 @@ public class RobotTracker extends Threaded {
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		// Get change in rotation
-		deltaRotation = latestState.rotationMat.inverse().rotateBy(new Rotation(Math.cos(gyroSensor.getAngle()), Math.sin(gyroSensor.getAngle())));
+		deltaRotation = latestState.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		// Get change in distance
-		deltaPosition = new Translation(oldDistance - currentDistance, 0).rotateBy(deltaRotation);
+		Translation deltaPosition;
 		// transform the change to compared to the robot's current
 		// position/rotation
 		// 1E-10 is arbitrary. It is a tolerance
+		double sTBT;
+		double cTBT;
 		if(Math.abs(deltaRotation.getRadians()) < 1E-10){
-			
+			sTBT = 1.0 - 1.0 / 6.0 * deltaRotation.getRadians() * deltaRotation.getRadians();
+			cTBT = 0.5 * deltaRotation.getRadians() - 1.0 / 24.0 * Math.pow(deltaRotation.getRadians(), 3);
 		} else {
-			
+			sTBT = deltaRotation.sin() / deltaRotation.getRadians();
+			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
 		}
+
+		deltaPosition = new Translation(sTBT * currentDistance, cTBT * currentDistance);
 		latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
 		// store old distance
 		oldDistance = currentDistance;
