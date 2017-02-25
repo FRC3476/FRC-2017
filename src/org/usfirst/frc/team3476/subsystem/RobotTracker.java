@@ -26,6 +26,7 @@ public class RobotTracker extends Threaded {
 	private RobotTracker() {
 		RUNNINGSPEED = 10;
 		latestState = new RigidTransform(new Translation(), new Rotation());
+		driveBase.zeroSensors();
 	}
 
 	// TODO: Optimize this
@@ -50,9 +51,11 @@ public class RobotTracker extends Threaded {
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
 		}
 
-		deltaPosition = new Translation(sTBT * currentDistance, cTBT * currentDistance);
+		deltaPosition = new Translation(sTBT * (currentDistance-oldDistance), cTBT * (currentDistance-oldDistance));
 		latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
 		// store old distance
+		System.out.println(sTBT + cTBT);
+		System.out.println(latestState.translationMat.getX() + "  " + latestState.translationMat.getY());
 		oldDistance = currentDistance;
 	}
 

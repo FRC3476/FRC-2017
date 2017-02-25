@@ -279,6 +279,13 @@ public class OrangeDrive extends Threaded {
 		driveShifters.set(true);
 	}
 	
+	public void zeroSensors(){
+		gyroSensor.calibrate();
+		gyroSensor.reset();
+		leftTalon.setPosition(0);
+		rightTalon.setPosition(0);
+	}
+	
 	public static class DriveVelocity {
 
 		public double wheelSpeed;
