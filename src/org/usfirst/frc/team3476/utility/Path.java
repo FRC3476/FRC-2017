@@ -40,8 +40,7 @@ public class Path {
 				Rotation pathSegmentAngle = new Rotation(180 - lookAheadAngle.getDegrees()
 						- pathPointAngle.getDegrees());
 
-				return new Translation(0, lookAheadDistance * pathSegmentAngle.sin()
-						/ pathPointAngle.sin()).rotateBy(nextPathAngle);
+				return new Translation(0, lookAheadDistance * pathSegmentAngle.sin() / pathPointAngle.sin()).rotateBy(nextPathAngle);
 			}
 			prevPoint = pathPoint.getPosition();
 		}

@@ -55,24 +55,24 @@ public class PurePursuitController {
 		// check if it is straight ahead or not
 		// TODO: fix method of checking whether to drive straight or not
 		// TODO: Constants
-		if (Math.abs(lookAheadPoint.getX() - robotPosition.translationMat.getX()) < 1) {
+		Translation lookAheadPointToRobot = robotPosition.translationMat.inverse().translateBy(lookAheadPoint);
+		
+		if (Math.abs(lookAheadPointToRobot.getX()) < 1) {
 			return 0;
 		}
-		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPosition.translationMat), 2)
-				/ (2 * lookAheadPoint.getX());
-		if (lookAheadPoint.getX() > 0) {
-			System.out.println("radius " + radius);
-			return radius;
-		} else {
-			System.out.println("radius " + -radius);
+		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPosition.translationMat), 2) / (2 * Math.abs(lookAheadPointToRobot.getX()));
+		System.out.println(radius);
+		if (lookAheadPointToRobot.getX() > 0) {
 			return -radius;
+		} else {
+			return radius;
 		}
 	}
 
 	public boolean isDone(RigidTransform robotState) {
 		// TODO: separate to translation and rotational isDone
 		// TODO: Constants
-		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 5) {
+		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 2) {
 			return true;
 		} else {
 			return false;

@@ -19,6 +19,8 @@ import org.usfirst.frc.team3476.subsystem.Turret;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Path;
+import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
@@ -108,11 +110,6 @@ public class Robot extends IterativeRobot {
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 		
-		robotState.addTask(mainExecutor);
-		orangeDrive.addTask(mainExecutor);
-		gear.addTask(mainExecutor);
-		//shooters.addTask(mainExecutor);
-		
 		//if the pulse doesn't work
 		
 		/*
@@ -139,9 +136,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		robotState.addTask(mainExecutor);
+		orangeDrive.addTask(mainExecutor);
+		gear.addTask(mainExecutor);
+		//shooters.addTask(mainExecutor);
+		
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
-		manager = new ScriptEngineManager();
+		
+		/*manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
@@ -154,7 +157,9 @@ public class Robot extends IterativeRobot {
 			engine.eval(code);
 		} catch (ScriptException e) {
 			System.out.println(e);
-		}
+		}*/
+		
+		orangeDrive.setAutoPath(new Path(new Waypoint(0, 120, 10)));
 
 	}
 
@@ -168,6 +173,11 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		robotState.addTask(mainExecutor);
+		orangeDrive.addTask(mainExecutor);
+		gear.addTask(mainExecutor);
+		//shooters.addTask(mainExecutor);
+		
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gear.setRunningState(true);
@@ -301,6 +311,12 @@ public class Robot extends IterativeRobot {
 			logger.cancel(true);
 		}
 		gear.setRunningState(false);
+		
+		robotState.endTask();
+		orangeDrive.endTask();
+		gear.endTask();
+		//shooters.endTask();
+		
 		//shooters.setRunningState(false);
 	}
 

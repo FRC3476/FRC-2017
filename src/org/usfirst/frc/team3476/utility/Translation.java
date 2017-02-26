@@ -38,6 +38,9 @@ public class Translation {
 		return new Translation(x, y);
 	}
 
+	public Translation inverse(){
+		return new Translation(-x, -y);
+	}
 	// Rotation matrix consists of
 	// cos O -sin O
 	// sin O cos O

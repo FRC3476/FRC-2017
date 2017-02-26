@@ -34,9 +34,12 @@ public class RobotTracker extends Threaded {
 	public synchronized void update() {
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
+		double deltaDistance = currentDistance - oldDistance;
 		// Get change in rotation
+		System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
 		deltaRotation = latestState.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		// Get change in distance
+		System.out.println(deltaRotation.getDegrees());
 		Translation deltaPosition;
 		// transform the change to compared to the robot's current
 		// position/rotation
@@ -50,12 +53,12 @@ public class RobotTracker extends Threaded {
 			sTBT = deltaRotation.sin() / deltaRotation.getRadians();
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
 		}
-
-		deltaPosition = new Translation(sTBT * (currentDistance-oldDistance), cTBT * (currentDistance-oldDistance));
-		latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
+		
+		deltaPosition = new Translation(sTBT * deltaDistance, cTBT * deltaDistance);
+		latestState.transform(new RigidTransform(deltaPosition, deltaRotation.inverse()));
 		// store old distance
-		System.out.println(sTBT + cTBT);
-		System.out.println(latestState.translationMat.getX() + "  " + latestState.translationMat.getY());
+		//System.out.println("stbt " + sTBT + "ctbt " + cTBT);
+		//System.out.println(latestState.translationMat.getX() + "  " + latestState.translationMat.getY());
 		oldDistance = currentDistance;
 	}
 

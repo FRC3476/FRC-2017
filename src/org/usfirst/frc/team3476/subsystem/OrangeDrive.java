@@ -39,7 +39,6 @@ public class OrangeDrive extends Threaded {
 	//private RobotDrive driveBase;
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private CANTalon leftTalon, rightTalon;
-	private RobotTracker robotState;
 	private PurePursuitController autonomousDriver;
 	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
 	private DriveVelocity autoDriveVelocity;
@@ -56,8 +55,6 @@ public class OrangeDrive extends Threaded {
 
 	private OrangeDrive() {
 		RUNNINGSPEED = 10;
-		
-		robotState = RobotTracker.getInstance();
 		
 		leftTalon = new CANTalon(Constants.LeftMasterDriveId);
 		rightTalon = new CANTalon(Constants.RightMasterDriveId);
@@ -127,7 +124,7 @@ public class OrangeDrive extends Threaded {
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
 		}
-		autonomousDriver = new PurePursuitController(10, 10, 10, autoPath);
+		autonomousDriver = new PurePursuitController(10, 10, 25.5, autoPath);
 		shiftUp();
 		updateAutoPath();
 	}
@@ -159,7 +156,7 @@ public class OrangeDrive extends Threaded {
 		case MANUAL:
 			return true;
 		case AUTO:
-			return autonomousDriver.isDone(robotState.getCurrentPosition());
+			return autonomousDriver.isDone(RobotTracker.getInstance().getCurrentPosition());
 		case GEAR:
 			return isDone;
 		}
@@ -167,7 +164,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private void updateAutoPath() {
-		autoDriveVelocity = autonomousDriver.calculate(robotState.getCurrentPosition());
+		autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
 		setWheelVelocity(autoDriveVelocity);
 	}
 
