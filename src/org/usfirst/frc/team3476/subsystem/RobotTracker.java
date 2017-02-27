@@ -36,10 +36,10 @@ public class RobotTracker extends Threaded {
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		double deltaDistance = currentDistance - oldDistance;
 		// Get change in rotation
-		System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
+		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
 		deltaRotation = latestState.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		// Get change in distance
-		System.out.println(deltaRotation.getDegrees());
+		//System.out.println(deltaRotation.getDegrees());
 		Translation deltaPosition;
 		// transform the change to compared to the robot's current
 		// position/rotation

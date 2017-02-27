@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.ADXRS453_Gyro;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -37,13 +39,14 @@ public class OrangeDrive extends Threaded {
 	private boolean isDone;
 
 	//private RobotDrive driveBase;
-	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+	private ADXRS453_Gyro gyroSensor;
 	private CANTalon leftTalon, rightTalon;
 	private PurePursuitController autonomousDriver;
 	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
 	private DriveVelocity autoDriveVelocity;
 	private static final OrangeDrive driveInstance = new OrangeDrive();
 	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);
+	private double gearDeltaSpeed = 0;
 	//private RobotDrive driveBase;
 	// Do not do private static double MINIMUM_INPUT = Constants.MinimumControllerInput;
 	// just use Constants.X
@@ -82,9 +85,11 @@ public class OrangeDrive extends Threaded {
 		leftSlaveTalon.set(leftTalon.getDeviceID());
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		rightSlaveTalon.set(rightTalon.getDeviceID());
+		
+		gyroSensor = new ADXRS453_Gyro(SPI.Port.kOnboardCS0);
 		configureTalons(TalonControlMode.Speed);
 	}
-
+	
 	@Override
 	public synchronized void update() {
 		switch (driveState) {
@@ -101,6 +106,9 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setManualDrive(double moveValue, double turnValue) {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+		if(driveState != DriveState.MANUAL){
+			driveState = DriveState.MANUAL;
+		}
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
 			moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((0.85) * Math.abs(moveValue));
 			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
@@ -134,6 +142,7 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.GEAR;
 			isDone = false;
 			desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
+			gearDeltaSpeed = 0;
 			gearDriver.setSetpoint(desiredAngle);
 			updateGearPath();
 		}
@@ -170,18 +179,32 @@ public class OrangeDrive extends Threaded {
 
 	private void updateGearPath() {
 		if (Math.abs(desiredAngle - gyroSensor.getAngle()) > Constants.GearAngleTolerance) {
-			setWheelVelocity(new DriveVelocity(0, gearDriver.update(gyroSensor.getAngle())));
-		} else {
-			if(isDone = true){
-				DriveVelocity drivingSpeed = new DriveVelocity(-10, 0);
-				setWheelVelocity(drivingSpeed);
+			if(desiredAngle - gyroSensor.getAngle() < 0){
+				setWheelVelocity(new DriveVelocity(0, -20));
 			} else {
+				setWheelVelocity(new DriveVelocity(0, 20));
+			}
+			System.out.println("turning " + gyroSensor.getAngle());
+			System.out.println("desired " + desiredAngle);
+		} else {
+			System.out.println("driving");
+			if(isDone){
 				DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
 				setWheelVelocity(drivingSpeed);
-				if(Math.abs(Dashcomm.get("angle", 0)) < 2){
-					desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
-				}
-				if(Gear.getInstance().isPushed()){
+				System.out.println("isPushed");
+			} else {
+				/*
+				if(Dashcomm.get("isNew", 0) == 1){
+					desiredAngle = Dashcomm.get("angle", 0) + gyroSensor.getAngle();	
+					Dashcomm.put("isNew", 0);
+				} 
+				gearDeltaSpeed = (desiredAngle - gyroSensor.getAngle() * 0.25);
+				System.out.println(desiredAngle - gyroSensor.getAngle());
+				*/
+				
+				DriveVelocity drivingSpeed = new DriveVelocity(-10, 0);
+				setWheelVelocity(drivingSpeed);
+				if(Gear.getInstance().isPushed()){					
 					isDone = true;
 				}
 			}
@@ -204,6 +227,10 @@ public class OrangeDrive extends Threaded {
 
 	public Rotation getGyroAngle(){
 		return new Rotation(gyroSensor.getAngle());
+	}
+	
+	public double getDegreeAngle(){
+		return gyroSensor.getAngle();
 	}
 	
 	private void arcadeDrive(double moveValue, double rotateValue) {
