@@ -5,7 +5,7 @@ import java.util.Arrays;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 
-public class ADXRS453_Gyro extends ADXRS450_Gyro implements DifferentialGyro
+public class ADXRS453_Gyro extends ADXRS450_Gyro 
 {
 	public final int DEFSAMPLES = 5;
 	private int samples;
@@ -35,13 +35,11 @@ public class ADXRS453_Gyro extends ADXRS450_Gyro implements DifferentialGyro
 		lastHeading = get();
 	}
 	
-	@Override
 	public double pidGet()
 	{
 		return getAngle();
 	}
 	
-	@Override
 	public double getAngle()
 	{
 		return calcDiff();

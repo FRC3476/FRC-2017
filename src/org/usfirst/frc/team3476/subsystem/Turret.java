@@ -36,7 +36,7 @@ public class Turret {
 	}
 
 	public Rotation getAngle() {
-		return new Rotation(turretTalon.getPosition() / Constants.TurretTicksPerRotations);
+		return Rotation.fromRadians((turretTalon.getPosition() / Constants.TurretTicksPerRotations) * 2 * Math.PI);
 	}
 
 	public synchronized Rotation getSetAngle() {

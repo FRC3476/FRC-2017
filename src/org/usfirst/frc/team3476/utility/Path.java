@@ -34,11 +34,10 @@ public class Path {
 				}
 				// law of sine to find distance on path
 				Rotation nextPathAngle = prevPoint.getAngle(pathPoint.getPosition());
+				// TODO: fix this logic http://mathworld.wolfram.com/Circle-LineIntersection.html
 				Rotation pathPointAngle = nextPathAngle.rotateBy(robotPosition.getAngle(prevPoint));
-				Rotation lookAheadAngle = new Rotation(Math.asin(robotPosition.getDistanceTo(prevPoint)
-						* pathPointAngle.sin() / lookAheadDistance));
-				Rotation pathSegmentAngle = new Rotation(180 - lookAheadAngle.getDegrees()
-						- pathPointAngle.getDegrees());
+				Rotation lookAheadAngle = Rotation.fromRadians(Math.asin(robotPosition.getDistanceTo(prevPoint)	* pathPointAngle.sin() / lookAheadDistance));
+				Rotation pathSegmentAngle = Rotation.fromDegrees(180 - lookAheadAngle.getDegrees() - pathPointAngle.getDegrees());
 
 				return new Translation(0, lookAheadDistance * pathSegmentAngle.sin() / pathPointAngle.sin()).rotateBy(nextPathAngle);
 			}

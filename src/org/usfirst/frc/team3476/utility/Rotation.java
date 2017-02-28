@@ -17,12 +17,14 @@ public class Rotation {
 		angle = Math.acos(cos);
 	}
 
-	public Rotation(double angle) {
-		cos = Math.cos(angle);
-		sin = Math.sin(angle);
-		this.angle = angle;
+	public static Rotation fromDegrees(double angle) {
+		return new Rotation(Math.cos(Math.toRadians(angle)), Math.sin(Math.toRadians(angle)));	
 	}
-
+	
+	public static Rotation fromRadians(double radians) {
+		return new Rotation(Math.cos(radians), Math.sin(radians));
+	}
+	
 	public double getDegrees() {
 		return angle;
 	}
