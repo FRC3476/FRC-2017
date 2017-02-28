@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -35,7 +36,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-	private SynchronousPid gearDriver = new SynchronousPid(0.1, 0.01, 0, 0.1);
+	private SynchronousPid gearDriver = new SynchronousPid(0.05, 0, 0, 0);
 	private double desiredAngle;
 	private boolean isDone;
 
@@ -104,6 +105,9 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setManualDrive(double moveValue, double turnValue) {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+		if(driveState != DriveState.MANUAL){
+			driveState = DriveState.MANUAL;
+		}
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
 			moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((0.85) * Math.abs(moveValue));
 			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
@@ -137,7 +141,7 @@ public class OrangeDrive extends Threaded {
 			driveState = DriveState.GEAR;
 			isDone = false;
 			desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
-			gearDriver.setSetpoint(desiredAngle);
+			gearDriver.setSetpoint(0);
 			updateGearPath();
 		}
 	}
@@ -152,6 +156,9 @@ public class OrangeDrive extends Threaded {
 		
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
 		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);		
+		NetworkTable.getTable("").putNumber("speed", leftTalon.getSpeed());
+		NetworkTable.getTable("").putNumber("setpoint", leftTalon.getSetpoint());
+		
 	}
 
 	public boolean isDone() {
@@ -173,17 +180,32 @@ public class OrangeDrive extends Threaded {
 
 	private void updateGearPath() {
 		if (Math.abs(desiredAngle - gyroSensor.getAngle()) > Constants.GearAngleTolerance) {
-			setWheelVelocity(new DriveVelocity(0, gearDriver.update(gyroSensor.getAngle())));
-		} else {
-			if(isDone = true){
-				DriveVelocity drivingSpeed = new DriveVelocity(-10, 0);
-				setWheelVelocity(drivingSpeed);
+			/*
+			if(desiredAngle - gyroSensor.getAngle() < 0){
+			
+				setWheelVelocity(new DriveVelocity(0, 30));
 			} else {
-				DriveVelocity drivingSpeed = new DriveVelocity(10, 0);
+				setWheelVelocity(new DriveVelocity(0, -30));				
+			}
+			*/
+			setWheelVelocity(new DriveVelocity(0, 100 * gearDriver.update(gyroSensor.getAngle() - desiredAngle)));
+			System.out.println("turning" + desiredAngle);
+			System.out.println("rightnow" + gyroSensor.getAngle());
+			
+		} else {
+			if(isDone){
+				DriveVelocity drivingSpeed = new DriveVelocity(100, 0);
 				setWheelVelocity(drivingSpeed);
-				if(Math.abs(Dashcomm.get("angle", 0)) < 2){
-					desiredAngle = gyroSensor.getAngle() + Dashcomm.get("angle", 0);
-				}
+				System.out.println("reversing");
+			} else {
+				DriveVelocity drivingSpeed = new DriveVelocity(-100, 0);
+				setWheelVelocity(drivingSpeed);
+				
+				System.out.println("diving");
+				
+				// Use timestamp of vision 
+				
+				
 				if(Gear.getInstance().isPushed()){
 					isDone = true;
 				}
@@ -244,9 +266,9 @@ public class OrangeDrive extends Threaded {
 		}
 
 		// 18 ft per sec -> 216 inches per sec
-		leftMotorSpeed *= 25;
-		rightMotorSpeed *= 25;
-
+		leftMotorSpeed *= 216;
+		rightMotorSpeed *= 216;
+		
 		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
 	}
 	

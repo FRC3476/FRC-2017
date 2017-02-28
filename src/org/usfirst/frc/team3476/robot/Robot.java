@@ -53,7 +53,7 @@ public class Robot extends IterativeRobot {
 	OrangeDrive orangeDrive;
 	Flywheel shooters;
 	Gear gear;
-	Intake intake;
+	//Intake intake;
 	
 	Turret leftTurret;
 	Turret rightTurret;
@@ -104,7 +104,7 @@ public class Robot extends IterativeRobot {
 		robotState = RobotTracker.getInstance();
 		orangeDrive = OrangeDrive.getInstance();
 		gear = Gear.getInstance();
-		intake = Intake.getInstance();
+		//intake = Intake.getInstance();
 		leftTurret = new Turret(Constants.LeftTurretId);
 		rightTurret = new Turret(Constants.RightTurretId);
 		climber = new CANTalon(Constants.ClimberId);
@@ -198,12 +198,21 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		xbox.update();
+		double moveVal = -xbox.getRawAxis(1);
+		double turnVal = -xbox.getRawAxis(4);
+		
 		led.setRaw(255);
+		if(xbox.getRawButton(1)){
+			orangeDrive.setGearPath();
+		} else {
+			orangeDrive.setManualDrive(moveVal, turnVal);
+			
+		}
 		//System.out.println(testSensor.get());
 		//System.out.println(testSensor2.get());
 		
 		//ACTUAL STUFF
-		
+		/*
 
 		if(xbox.getPOV(0) == 180){
 			intake.setSucking(0.5);
@@ -235,7 +244,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("channel 0 " + pdp.getCurrent(0));
 		System.out.println("channel 3 " + pdp.getCurrent(3));
 		*/
-		
+	
 		if (xbox.getRawButton(5))
 		{
 			orangeDrive.shiftDown();
@@ -245,11 +254,11 @@ public class Robot extends IterativeRobot {
 			orangeDrive.shiftUp();
 		}
 		
-		intake.setFeeder(xbox.getRawButton(8));
+	//	intake.setFeeder(xbox.getRawButton(8));
 
 		//intake.setFeeder(xbox.getRawButton(5));
 		
-		gear.setGearMech(xbox.getRawButton(7));
+	//	gear.setGearMech(xbox.getRawButton(7));
 		
 		double leftTrigger = -xbox.getRawAxis(2);
 		double rightTrigger = xbox.getRawAxis(3);
@@ -261,10 +270,6 @@ public class Robot extends IterativeRobot {
 		leftTurret.setManual(triggers);
 		rightTurret.setManual(triggers);
 		
-		double moveVal = -xbox.getRawAxis(1);
-		double turnVal = -xbox.getRawAxis(4);
-		
-		orangeDrive.setManualDrive(moveVal, turnVal);
 		/*
 		//END ACTUAL
 		
