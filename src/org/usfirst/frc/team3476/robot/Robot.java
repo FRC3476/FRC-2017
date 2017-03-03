@@ -21,6 +21,7 @@ import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.Path.Waypoint;
+import org.usfirst.frc.team3476.utility.Rotation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
@@ -77,7 +78,7 @@ public class Robot extends IterativeRobot {
 	UsbCamera boilerCamera;
 	UsbCamera driverCamera;
 	*/
-	PWM led = new PWM(0);
+	DigitalOutput led =  new DigitalOutput(4);
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 	// TODO: Determine best number of threads
@@ -97,8 +98,7 @@ public class Robot extends IterativeRobot {
 			// do nothing
 		}
 		turnOnJetson.set(true);
-		
-		
+		led.set(true);
 		//Subsystems
 		//shooters = new Flywheel(10, 11, 22);
 		robotState = RobotTracker.getInstance();
@@ -109,7 +109,10 @@ public class Robot extends IterativeRobot {
 		rightTurret = new Turret(Constants.RightTurretId);
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
-		
+
+		robotState.addTask(mainExecutor);
+		orangeDrive.addTask(mainExecutor);
+		gear.addTask(mainExecutor);
 		//if the pulse doesn't work
 		
 		/*
@@ -136,31 +139,37 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		robotState.addTask(mainExecutor);
-		orangeDrive.addTask(mainExecutor);
-		gear.addTask(mainExecutor);
 		//shooters.addTask(mainExecutor);
 		
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
-		
-		/*manager = new ScriptEngineManager();
+		gear.setRunningState(true);
+		/*
+		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
 
 		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
+		
 		//shooters.setRunningState(true);
 		try {
 			engine.eval(helperCode);
 			engine.eval(code);
 		} catch (ScriptException e) {
 			System.out.println(e);
-		}*/
+		}
+		*/
+		orangeDrive.setAutoPath(new Path(new Waypoint(0, 72, 30)), true);
+		while(!orangeDrive.isDone()){
+			
+		}
+		orangeDrive.setRotation(Rotation.fromDegrees(30));
+		while(!orangeDrive.isDone()){
+			
+		}
 		
-		orangeDrive.setAutoPath(new Path(new Waypoint(0, 120, 10)));
-
 	}
 
 	/**
@@ -173,9 +182,6 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
-		robotState.addTask(mainExecutor);
-		orangeDrive.addTask(mainExecutor);
-		gear.addTask(mainExecutor);
 		//shooters.addTask(mainExecutor);
 		
 		robotState.setRunningState(true);
@@ -187,7 +193,7 @@ public class Robot extends IterativeRobot {
 			public void run() {
 			}
 		}, 0, 10, TimeUnit.MILLISECONDS);
-		System.out.println("created runnable");
+		//System.out.println("created runnable");
 	}
 
 	/**
@@ -201,12 +207,17 @@ public class Robot extends IterativeRobot {
 		double moveVal = -xbox.getRawAxis(1);
 		double turnVal = -xbox.getRawAxis(4);
 		
-		led.setRaw(255);
 		if(xbox.getRawButton(1)){
 			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
-			
+		}
+		
+		orangeDrive.updateGearSpeed(graph.getNumber("gearSpeed", 0));
+		
+		if (xbox.getRawButton(4))
+		{
+			orangeDrive.updatePIDF(graph.getNumber("P",0),graph.getNumber("I",0), graph.getNumber("D", 0), graph.getNumber("F", 0));
 		}
 		//System.out.println(testSensor.get());
 		//System.out.println(testSensor2.get());
@@ -317,9 +328,6 @@ public class Robot extends IterativeRobot {
 		}
 		gear.setRunningState(false);
 		
-		robotState.endTask();
-		orangeDrive.endTask();
-		gear.endTask();
 		//shooters.endTask();
 		
 		//shooters.setRunningState(false);

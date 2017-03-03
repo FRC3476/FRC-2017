@@ -10,23 +10,25 @@ import edu.wpi.first.wpilibj.SPI;
 
 public class RobotTracker extends Threaded {
 
-	private static final RobotTracker trackingInstance = new RobotTracker();
+	private static RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase = OrangeDrive.getInstance();
 
 	private RigidTransform latestState;
-	private Translation deltaPosition;
 	private Rotation deltaRotation;
 
+	
 	private double currentDistance, oldDistance;
-
+	
+	
 	public static RobotTracker getInstance() {
 		return trackingInstance;
 	}
 
 	private RobotTracker() {
 		RUNNINGSPEED = 10;
-		latestState = new RigidTransform(new Translation(), new Rotation());
 		driveBase.zeroSensors();
+		latestState = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		oldDistance = 0;
 	}
 
 	// TODO: Optimize this
@@ -38,27 +40,22 @@ public class RobotTracker extends Threaded {
 		// Get change in rotation
 		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
 		deltaRotation = latestState.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
-		// Get change in distance
-		//System.out.println(deltaRotation.getDegrees());
-		Translation deltaPosition;
-		// transform the change to compared to the robot's current
-		// position/rotation
-		// 1E-10 is arbitrary. It is a tolerance
 		double sTBT;
 		double cTBT;
-		if(Math.abs(deltaRotation.getRadians()) < 1E-10){
+		if(Math.abs(deltaRotation.getRadians()) < 1E-9){
 			sTBT = 1.0 - 1.0 / 6.0 * deltaRotation.getRadians() * deltaRotation.getRadians();
 			cTBT = 0.5 * deltaRotation.getRadians() - 1.0 / 24.0 * Math.pow(deltaRotation.getRadians(), 3);
+			//System.out.println("change is small");
 		} else {
 			sTBT = deltaRotation.sin() / deltaRotation.getRadians();
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
+			//System.out.println("change is large");
 		}
-		
-		deltaPosition = new Translation(sTBT * deltaDistance, cTBT * deltaDistance);
-		latestState.transform(new RigidTransform(deltaPosition, deltaRotation.inverse()));
-		// store old distance
-		//System.out.println("stbt " + sTBT + "ctbt " + cTBT);
-		//System.out.println(latestState.translationMat.getX() + "  " + latestState.translationMat.getY());
+
+		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
+		latestState = latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
+		System.out.println(latestState.translationMat.getX() + " " + latestState.translationMat.getY());
+		System.out.println(latestState.rotationMat.getDegrees());
 		oldDistance = currentDistance;
 	}
 
@@ -69,6 +66,7 @@ public class RobotTracker extends Threaded {
 	public synchronized Rotation getCurrentAngle(){
 		return latestState.rotationMat;
 	}
+	
 }
 
 /*

@@ -14,11 +14,29 @@ public class Rotation {
 	public Rotation(double cos, double sin) {
 		this.cos = cos;
 		this.sin = sin;
-		angle = Math.acos(cos);
 	}
 
+	public Rotation(double cos, double sin, boolean normalize) {
+		this.cos = cos;
+		this.sin = sin;
+		if(normalize){
+			normalize();
+		}
+	}
+	
+	public void normalize(){
+		double magnitude = Math.hypot(cos, sin);
+		if(magnitude > 1E-9){
+			cos /= magnitude;
+			sin /= magnitude;
+		} else {
+			cos = 1;
+			sin = 0;
+		}
+	}
+	
 	public static Rotation fromDegrees(double angle) {
-		return new Rotation(Math.cos(Math.toRadians(angle)), Math.sin(Math.toRadians(angle)));	
+		return fromRadians(Math.toRadians(angle));	
 	}
 	
 	public static Rotation fromRadians(double radians) {
@@ -26,7 +44,7 @@ public class Rotation {
 	}
 	
 	public double getDegrees() {
-		return angle;
+		return Math.toDegrees(getRadians());
 	}
 
 	// cos , sin in unit circle
@@ -41,13 +59,12 @@ public class Rotation {
 	// Rotated coordinates is R * R
 	// We only need cos O and sin O because the other two can be determined
 	public Rotation rotateBy(Rotation rotationMat) {
-		return new Rotation(cos * rotationMat.cos - sin * rotationMat.sin, sin * rotationMat.cos
-				+ cos * rotationMat.sin);
+		return new Rotation(cos * rotationMat.cos() - sin * rotationMat.sin(), sin * rotationMat.cos()
+				+ cos * rotationMat.sin(), true);
 	}
 	
-
 	public Rotation inverse() {
-		return new Rotation(-cos, -sin);
+		return new Rotation(cos, -sin);
 	}
 
 	public double cos() {

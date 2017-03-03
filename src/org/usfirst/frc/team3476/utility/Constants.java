@@ -13,7 +13,7 @@ public final class Constants {
 	public static double MinimumControllerOutput = 0;
 	public static double MaximumControllerOutput = 1;
 
-	public static double GearAngleTolerance = 2;
+	public static double DrivingAngleTolerance = 5;
 	public static double WheelDiameter = 4;
 	public static int LeftMasterDriveId = 2;
 	public static int LeftSlaveDriveId = 3;

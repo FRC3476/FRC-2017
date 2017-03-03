@@ -15,12 +15,14 @@ public class PurePursuitController {
 	private double robotSpeed;
 	private double robotDiameter;
 	private Path robotPath;
+	private boolean isReversed;
 
-	public PurePursuitController(double lookAheadDistance, double robotSpeed, double robotDiameter, Path robotPath) {
+	public PurePursuitController(double lookAheadDistance, double robotSpeed, double robotDiameter, Path robotPath, boolean isReversed) {
 		this.lookAheadDistance = lookAheadDistance;
 		this.robotSpeed = robotSpeed;
 		this.robotDiameter = robotDiameter;
 		this.robotPath = robotPath;
+		this.isReversed = isReversed;
 
 	}
 
@@ -31,9 +33,17 @@ public class PurePursuitController {
 		}
 		double radius = getRadius(robotState, lookAheadDistance);
 		if(radius != 0){
-			return new OrangeDrive.DriveVelocity(robotSpeed, robotDiameter * (robotSpeed / radius) / 2);
+			if(isReversed){
+				return new OrangeDrive.DriveVelocity(-robotSpeed, -robotDiameter * (robotSpeed / radius) / 2);
+			} else {
+				return new OrangeDrive.DriveVelocity(robotSpeed, robotDiameter * (robotSpeed / radius) / 2);				
+			}
 		} else {
-			return new OrangeDrive.DriveVelocity(robotSpeed, 0);
+			if(isReversed){
+				return new OrangeDrive.DriveVelocity(-robotSpeed, 0);
+			} else {
+				return new OrangeDrive.DriveVelocity(robotSpeed, 0);				
+			}
 		}
 
 		// TODO: Lower wheel speed as you get closer to endpoint
@@ -51,7 +61,7 @@ public class PurePursuitController {
 	public double getRadius(RigidTransform robotPosition, double lookAheadDistance) {
 		// Get point if robot was centered on 0 degrees
 		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPosition.translationMat, lookAheadDistance); //.rotateBy(robotPosition.rotationMat.inverse()); Don't rotate because it is done in getting the lookAheadPoint
-		System.out.println("position " + lookAheadPoint.getX() + " " + lookAheadPoint.getY());
+	//	System.out.println("position " + lookAheadPoint.getX() + " " + lookAheadPoint.getY());
 		// check if it is straight ahead or not
 		// TODO: fix method of checking whether to drive straight or not
 		// TODO: Constants
@@ -72,7 +82,7 @@ public class PurePursuitController {
 	public boolean isDone(RigidTransform robotState) {
 		// TODO: separate to translation and rotational isDone
 		// TODO: Constants
-		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 2) {
+		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 1) {
 			return true;
 		} else {
 			return false;

@@ -8,17 +8,11 @@ import org.usfirst.frc.team3476.utility.Path.Waypoint;
 public class Path {
 
 	private List<Waypoint> pathPoints;
-	private Rotation endingRotation;
 
 	// TODO: Remake algo to match new intended behavior
 	public Path(Waypoint initialPoint) {
 		pathPoints =  new ArrayList<Waypoint>();
 		pathPoints.add(initialPoint);
-	}
-
-	public Path(Waypoint initialPoint, Rotation endingRotation) {
-		pathPoints.add(initialPoint);
-		this.endingRotation = endingRotation;
 	}
 
 	public void addWaypoint(Waypoint nextPoint) {
@@ -48,10 +42,6 @@ public class Path {
 
 	public Translation endPoint() {
 		return pathPoints.get(pathPoints.size() - 1).getPosition();
-	}
-
-	public Rotation getRotation() {
-		return endingRotation;
 	}
 
 	public static class Waypoint {

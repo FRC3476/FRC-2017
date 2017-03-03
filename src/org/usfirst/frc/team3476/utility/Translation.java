@@ -32,10 +32,8 @@ public class Translation {
 	}
 
 	public Translation translateBy(Translation delta) {
-		this.x += delta.getX();
-		this.y += delta.getY();
 
-		return new Translation(x, y);
+		return new Translation(x + delta.getX(), y + delta.getY());
 	}
 
 	public Translation inverse(){

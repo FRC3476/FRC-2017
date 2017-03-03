@@ -18,7 +18,7 @@ public class Drive implements Action {
 
 	@Override
 	public void start() {
-		drive.setAutoPath(setPath);
+		drive.setAutoPath(setPath, false);
 
 	}
 
