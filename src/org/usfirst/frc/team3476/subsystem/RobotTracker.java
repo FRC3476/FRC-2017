@@ -56,8 +56,8 @@ public class RobotTracker extends Threaded {
 
 		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
 		currentPose = currentPose.transform(new RigidTransform(deltaPosition, deltaRotation));
-		System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
-		System.out.println(currentPose.rotationMat.getDegrees());
+		//System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
+		//System.out.println(currentPose.rotationMat.getDegrees());
 		oldDistance = currentDistance;
 	}
 

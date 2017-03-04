@@ -85,7 +85,7 @@ public class PurePursuitController {
 	public boolean isDone(RigidTransform robotState) {
 		// TODO: separate to translation and rotational isDone
 		// TODO: Constants
-		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 1) {
+		if (robotState.translationMat.getDistanceTo(robotPath.endPoint()) < 5) {
 			return true;
 		} else {
 			return false;

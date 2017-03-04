@@ -21,7 +21,9 @@ import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.Path.Waypoint;
+import org.usfirst.frc.team3476.utility.RigidTransform;
 import org.usfirst.frc.team3476.utility.Rotation;
+import org.usfirst.frc.team3476.utility.Translation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
@@ -144,6 +146,7 @@ public class Robot extends IterativeRobot {
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gear.setRunningState(true);
+		orangeDrive.setInverse(true);
 		/*
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
@@ -161,14 +164,24 @@ public class Robot extends IterativeRobot {
 			System.out.println(e);
 		}
 		*/
+		// inversed
+		robotState.resetPose(new RigidTransform(new Translation(), orangeDrive.getGyroAngle()));
+		/*
 		orangeDrive.setAutoPath(new Path(new Waypoint(0, 72, 30)), true);
 		while(!orangeDrive.isDone()){
 			
 		}
+		
+
+		System.out.println("setting rotate");
+		
 		orangeDrive.setRotation(Rotation.fromDegrees(30));
+		*/
+		orangeDrive.setGearPath();
 		while(!orangeDrive.isDone()){
 			
 		}
+		orangeDrive.setManualDrive(0, 0);
 		
 	}
 
