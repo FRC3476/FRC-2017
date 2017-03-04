@@ -26,12 +26,16 @@ public class PurePursuitController {
 
 	}
 
-	public OrangeDrive.DriveVelocity calculate(RigidTransform robotState) {
-
-		if (isDone(robotState)) {
+	public OrangeDrive.DriveVelocity calculate(RigidTransform robotPose) {
+		
+		if(isReversed){
+			robotPose = new RigidTransform(robotPose.translationMat, robotPose.rotationMat.rotateBy(Rotation.fromDegrees(180)));
+		}
+		
+		if (isDone(robotPose)) {
 			return new OrangeDrive.DriveVelocity(0, 0);
 		}
-		double radius = getRadius(robotState, lookAheadDistance);
+		double radius = getRadius(robotPose, lookAheadDistance);
 		if(radius != 0){
 			if(isReversed){
 				return new OrangeDrive.DriveVelocity(-robotSpeed, -robotDiameter * (robotSpeed / radius) / 2);
@@ -58,20 +62,19 @@ public class PurePursuitController {
 	}
 
 	// Move lookaheaddistance to path
-	public double getRadius(RigidTransform robotPosition, double lookAheadDistance) {
+	public double getRadius(RigidTransform robotPose, double lookAheadDistance) {
 		// Get point if robot was centered on 0 degrees
-		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPosition.translationMat, lookAheadDistance); //.rotateBy(robotPosition.rotationMat.inverse()); Don't rotate because it is done in getting the lookAheadPoint
+		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPose.translationMat, lookAheadDistance); //.rotateBy(robotPosition.rotationMat.inverse()); Don't rotate because it is done in getting the lookAheadPoint
 	//	System.out.println("position " + lookAheadPoint.getX() + " " + lookAheadPoint.getY());
 		// check if it is straight ahead or not
 		// TODO: fix method of checking whether to drive straight or not
 		// TODO: Constants
-		Translation lookAheadPointToRobot = robotPosition.translationMat.inverse().translateBy(lookAheadPoint);
+		Translation lookAheadPointToRobot = robotPose.translationMat.inverse().translateBy(lookAheadPoint);
 		
-		if (Math.abs(lookAheadPointToRobot.getX()) < 1) {
+		if (lookAheadPointToRobot.getX() * robotPose.rotationMat.sin() - lookAheadPointToRobot.getY() * robotPose.rotationMat.cos() < 0) {
 			return 0;
 		}
-		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPosition.translationMat), 2) / (2 * Math.abs(lookAheadPointToRobot.getX()));
-		System.out.println(radius);
+		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPose.translationMat), 2) / (2 * Math.abs(lookAheadPointToRobot.getX()));
 		if (lookAheadPointToRobot.getX() > 0) {
 			return -radius;
 		} else {

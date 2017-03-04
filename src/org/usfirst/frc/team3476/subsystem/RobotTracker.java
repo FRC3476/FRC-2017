@@ -13,7 +13,7 @@ public class RobotTracker extends Threaded {
 	private static RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase = OrangeDrive.getInstance();
 
-	private RigidTransform latestState;
+	private RigidTransform currentPose;
 	private Rotation deltaRotation;
 
 	
@@ -27,11 +27,13 @@ public class RobotTracker extends Threaded {
 	private RobotTracker() {
 		RUNNINGSPEED = 10;
 		driveBase.zeroSensors();
-		latestState = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;
 	}
 
-	// TODO: Optimize this
+	
+	// TODO: Timestamp it for Orange County
+	// Ain't even our final form yet
 	@Override
 	public synchronized void update() {
 		// Average distance
@@ -39,7 +41,7 @@ public class RobotTracker extends Threaded {
 		double deltaDistance = currentDistance - oldDistance;
 		// Get change in rotation
 		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
-		deltaRotation = latestState.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
+		deltaRotation = currentPose.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		double sTBT;
 		double cTBT;
 		if(Math.abs(deltaRotation.getRadians()) < 1E-9){
@@ -53,20 +55,23 @@ public class RobotTracker extends Threaded {
 		}
 
 		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
-		latestState = latestState.transform(new RigidTransform(deltaPosition, deltaRotation));
-		System.out.println(latestState.translationMat.getX() + " " + latestState.translationMat.getY());
-		System.out.println(latestState.rotationMat.getDegrees());
+		currentPose = currentPose.transform(new RigidTransform(deltaPosition, deltaRotation));
+		System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
+		System.out.println(currentPose.rotationMat.getDegrees());
 		oldDistance = currentDistance;
 	}
 
 	public synchronized RigidTransform getCurrentPosition() {
-		return latestState;
+		return currentPose;
 	}
 	
 	public synchronized Rotation getCurrentAngle(){
-		return latestState.rotationMat;
+		return currentPose.rotationMat;
 	}
 	
+	public synchronized void resetPose(RigidTransform newPose){
+		currentPose = newPose;
+	}
 }
 
 /*

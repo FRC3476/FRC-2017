@@ -104,7 +104,7 @@ public class OrangeDrive extends Threaded {
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		rightSlaveTalon.set(rightTalon.getDeviceID());
 		configureTalons(TalonControlMode.Speed);
-		isRotated = true;
+		isRotated = false;
 		gyroInversed = true;
 	}
 
@@ -195,10 +195,10 @@ public class OrangeDrive extends Threaded {
 			return true;
 		case AUTO:
 			switch(autoState){
-				case DRIVING:
-					return autonomousDriver.isDone(RobotTracker.getInstance().getCurrentPosition());
-				case ROTATING:
-					return isRotated;
+			case DRIVING:
+				return autonomousDriver.isDone(RobotTracker.getInstance().getCurrentPosition());
+			case ROTATING:
+				return isRotated;
 			}
 		case GEAR:
 			return isDone;
@@ -208,15 +208,14 @@ public class OrangeDrive extends Threaded {
 
 	private synchronized void updateAutoPath() {
 		switch(autoState){
-			case DRIVING:
-				autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
-				setWheelVelocity(autoDriveVelocity);
-				System.out.println("driving");
-				break;
-			case ROTATING:
-				updateRotation();
-				System.out.println("rotating");
-				break;
+		case DRIVING:
+			autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
+			setWheelVelocity(autoDriveVelocity);
+			System.out.println("driving");
+			break;
+		case ROTATING:
+			updateRotation();
+			break;
 		}
 	}
 
@@ -224,7 +223,9 @@ public class OrangeDrive extends Threaded {
 		if (Math.abs(desiredAngle - getAngle()) > Constants.DrivingAngleTolerance) {
 			isRotated = false;
 			setWheelVelocity(new DriveVelocity(0, 50 * turningDriver.update(getAngle() - desiredAngle)));		
-		} else {
+			System.out.println("turning");
+		} else {	
+			System.out.println("done turning");
 			setWheelVelocity(new DriveVelocity(0, 0));
 			isRotated = true;
 		}

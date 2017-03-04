@@ -3,12 +3,11 @@ package org.usfirst.frc.team3476.utility;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 public class Path {
 
 	private List<Waypoint> pathPoints;
-
+	private double currentPathSpeed;
 	// TODO: Remake algo to match new intended behavior
 	public Path(Waypoint initialPoint) {
 		pathPoints =  new ArrayList<Waypoint>();
@@ -19,29 +18,46 @@ public class Path {
 		pathPoints.add(nextPoint);
 	}
 
-	public Translation getLookAheadPoint(Translation robotPosition, double lookAheadDistance) {
-		Translation prevPoint = null;
+	public Translation getLookAheadPoint(Translation robotPose, double lookAheadDistance) {
+		Waypoint prevPoint = null;
 		for (Waypoint pathPoint : pathPoints) {
-			if (lookAheadDistance <= pathPoint.position.getDistanceTo(robotPosition)) {
+			if (lookAheadDistance <= pathPoint.position.getDistanceTo(robotPose)) {
 				if (prevPoint == null) {
 					return pathPoint.getPosition();
 				}
-				// law of sine to find distance on path
-				Rotation nextPathAngle = prevPoint.getAngle(pathPoint.getPosition());
 				// TODO: fix this logic http://mathworld.wolfram.com/Circle-LineIntersection.html
-				Rotation pathPointAngle = nextPathAngle.rotateBy(robotPosition.getAngle(prevPoint));
-				Rotation lookAheadAngle = Rotation.fromRadians(Math.asin(robotPosition.getDistanceTo(prevPoint)	* pathPointAngle.sin() / lookAheadDistance));
-				Rotation pathSegmentAngle = Rotation.fromDegrees(180 - lookAheadAngle.getDegrees() - pathPointAngle.getDegrees());
-
-				return new Translation(0, lookAheadDistance * pathSegmentAngle.sin() / pathPointAngle.sin()).rotateBy(nextPathAngle);
+				double x1 = prevPoint.getPosition().getX();
+				double x2 = pathPoint.getPosition().getX();
+				double y1 = prevPoint.getPosition().getY();
+				double y2 = pathPoint.getPosition().getY();
+				double dX = x2 - x1;
+				double dY = y2 - y1;
+				double dR2 = dX * dX + dY * dY;
+				double D = x1 * y2 - x2 * y1;
+				
+				double sqrtDiscriminant = Math.sqrt(lookAheadDistance * dR2 - D * D);
+				
+				Translation negativePoint = new Translation((D * dY - (dY < 0 ? -1 : 1) * dX * sqrtDiscriminant) / sqrtDiscriminant,
+															(-D * dX - Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);
+				Translation positivePoint = new Translation((D * dY + (dY < 0 ? -1 : 1) * dX * sqrtDiscriminant) / sqrtDiscriminant,
+						(-D * dX + Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);
+				
+				// select the best point
+				
+				currentPathSpeed = prevPoint.getSpeed();
 			}
-			prevPoint = pathPoint.getPosition();
+			pathPoints.remove(prevPoint);
+			prevPoint = pathPoint;
 		}
 		return pathPoints.get(pathPoints.size() - 1).position;
 	}
 
 	public Translation endPoint() {
 		return pathPoints.get(pathPoints.size() - 1).getPosition();
+	}
+	
+	public double getPathSpeed(){
+		return currentPathSpeed;
 	}
 
 	public static class Waypoint {
