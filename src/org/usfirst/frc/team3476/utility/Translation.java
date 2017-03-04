@@ -55,8 +55,16 @@ public class Translation {
 		return Math.sqrt(Math.pow((x - nextPoint.getX()), 2) + Math.pow(y - nextPoint.getY(), 2));
 	}
 
-	public Rotation getAngle(Translation nextPoint) {
-		double angleOffset = Math.asin(y - nextPoint.getY() / this.getDistanceTo(nextPoint));
+	public Rotation getAngleTo(Translation nextPoint) {
+		double angleOffset = Math.asin(x - nextPoint.getX() / this.getDistanceTo(nextPoint));
 		return Rotation.fromRadians(angleOffset);
+	}
+	
+	public Rotation getAngleFromOffset(Translation offset){
+		return offset.getAngleTo(this);
+	}	
+	
+	public static Translation fromAngleDistance(double distance, Rotation angle){
+		return new Translation(angle.sin() * distance, angle.cos() * distance);
 	}
 }

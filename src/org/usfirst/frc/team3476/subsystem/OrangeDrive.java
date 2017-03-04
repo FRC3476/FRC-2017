@@ -7,6 +7,7 @@ import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
+import org.usfirst.frc.team3476.utility.Translation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -179,18 +180,14 @@ public class OrangeDrive extends Threaded {
 			isDone = false;
 			double cameraAngle = Dashcomm.get("angle", 0)*180/Math.PI;
 			double distance = Dashcomm.get("distance", 0);
-			double theta = Math.PI/2 - cameraAngle;
-			double cameraOffset = Constants.cameraOffset + 12.5;
-			
-			double distanceFromMiddle = Math.sqrt(distance * distance + cameraOffset * cameraOffset - 2 * distance*Constants.cameraOffset * Math.cos(theta));
-			double angleFromRobotFrame = Math.asin(distance * Math.sin(theta) / distanceFromMiddle);
-			System.out.println(Math.toDegrees(angleFromRobotFrame));
-			Rotation angle = Rotation.fromRadians(angleFromRobotFrame - Math.PI/2);
-			System.out.println(angle.getDegrees());
-			desiredAngle = getGyroAngle().getDegrees() + angle.getDegrees();
-			turningDriver.setSetpoint(0);
+			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle));
+			System.out.println("x");
+			Translation offset = new Translation(-1.75, -12);
+			desiredAngle = getGyroAngle().rotateBy(targetPosition.getAngleFromOffset(offset)).getDegrees();
+			System.out.println(desiredAngle);
+			turningDriver.setSetpoint(desiredAngle);
 			shiftDown();
-			//updateGearPath();
+			updateGearPath();
 		}
 	}
 
@@ -242,7 +239,7 @@ public class OrangeDrive extends Threaded {
 		System.out.println(desiredAngle);
 		if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) > Constants.DrivingAngleTolerance) {
 			isRotated = false;
-			setWheelVelocity(new DriveVelocity(0, 30 * turningDriver.update(getGyroAngle().getDegrees() - desiredAngle)));		
+			setWheelVelocity(new DriveVelocity(0, 30 * turningDriver.update(getGyroAngle().getDegrees())));		
 		} else {	
 			setWheelVelocity(new DriveVelocity(0, 0));
 			isRotated = true;
