@@ -43,7 +43,7 @@ public class OrangeDrive extends Threaded {
 
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(0.8, 0, 0, 0);
-	private double desiredAngle;
+	private Rotation desiredAngle;
 	private boolean isDone;
 	private boolean isRotated;
 
@@ -105,6 +105,7 @@ public class OrangeDrive extends Threaded {
 		isRotated = false;
 		gyroInversed = false;
 		turningDriver.setOutputRange(216, -216);
+		turningDriver.setSetpoint(0);
 	}
 
 	@Override
@@ -165,10 +166,8 @@ public class OrangeDrive extends Threaded {
 				autoState = AutoState.ROTATING;
 			}
 		}
-		isRotated = false;
-		desiredAngle = desiredRotation.getDegrees();
-		turningDriver.setSetpoint(desiredAngle);
 		shiftDown();
+		desiredAngle = desiredRotation;
 		System.out.println("rotating");
 	}
 	
@@ -187,15 +186,11 @@ public class OrangeDrive extends Threaded {
 			double cameraAngle = Dashcomm.get("angle", 0);
 			double distance = Dashcomm.get("distance", 0);
 			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle));
-			Translation offset = new Translation(5.65, -12.25);
-			double desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition)).getDegrees();
-			//desiredAngle = getGyroAngle().getDegrees() - angleOffset;
-			System.out.println("desired " + desiredAngle);
+			Translation offset = new Translation(5.25, -12.25);
+			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition));
 		} else {
-			desiredAngle = getGyroAngle().getDegrees();
+			desiredAngle = getGyroAngle();
 		}
-
-		turningDriver.setSetpoint(desiredAngle);
 	}
 	
 	private synchronized void setWheelVelocity(DriveVelocity setVelocity) {
@@ -242,13 +237,14 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	private synchronized void updateRotation(){
-		if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) > Constants.DrivingAngleTolerance) {
-			isRotated = false;
-			setWheelVelocity(new DriveVelocity(0, 25 * turningDriver.update(getGyroAngle().getDegrees())));		
+	private synchronized boolean updateRotation(){
+		Rotation error = getGyroAngle().inverse().rotateBy(desiredAngle);
+		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
+			setWheelVelocity(new DriveVelocity(0, 25 * turningDriver.update(error.getDegrees())));	
+			return false;
 		} else {	
 			setWheelVelocity(new DriveVelocity(0, 0));
-			isRotated = true;
+			return true;
 		}
 	}
 	
@@ -264,27 +260,12 @@ public class OrangeDrive extends Threaded {
 			case TURNING:
 				if(Gear.getInstance().isPushed()){
 					gearState = GearState.REVERSING;
-				} else if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) < Constants.DrivingAngleTolerance) {
+				} else if (updateRotation()) {
 					gearState = GearState.DRIVING;
-				} else {
-					System.out.println("current" + getGyroAngle().getDegrees());
-					System.out.println("desired" + desiredAngle);
-					double turningSpeed = turningDriver.update(getGyroAngle().getDegrees());
-					turningSpeed = OrangeUtility.donut(turningSpeed, 11);
-					setWheelVelocity(new DriveVelocity(0, turningSpeed));
-					/*
-					if(desiredAngle - getGyroAngle().getDegrees() < 0){
-
-						setWheelVelocity(new DriveVelocity(0, -12));
-					} else {
-
-						setWheelVelocity(new DriveVelocity(0, 12));
-					}
-					*/
-
-				}
+				} 
+				break;
 			case DRIVING:
-				if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) > Constants.DrivingAngleTolerance) {
+				if (!updateRotation()) {
 					gearState = GearState.TURNING;
 				} else {
 					/*
@@ -320,7 +301,8 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public Rotation getGyroAngle(){
-		if(gyroInversed){
+		// -180 through 180
+		if(gyroInversed){			
 			return Rotation.fromDegrees(gyroSensor.getAngle()).rotateBy(Rotation.fromDegrees(180));
 		} else {
 			return Rotation.fromDegrees(gyroSensor.getAngle());

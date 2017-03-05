@@ -13,7 +13,8 @@ public final class Constants {
 	public static double MinimumControllerOutput = 0;
 	public static double MaximumControllerOutput = 1;
 
-	
+
+	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
 	public static double DrivingAngleTolerance = 5;
 	public static double WheelDiameter = 4;
@@ -23,10 +24,10 @@ public final class Constants {
 	public static int RightSlaveDriveId = 5;
 	public static int ShifterSolenoidId = 3;
 
-	public static int LeftMasterFlywheelId = 34; //CHANGE THE MOTORS IN THE CODE
-	public static int LeftSlaveFlywheelId = 35;
-	public static int RightMasterFlywheelId = 12;
-	public static int RightSlaveFlywheelId = 13;
+	public static int LeftMasterFlywheelId = 15; //CHANGE THE MOTORS IN THE CODE
+	public static int LeftSlaveFlywheelId = 16;
+	public static int RightMasterFlywheelId = 13;
+	public static int RightSlaveFlywheelId = 14;
 	public static int LeftBallSensorId = 22;
 	public static int RightBallSensorId = 23;
 	
@@ -38,7 +39,7 @@ public final class Constants {
 	public static int ReverseIntakeSolenoidId = 6;
 
 	public static int GearSolenoidId = 2;
-	public static int PegSensorId = 1;
+	public static int PegSensorId = 3;
 	
 	public static int ClimberId = 10;
 	
