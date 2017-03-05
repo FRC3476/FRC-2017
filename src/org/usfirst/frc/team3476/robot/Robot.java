@@ -33,6 +33,7 @@ import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -170,10 +171,17 @@ public class Robot extends IterativeRobot {
 		// inversed
 		robotState.resetPose(new RigidTransform(new Translation(), orangeDrive.getGyroAngle()));
 		
-		/*
-		orangeDrive.setAutoPath(new Path(new Waypoint(0, 60, 30)), true);
+		
+		orangeDrive.setAutoPath(new Path(new Waypoint(0, 30, 30)), true);
 		while(!orangeDrive.isDone()){
 			
+		}
+		double start = System.currentTimeMillis();
+		/*
+		while(System.currentTimeMillis() - start < 1000){
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
 		}
 		*/
 
@@ -183,7 +191,9 @@ public class Robot extends IterativeRobot {
 		
 		orangeDrive.setGearPath();
 		while(!orangeDrive.isDone()){
-			
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
 		}
 		orangeDrive.setManualDrive(0, 0);
 		
@@ -260,6 +270,7 @@ public class Robot extends IterativeRobot {
 		if (joystick.getRawButton(7)) {
 			shooter1.setPercent(0.5);
 			shooter2.setPercent(0.5);
+			feeder.set(0.95);
 		} else {
 			shooter1.setPercent(0);
 			shooter2.setPercent(0);

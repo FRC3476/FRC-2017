@@ -41,7 +41,7 @@ public class Gear extends Threaded {
 	}
 	
 	public boolean isPushed(){
-		return !pegSensor.get();
+		return gearMech.get();
 	}
 
 	/*

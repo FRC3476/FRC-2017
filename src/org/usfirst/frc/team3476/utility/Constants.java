@@ -13,10 +13,9 @@ public final class Constants {
 	public static double MinimumControllerOutput = 0;
 	public static double MaximumControllerOutput = 1;
 
-
-	public static double GearSpeed = 50;
+	public static double GearSpeed = 25;
 	public static double cameraOffset = 5.5;
-	public static double DrivingAngleTolerance = 5;
+	public static double DrivingAngleTolerance = 2;
 	public static double WheelDiameter = 4;
 	public static int LeftMasterDriveId = 2;
 	public static int LeftSlaveDriveId = 3;
@@ -24,14 +23,14 @@ public final class Constants {
 	public static int RightSlaveDriveId = 5;
 	public static int ShifterSolenoidId = 3;
 
-	public static int LeftMasterFlywheelId = 15; //CHANGE THE MOTORS IN THE CODE
-	public static int LeftSlaveFlywheelId = 16;
+	public static int LeftMasterFlywheelId = 15;
+	public static int LeftSlaveFlywheelId = 16; 
 	public static int RightMasterFlywheelId = 13;
-	public static int RightSlaveFlywheelId = 14;
+	public static int RightSlaveFlywheelId = 14; 
 	public static int LeftBallSensorId = 22;
 	public static int RightBallSensorId = 23;
 	
-	public static int IntakeFeederId = 7;
+	public static int IntakeFeederId = 7; 
 	public static int UNUSEDFEEDER = 7;
 	public static int MasterIntakeId = 8;
 	public static int SlaveIntakeId = 9;
@@ -41,9 +40,9 @@ public final class Constants {
 	public static int GearSolenoidId = 2;
 	public static int PegSensorId = 3;
 	
-	public static int ClimberId = 10;
+	public static int ClimberId = 10; 
 	
 	public static double TurretTicksPerRotations = 20000;
-	public static int LeftTurretId = 11;
-	public static int RightTurretId = 12;
+	public static int LeftTurretId = 11; // change
+	public static int RightTurretId = 12; // change
 }
