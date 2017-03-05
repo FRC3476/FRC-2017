@@ -17,7 +17,7 @@ public class RobotTracker extends Threaded {
 	private Rotation deltaRotation;
 
 	
-	private double currentDistance, oldDistance;
+	private double currentDistance, oldDistance, deltaDistance;
 	
 	
 	public static RobotTracker getInstance() {
@@ -38,7 +38,7 @@ public class RobotTracker extends Threaded {
 	public synchronized void update() {
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
-		double deltaDistance = currentDistance - oldDistance;
+		deltaDistance = currentDistance - oldDistance;
 		// Get change in rotation
 		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
 		deltaRotation = currentPose.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());

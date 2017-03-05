@@ -49,17 +49,19 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 public class Robot extends IterativeRobot {
 
 	Controller xbox = new Controller(0);
+	Controller joystick = new Controller(1);
 
 	double speed = 3000;
 
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
-	Flywheel shooters;
+	Flywheel shooter1, shooter2;
 	Gear gear;
-	//Intake intake;
+	Intake intake;
+	CANTalon feeder = new CANTalon(Constants.IntakeFeederId);
 	
-	Turret leftTurret;
-	Turret rightTurret;
+//	Turret leftTurret;
+//	Turret rightTurret;
 	CANTalon climber;
 
 	NetworkTable table = NetworkTable.getTable("");
@@ -102,13 +104,15 @@ public class Robot extends IterativeRobot {
 		turnOnJetson.set(true);
 		led.set(true);
 		//Subsystems
-		//shooters = new Flywheel(10, 11, 22);
+		shooter1 = new Flywheel(Constants.LeftMasterFlywheelId, Constants.LeftSlaveFlywheelId, 22);
+		shooter2 = new Flywheel(Constants.RightMasterFlywheelId, Constants.RightSlaveFlywheelId, 23);
+		
 		robotState = RobotTracker.getInstance();
 		orangeDrive = OrangeDrive.getInstance();
 		gear = Gear.getInstance();
-		//intake = Intake.getInstance();
-		leftTurret = new Turret(Constants.LeftTurretId);
-		rightTurret = new Turret(Constants.RightTurretId);
+		intake = Intake.getInstance();
+//		leftTurret = new Turret(Constants.LeftTurretId);
+//		rightTurret = new Turret(Constants.RightTurretId);
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 
@@ -141,7 +145,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		//shooters.addTask(mainExecutor);
 		
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
@@ -166,17 +169,18 @@ public class Robot extends IterativeRobot {
 		*/
 		// inversed
 		robotState.resetPose(new RigidTransform(new Translation(), orangeDrive.getGyroAngle()));
+		
 		/*
-		orangeDrive.setAutoPath(new Path(new Waypoint(0, 72, 30)), true);
+		orangeDrive.setAutoPath(new Path(new Waypoint(0, 60, 30)), true);
 		while(!orangeDrive.isDone()){
 			
 		}
-		
-
-		System.out.println("setting rotate");
-		
-		orangeDrive.setRotation(Rotation.fromDegrees(30));
 		*/
+
+		//System.out.println("setting rotate");
+		
+		//orangeDrive.setRotation(Rotation.fromDegrees(30));
+		
 		orangeDrive.setGearPath();
 		while(!orangeDrive.isDone()){
 			
@@ -195,17 +199,9 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
-		//shooters.addTask(mainExecutor);
-		
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gear.setRunningState(true);
-		//shooters.setRunningState(true);
-		logger = mainExecutor.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-			}
-		}, 0, 10, TimeUnit.MILLISECONDS);
 		//System.out.println("created runnable");
 	}
 
@@ -217,6 +213,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		xbox.update();
+		joystick.update();
 		double moveVal = -xbox.getRawAxis(1);
 		double turnVal = -xbox.getRawAxis(4);
 		
@@ -225,50 +222,32 @@ public class Robot extends IterativeRobot {
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
 		}
-		
-		orangeDrive.updateGearSpeed(graph.getNumber("gearSpeed", 0));
-		
-		if (xbox.getRawButton(4))
-		{
-			orangeDrive.updatePIDF(graph.getNumber("P",0),graph.getNumber("I",0), graph.getNumber("D", 0), graph.getNumber("F", 0));
-		}
-		//System.out.println(testSensor.get());
-		//System.out.println(testSensor2.get());
-		
-		//ACTUAL STUFF
 		/*
-
-		if(xbox.getPOV(0) == 180){
+		//ACTUAL STUFF
+		if(joystick.getPOV(0) == 180 ||  joystick.getPOV(0) == 225 || joystick.getPOV(0) == 135){
 			intake.setSucking(0.5);
-		} else if(xbox.getPOV(0) == 0){
+		} else if(joystick.getPOV(0) == 315 || joystick.getPOV(0) == 0 || joystick.getPOV(0) == 45){
 			intake.setSucking(-0.5);
 		} else {
 			intake.setSucking(0);
 		}
-				
-		if (xbox.getRawButton(2))
+		
+		if (joystick.getRawButton(5))
 		{
 			intake.setState(IntakeState.DOWN);
 		}
-		if (xbox.getRawButton(3))
+		if (joystick.getRawButton(3))
 		{
 			intake.setState(IntakeState.UP);
 		}
-		
-		if(climber.getOutputCurrent() < 40){
-			if (xbox.getRawButton(4))
-				climber.set(-.85);
-			else
-				climber.set(0);
-		}
-		if(climber.getOutputCurrent() > 40){
-			System.out.println(climber.getOutputCurrent());
-		}
-		/*
-		System.out.println("channel 0 " + pdp.getCurrent(0));
-		System.out.println("channel 3 " + pdp.getCurrent(3));
-		*/
 	
+		if (joystick.getRawButton(11)){
+			climber.set(-.85);
+		}
+		else {
+			climber.set(0);
+		}
+		
 		if (xbox.getRawButton(5))
 		{
 			orangeDrive.shiftDown();
@@ -278,58 +257,22 @@ public class Robot extends IterativeRobot {
 			orangeDrive.shiftUp();
 		}
 		
-	//	intake.setFeeder(xbox.getRawButton(8));
-
-		//intake.setFeeder(xbox.getRawButton(5));
-		
-	//	gear.setGearMech(xbox.getRawButton(7));
-		
-		double leftTrigger = -xbox.getRawAxis(2);
-		double rightTrigger = xbox.getRawAxis(3);
-		double triggers = -(leftTrigger + rightTrigger);
-
-		table.putNumber("current", pdp.getCurrent(0));
-		NetworkTable.flush();
-		
-		leftTurret.setManual(triggers);
-		rightTurret.setManual(triggers);
-		
-		/*
-		//END ACTUAL
-		
-		if (xbox.getRisingEdge(2)) {
-			speed += 50;
-		}
-
-		if (xbox.getRisingEdge(3)) {
-			speed -= 50;
-		}
-
-		if (xbox.getRawButton(1)) {
-			shooters.setSetpoint(speed);
-			shooters.enable();
-			feeder.set(-.5);
+		if (joystick.getRawButton(7)) {
+			shooter1.setPercent(0.5);
+			shooter2.setPercent(0.5);
 		} else {
-			shooters.setSetpoint(0);
-			shooters.disable();
+			shooter1.setPercent(0);
+			shooter2.setPercent(0);
 			feeder.set(0);
 		}
+		if(joystick.getRawButton(8)){
+			gear.setGearMech(true);
+			gear.setRunningState(false);
+		} else {			
+			gear.setRunningState(true);
+		}
+		*/
 		
-		
-		double moveVal = -xbox.getRawAxis(1);
-		double turnVal = -xbox.getRawAxis(4);
-		
-		orangeDrive.setManualDrive(moveVal, turnVal);
-		
-		
-		// test one variable at a time
-		if (xbox.getRawButton(4)) {
-			shooters.setVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_10Ms);
-			shooters.setVelocityMeasurementWindow(64);
-		} else {
-			shooters.setVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_100Ms);
-			shooters.setVelocityMeasurementWindow(64);
-		}*/
 	}
 
 	@Override

@@ -96,5 +96,10 @@ public class Flywheel {
 	{
 		return ballSensor.get();
 	}
+	
+	public void setPercent(double percent){
+		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
+		masterTalon.set(percent);
+	}
 
 }

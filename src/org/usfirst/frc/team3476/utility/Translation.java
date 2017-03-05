@@ -56,7 +56,7 @@ public class Translation {
 	}
 
 	public Rotation getAngleTo(Translation nextPoint) {
-		double angleOffset = Math.asin(x - nextPoint.getX() / this.getDistanceTo(nextPoint));
+		double angleOffset = Math.asin((x - nextPoint.getX()) / this.getDistanceTo(nextPoint));
 		return Rotation.fromRadians(angleOffset);
 	}
 	

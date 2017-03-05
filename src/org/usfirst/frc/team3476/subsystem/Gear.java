@@ -19,7 +19,7 @@ public class Gear extends Threaded {
 	}
 
 	private Gear() {
-		RUNNINGSPEED = 50;
+		RUNNINGSPEED = 100;
 		gearMech = new Solenoid(Constants.GearSolenoidId);
 		pegSensor = new DigitalInput(Constants.PegSensorId);
 	}

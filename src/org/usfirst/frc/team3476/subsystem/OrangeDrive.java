@@ -2,6 +2,7 @@ package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.OrangeUtility;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Rotation;
@@ -41,7 +42,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-	private SynchronousPid turningDriver = new SynchronousPid(0.08, 0, 0, 0);
+	private SynchronousPid turningDriver = new SynchronousPid(0.8, 0, 0, 0);
 	private double desiredAngle;
 	private boolean isDone;
 	private boolean isRotated;
@@ -50,6 +51,7 @@ public class OrangeDrive extends Threaded {
 	
 	private DriveState driveState = DriveState.MANUAL;
 	private AutoState autoState;
+	private GearState gearState;
 	
 	private boolean gyroInversed;
 
@@ -68,11 +70,6 @@ public class OrangeDrive extends Threaded {
 	public void updatePIDF(double P, double I, double D, double F)
 	{
 		turningDriver.setPIDF(P, I, D, F);
-	}
-	
-	public void updateGearSpeed(double speed)
-	{
-		gearSpeed = speed;
 	}
 	
 	private OrangeDrive() {
@@ -107,6 +104,7 @@ public class OrangeDrive extends Threaded {
 		configureTalons(TalonControlMode.Speed);
 		isRotated = false;
 		gyroInversed = false;
+		turningDriver.setOutputRange(216, -216);
 	}
 
 	@Override
@@ -118,7 +116,7 @@ public class OrangeDrive extends Threaded {
 			updateAutoPath();
 			break;
 		case GEAR:
-			//updateGearPath();
+			updateGearPath();
 			break;
 		}
 	}
@@ -177,20 +175,29 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setGearPath() {
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
-			isDone = false;
-			double cameraAngle = Dashcomm.get("angle", 0)*180/Math.PI;
-			double distance = Dashcomm.get("distance", 0);
-			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle));
-			System.out.println("x");
-			Translation offset = new Translation(-1.75, -12);
-			desiredAngle = getGyroAngle().rotateBy(targetPosition.getAngleFromOffset(offset)).getDegrees();
-			System.out.println(desiredAngle);
-			turningDriver.setSetpoint(desiredAngle);
+			updateDesiredAngle();
 			shiftDown();
+			gearState = GearState.TURNING;
 			updateGearPath();
 		}
 	}
+	
+	public synchronized void updateDesiredAngle(){
+		if(Dashcomm.get("isVisible", 0) != 0){
+			double cameraAngle = Dashcomm.get("angle", 0);
+			double distance = Dashcomm.get("distance", 0);
+			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle));
+			Translation offset = new Translation(5.65, -12.25);
+			double desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition)).getDegrees();
+			//desiredAngle = getGyroAngle().getDegrees() - angleOffset;
+			System.out.println("desired " + desiredAngle);
+		} else {
+			desiredAngle = getGyroAngle().getDegrees();
+		}
 
+		turningDriver.setSetpoint(desiredAngle);
+	}
+	
 	private synchronized void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
 		if(setVelocity.wheelSpeed > 216){
@@ -218,7 +225,7 @@ public class OrangeDrive extends Threaded {
 				return isRotated;
 			}
 		case GEAR:
-			return isDone;
+			return gearState == GearState.REVERSING;
 		}
 		return true;
 	}
@@ -236,10 +243,9 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private synchronized void updateRotation(){
-		System.out.println(desiredAngle);
 		if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) > Constants.DrivingAngleTolerance) {
 			isRotated = false;
-			setWheelVelocity(new DriveVelocity(0, 30 * turningDriver.update(getGyroAngle().getDegrees())));		
+			setWheelVelocity(new DriveVelocity(0, 25 * turningDriver.update(getGyroAngle().getDegrees())));		
 		} else {	
 			setWheelVelocity(new DriveVelocity(0, 0));
 			isRotated = true;
@@ -247,21 +253,55 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private synchronized void updateGearPath() {
-		updateRotation();
-		if(isRotated){
-			System.out.println("rotated");
-			if(isDone){
-				DriveVelocity drivingSpeed = new DriveVelocity(gearSpeed, 0);
-				setWheelVelocity(drivingSpeed);
-				System.out.println("reversing");
-			} else {
-				DriveVelocity drivingSpeed = new DriveVelocity(-gearSpeed, 0);
-				setWheelVelocity(drivingSpeed);				
-				System.out.println("driving");							
+		
+		System.out.println(gearState);
+		/*
+		System.out.println("error " + Math.abs(desiredAngle - getGyroAngle().getDegrees()));
+		System.out.println("desired " + desiredAngle);
+		System.out.println("current " + getGyroAngle().getDegrees());
+		*/
+		switch(gearState){
+			case TURNING:
 				if(Gear.getInstance().isPushed()){
-					isDone = true;
+					gearState = GearState.REVERSING;
+				} else if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) < Constants.DrivingAngleTolerance) {
+					gearState = GearState.DRIVING;
+				} else {
+					System.out.println("current" + getGyroAngle().getDegrees());
+					System.out.println("desired" + desiredAngle);
+					double turningSpeed = turningDriver.update(getGyroAngle().getDegrees());
+					turningSpeed = OrangeUtility.donut(turningSpeed, 11);
+					setWheelVelocity(new DriveVelocity(0, turningSpeed));
+					/*
+					if(desiredAngle - getGyroAngle().getDegrees() < 0){
+
+						setWheelVelocity(new DriveVelocity(0, -12));
+					} else {
+
+						setWheelVelocity(new DriveVelocity(0, 12));
+					}
+					*/
+
 				}
-			}
+			case DRIVING:
+				if (Math.abs(desiredAngle - getGyroAngle().getDegrees()) > Constants.DrivingAngleTolerance) {
+					gearState = GearState.TURNING;
+				} else {
+					/*
+					double turningSpeed = turningDriver.update(getGyroAngle().getDegrees());
+					turningSpeed = OrangeUtility.donut(turningSpeed/2, 10);
+					*/
+					DriveVelocity drivingSpeed = new DriveVelocity(-Constants.GearSpeed, 0);//turningDriver.update(getGyroAngle().getDegrees()));
+					setWheelVelocity(drivingSpeed);	
+					if(Gear.getInstance().isPushed()){
+						gearState = GearState.REVERSING;
+					}
+				}
+				break;
+			case REVERSING:
+				DriveVelocity drivingSpeed = new DriveVelocity(Constants.GearSpeed, 0);
+				setWheelVelocity(drivingSpeed);
+				break;
 		}
 	}
 
