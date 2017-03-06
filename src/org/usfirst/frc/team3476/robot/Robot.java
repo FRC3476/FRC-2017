@@ -34,6 +34,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -60,6 +61,7 @@ public class Robot extends IterativeRobot {
 	Gear gear;
 	Intake intake;
 	CANTalon feeder = new CANTalon(Constants.IntakeFeederId);
+	CANTalon star = new CANTalon(Constants.StarFeederId);
 	
 //	Turret leftTurret;
 //	Turret rightTurret;
@@ -169,21 +171,23 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 		// inversed
-		robotState.resetPose(new RigidTransform(new Translation(), orangeDrive.getGyroAngle()));
 		
 		
-		orangeDrive.setAutoPath(new Path(new Waypoint(0, 30, 30)), true);
+		robotState.resetPose(new RigidTransform(new Translation(), orangeDrive.getGyroAngle()));	
+		Path drivingPath = new Path(new Waypoint(0, 30, 30));
+		//drivingPath.addWaypoint(new Waypoint(0, 30, 0));
+		orangeDrive.setAutoPath(drivingPath, true);
 		while(!orangeDrive.isDone()){
 			
 		}
+		
 		double start = System.currentTimeMillis();
-		/*
-		while(System.currentTimeMillis() - start < 1000){
+		while(System.currentTimeMillis() - start < 750){
 			if(DriverStation.getInstance().isOperatorControl()){
 				break;
 			}
 		}
-		*/
+		
 
 		//System.out.println("setting rotate");
 		
@@ -197,6 +201,35 @@ public class Robot extends IterativeRobot {
 		}
 		orangeDrive.setManualDrive(0, 0);
 		
+		/*
+		orangeDrive.setAutoPath(new Path(new Waypoint(0, 72, 20)), true);
+		while(!orangeDrive.isDone()){
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
+		}
+		
+		orangeDrive.setRotation(Rotation.fromDegrees(-150));
+		double start = System.currentTimeMillis();
+		while(System.currentTimeMillis() - start < 1000){
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
+		}
+		while(!orangeDrive.isDone()){
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
+		}
+		orangeDrive.setGearPath();
+
+		while(!orangeDrive.isDone()){
+			if(DriverStation.getInstance().isOperatorControl()){
+				break;
+			}
+		}
+		
+		*/
 	}
 
 	/**
@@ -213,6 +246,14 @@ public class Robot extends IterativeRobot {
 		orangeDrive.setRunningState(true);
 		gear.setRunningState(true);
 		//System.out.println("created runnable");
+		mainExecutor.scheduleAtFixedRate(new Runnable(){
+			@Override
+			public void run(){
+				for(int i = 0; i < 16; i++){
+					NetworkTable.getTable("").putNumber("channel" + i, pdp.getCurrent(i));
+				}				
+			}
+		}, 0, 50, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -224,15 +265,33 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		xbox.update();
 		joystick.update();
-		double moveVal = -xbox.getRawAxis(1);
-		double turnVal = -xbox.getRawAxis(4);
+		double moveVal = xbox.getRawAxis(1);
+		double turnVal = xbox.getRawAxis(4);
 		
+
+		if (xbox.getRawButton(5))
+		{
+			orangeDrive.setNormal();
+		}
+		if (xbox.getRawButton(6))
+		{
+			orangeDrive.setInvert();
+		}
+
 		if(xbox.getRawButton(1)){
 			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
 		}
-		/*
+		
+		if(xbox.getRawAxis(2) > 0.8){
+			orangeDrive.shiftUp();
+		}
+
+		if(xbox.getRawAxis(3) > 0.8){
+			orangeDrive.shiftDown();
+		}
+		
 		//ACTUAL STUFF
 		if(joystick.getPOV(0) == 180 ||  joystick.getPOV(0) == 225 || joystick.getPOV(0) == 135){
 			intake.setSucking(0.5);
@@ -257,24 +316,14 @@ public class Robot extends IterativeRobot {
 		else {
 			climber.set(0);
 		}
-		
-		if (xbox.getRawButton(5))
-		{
-			orangeDrive.shiftDown();
-		}
-		if (xbox.getRawButton(6))
-		{
-			orangeDrive.shiftUp();
-		}
-		
+				
 		if (joystick.getRawButton(7)) {
 			shooter1.setPercent(0.5);
 			shooter2.setPercent(0.5);
-			feeder.set(0.95);
 		} else {
 			shooter1.setPercent(0);
 			shooter2.setPercent(0);
-			feeder.set(0);
+			star.set(0);
 		}
 		if(joystick.getRawButton(8)){
 			gear.setGearMech(true);
@@ -282,8 +331,18 @@ public class Robot extends IterativeRobot {
 		} else {			
 			gear.setRunningState(true);
 		}
-		*/
 		
+		if(joystick.getRawButton(10)){
+			star.set(0.95);
+		} else {  
+			star.set(0);
+		}
+		
+		if(joystick.getRawButton(12)){
+			feeder.set(0.95);
+		} else {
+			feeder.set(0);
+		}		
 	}
 
 	@Override

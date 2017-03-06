@@ -15,8 +15,10 @@ public final class Constants {
 
 	public static double GearSpeed = 25;
 	public static double cameraOffset = 5.5;
+	public static double CameraAngleOffset = 2;
 	public static double DrivingAngleTolerance = 2;
 	public static double WheelDiameter = 4;
+	public static double DriveBaseDiameter = 25;
 	public static int LeftMasterDriveId = 2;
 	public static int LeftSlaveDriveId = 3;
 	public static int RightMasterDriveId = 4;
@@ -31,7 +33,7 @@ public final class Constants {
 	public static int RightBallSensorId = 23;
 	
 	public static int IntakeFeederId = 7; 
-	public static int UNUSEDFEEDER = 7;
+	public static int StarFeederId = 6;
 	public static int MasterIntakeId = 8;
 	public static int SlaveIntakeId = 9;
 	public static int ForwardIntakeSolenoidId = 5;

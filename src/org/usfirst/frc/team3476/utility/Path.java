@@ -23,6 +23,7 @@ public class Path {
 		for (Waypoint pathPoint : pathPoints) {
 			if (lookAheadDistance <= pathPoint.position.getDistanceTo(robotPose)) {
 				if (prevPoint == null) {
+					currentPathSpeed = pathPoint.getSpeed();
 					return pathPoint.getPosition();
 				}
 				// TODO: fix this logic http://mathworld.wolfram.com/Circle-LineIntersection.html
@@ -49,6 +50,8 @@ public class Path {
 			pathPoints.remove(prevPoint);
 			prevPoint = pathPoint;
 		}
+		
+		currentPathSpeed = prevPoint.getSpeed();
 		return pathPoints.get(pathPoints.size() - 1).position;
 	}
 
