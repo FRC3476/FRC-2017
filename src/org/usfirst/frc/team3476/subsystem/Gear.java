@@ -12,16 +12,19 @@ public class Gear extends Threaded {
 	private Solenoid gearMech;
 	private static final Gear gearInstance = new Gear();
 	private DigitalInput pegSensor;
-
+	private Solenoid gearFlap;
+	private double gearStartTime;
 
 	public static Gear getInstance() {
 		return gearInstance;
 	}
 
 	private Gear() {
-		RUNNINGSPEED = 100;
+		RUNNINGSPEED = 5;
 		gearMech = new Solenoid(Constants.GearSolenoidId);
 		pegSensor = new DigitalInput(Constants.PegSensorId);
+		gearFlap = new Solenoid(Constants.GearFlapSolenoidId);
+		gearStartTime = System.currentTimeMillis();
 	}
 
 	public void setGearMech(boolean pushed) {
@@ -32,18 +35,30 @@ public class Gear extends Threaded {
 	@Override
 	public void update(){
 		
-		if(pegSensor.get()){
-			setGearMech(false);
-		} else {
+		if(!pegSensor.get()){
+			gearStartTime= System.currentTimeMillis();
+		}
+		
+		if(System.currentTimeMillis() - gearStartTime < 1000){
 			setGearMech(true);
+		} else {
+			setGearMech(false);
 		}
 		
 	}
 	
 	public boolean isPushed(){
-		return gearMech.get();
+		return !pegSensor.get();
 	}
-
+	
+	public void toggleFlap(){
+		if(gearFlap.get()){
+			gearFlap.set(false);
+		} else {
+			gearFlap.set(true);
+		}
+	}
+	
 	/*
 	 * if banner sensor
 	 * public void getGearInPlace(){

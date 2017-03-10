@@ -1,7 +1,10 @@
 package org.usfirst.frc.team3476.auto;
 
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.utility.Path;
+import org.usfirst.frc.team3476.utility.RigidTransform;
+import org.usfirst.frc.team3476.utility.Translation;
 import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 public class Drive implements Action {
@@ -11,15 +14,15 @@ public class Drive implements Action {
 	/*public Drive(Path path) {
 		setPath = path;
 	}*/
-	public Drive(double x, double y)
+	public Drive(double x, double y, double speed)
 	{
-		setPath = new Path(new Waypoint(x,y,10));
+		setPath = new Path(new Waypoint(x,y,speed));
 	}
 
 	@Override
 	public void start() {
-		drive.setAutoPath(setPath, false);
-
+		RobotTracker.getInstance().resetPose();
+		drive.setAutoPath(setPath, true);
 	}
 
 	@Override

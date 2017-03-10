@@ -42,13 +42,10 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-	private SynchronousPid turningDriver = new SynchronousPid(0.9, 0, 0, 0);
+	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
 	private Rotation desiredAngle;
 	private boolean isDone;
-	private boolean isRotated;
 	private double gearReverseTime;
-
-	private double gearSpeed = 100;
 	
 	private DriveState driveState = DriveState.MANUAL;
 	private AutoState autoState;
@@ -58,7 +55,7 @@ public class OrangeDrive extends Threaded {
 
 	private static final OrangeDrive driveInstance = new OrangeDrive();
 
-	private CANTalon leftTalon, rightTalon;
+	private CANTalon leftTalon, rightTalon, leftSlaveTalon, rightSlaveTalon;
 	//private RobotTracker robotState;
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
@@ -96,15 +93,17 @@ public class OrangeDrive extends Threaded {
 		rightTalon.reverseOutput(true);
 		rightTalon.reverseSensor(false);
 
-		CANTalon leftSlaveTalon = new CANTalon(Constants.LeftSlaveDriveId);
-		CANTalon rightSlaveTalon = new CANTalon(Constants.RightSlaveDriveId);
+		leftSlaveTalon = new CANTalon(Constants.LeftSlaveDriveId);
+		rightSlaveTalon = new CANTalon(Constants.RightSlaveDriveId);
 
 		leftSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		leftSlaveTalon.set(leftTalon.getDeviceID());
 		rightSlaveTalon.changeControlMode(TalonControlMode.Follower);
 		rightSlaveTalon.set(rightTalon.getDeviceID());
-		configureTalons(TalonControlMode.Speed);
-		isRotated = false;
+	
+		leftTalon.changeControlMode(TalonControlMode.Speed);
+		rightTalon.changeControlMode(TalonControlMode.Speed);
+		configureTalons();
 		gyroInversed = false;
 		turningDriver.setOutputRange(216, -216);
 		turningDriver.setSetpoint(0);
@@ -128,9 +127,9 @@ public class OrangeDrive extends Threaded {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if(driveState != DriveState.MANUAL){
 			driveState = DriveState.MANUAL;
+			configureTalons();
 		}
 		moveValue *= driveMultiplier;
-		turnValue *= driveMultiplier;
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
 			moveValue = (moveValue * (Math.abs(moveValue) - Constants.MinimumControllerInput)) / ((0.85) * Math.abs(moveValue));
 			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
@@ -153,47 +152,50 @@ public class OrangeDrive extends Threaded {
 		// double robotDiameter, Path robotPath)
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
-			if(autoState != AutoState.DRIVING){
-				autoState = AutoState.DRIVING;					
-			}
+			configureTalons();
 		}
-		autonomousDriver = new PurePursuitController(10, 20, Constants.DriveBaseDiameter, autoPath, isReversed);
-		shiftDown();
+
+		if(autoState != AutoState.DRIVING){
+			autoState = AutoState.DRIVING;					
+		}
+		autonomousDriver = new PurePursuitController(10, 30, Constants.DriveBaseDiameter, autoPath, isReversed);
 		updateAutoPath();
 		System.out.println("drive");
 	}
-
+	
 	public synchronized void setRotation(Rotation desiredRotation){
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
-			if(autoState != AutoState.ROTATING){
-				autoState = AutoState.ROTATING;
-			}
+			configureTalons();
 		}
-		shiftDown();
+
+		if(autoState != AutoState.ROTATING){
+			autoState = AutoState.ROTATING;
+		}
 		desiredAngle = desiredRotation;
-		System.out.println("rotating");
 	}
 	
 	public synchronized void setGearPath() {
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
-			updateDesiredAngle();
-			shiftDown();
 			gearState = GearState.TURNING;
+			configureTalons();
+			updateDesiredAngle();
 			updateGearPath();
 		}
 	}
 	
-	public synchronized void updateDesiredAngle(){
+	public synchronized boolean updateDesiredAngle(){
 		if(Dashcomm.get("isVisible", 0) != 0){
 			double cameraAngle = Dashcomm.get("angle", 0);
 			double distance = Dashcomm.get("distance", 0);
 			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
-			Translation offset = new Translation(5.25, -12.5);
+			Translation offset = new Translation(5.5, -10);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
+			return true;
 		} else {
 			desiredAngle = getGyroAngle();
+			return false;
 		}
 	}
 	
@@ -206,7 +208,8 @@ public class OrangeDrive extends Threaded {
 		}
 		
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
-		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);		
+		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);	
+		System.out.println(setVelocity.deltaSpeed);
 		NetworkTable.getTable("").putNumber("speed", leftTalon.getSpeed());
 		NetworkTable.getTable("").putNumber("setpoint", leftTalon.getSetpoint());
 		
@@ -232,6 +235,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private synchronized void updateAutoPath() {
+		System.out.println(autoState);
 		switch(autoState){
 		case DRIVING:
 			autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
@@ -252,10 +256,10 @@ public class OrangeDrive extends Threaded {
 
 	private synchronized boolean updateRotation(){
 		Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
-		System.out.println(error.getDegrees());
+		//System.out.println(error.getDegrees());
 		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
 			double turningSpeed = turningDriver.update(error.getDegrees());
-			turningSpeed = OrangeUtility.donut(turningSpeed, 11);
+			turningSpeed = OrangeUtility.donut(turningSpeed, 30);
 			setWheelVelocity(new DriveVelocity(0, turningSpeed));	
 			return false;
 		} else {	
@@ -265,6 +269,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private synchronized void updateGearPath() {
+		//System.out.println(gearState);
 		/*
 		System.out.println("error " + Math.abs(desiredAngle - getGyroAngle().getDegrees()));
 		System.out.println("desired " + desiredAngle);
@@ -276,26 +281,27 @@ public class OrangeDrive extends Threaded {
 					gearState = GearState.REVERSING;
 				} else if (updateRotation()) {
 					gearState = GearState.DRIVING;
+					System.out.println("DRIVING");
 				} 
 				break;
 			case DRIVING:
-				if (!updateRotation()) {
-					gearState = GearState.TURNING;
-				} else {
-					Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
-					double turningSpeed = turningDriver.update(error.getDegrees());
-					//turningSpeed = OrangeUtility.donut(turningSpeed/2, 10);
-					//turningDriver.update(getGyroAngle().getDegrees()));
-					setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
-					if(Gear.getInstance().isPushed()){
-						gearState = GearState.REVERSING;
-						gearReverseTime = System.currentTimeMillis();
-					}
+				
+				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
+				
+				double turningSpeed = turningDriver.update(error.getDegrees());
+				turningSpeed = OrangeUtility.donut(turningSpeed, 11);
+				
+				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
+				if(Gear.getInstance().isPushed()){
+					setWheelVelocity(new DriveVelocity(0, 0));
+					gearState = GearState.REVERSING;
+					gearReverseTime = System.currentTimeMillis();
+					
 				}
 				break;
 			case REVERSING:
-				setWheelVelocity(new DriveVelocity(Constants.GearSpeed, 0));
-				if(System.currentTimeMillis() - gearReverseTime > 500){
+				setWheelVelocity(new DriveVelocity(216, 0));
+				if(System.currentTimeMillis() - gearReverseTime > 350){
 					gearState = GearState.DONE;
 				}
 				break;
@@ -305,9 +311,29 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	private void configureTalons(TalonControlMode mode) {
-		leftTalon.changeControlMode(mode);
-		rightTalon.changeControlMode(mode);
+	private synchronized void configureTalons() {
+		switch(driveState){
+			case MANUAL:
+				leftTalon.enableBrakeMode(false);
+				rightTalon.enableBrakeMode(false);
+				leftSlaveTalon.enableBrakeMode(false);
+				rightSlaveTalon.enableBrakeMode(false);
+				break;
+			case AUTO:
+				shiftDown();
+				leftTalon.enableBrakeMode(true);
+				rightTalon.enableBrakeMode(true);
+				leftSlaveTalon.enableBrakeMode(true);
+				rightSlaveTalon.enableBrakeMode(true);
+				break;
+			case GEAR:
+				shiftDown();
+				leftTalon.enableBrakeMode(true);
+				rightTalon.enableBrakeMode(true);
+				leftSlaveTalon.enableBrakeMode(true);
+				rightSlaveTalon.enableBrakeMode(true);				
+				break;
+		}
 	}
 
 	// TODO: Return wheel in inches or something
@@ -406,8 +432,11 @@ public class OrangeDrive extends Threaded {
 		driveShifters.set(false);
 	}
 	
-	public void zeroSensors(){
+	public void calibrateGyro(){
 		gyroSensor.calibrate();
+	}
+	
+	public void zeroSensors(){
 		gyroSensor.reset();
 		leftTalon.setPosition(0);
 		rightTalon.setPosition(0);
@@ -421,15 +450,17 @@ public class OrangeDrive extends Threaded {
 		driveMultiplier = -1;
 	}
 	
+	public void updateConstants(){
+		turningDriver.setP(Constants.TurningP);
+		turningDriver.setD(Constants.TurningD);
+	}
+	
 	public static class DriveVelocity {
-
 		public double wheelSpeed;
 		public double deltaSpeed;
-
 		public DriveVelocity(double wheelSpeed, double deltaSpeed) {
 			this.wheelSpeed = wheelSpeed;
 			this.deltaSpeed = deltaSpeed;
 		}
-
 	}
 }

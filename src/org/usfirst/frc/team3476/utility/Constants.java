@@ -1,5 +1,7 @@
 package org.usfirst.frc.team3476.utility;
 
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
 public final class Constants {
 	
 	private Constants() {
@@ -15,8 +17,8 @@ public final class Constants {
 
 	public static double GearSpeed = 25;
 	public static double cameraOffset = 5.5;
-	public static double CameraAngleOffset = 2;
-	public static double DrivingAngleTolerance = 2;
+	public static double CameraAngleOffset = 0;
+	public static double DrivingAngleTolerance = 10;
 	public static double WheelDiameter = 4;
 	public static double DriveBaseDiameter = 25;
 	public static int LeftMasterDriveId = 2;
@@ -40,11 +42,19 @@ public final class Constants {
 	public static int ReverseIntakeSolenoidId = 6;
 
 	public static int GearSolenoidId = 2;
-	public static int PegSensorId = 3;
+	public static int PegSensorId = 2;
+	public static int GearFlapSolenoidId = 0;
 	
 	public static int ClimberId = 10; 
 	
 	public static double TurretTicksPerRotations = 20000;
 	public static int LeftTurretId = 11; // change
 	public static int RightTurretId = 12; // change
+	
+	public static double TurningP = 0.01;
+	public static double TurningD = 0.18;
+	static NetworkTable table = NetworkTable.getTable("SmartDashboard");
+	
+	public static void updateConstants(){
+	}
 }
