@@ -69,8 +69,14 @@ public class RobotTracker extends Threaded {
 		return currentPose.rotationMat;
 	}
 	
-	public synchronized void resetPose(RigidTransform newPose){
-		currentPose = newPose;
+	public synchronized void resetPose(){
+		driveBase.zeroSensors();
+		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		oldDistance = 0;
+	}
+	
+	public synchronized double getY(){
+		return currentPose.translationMat.getY();
 	}
 }
 

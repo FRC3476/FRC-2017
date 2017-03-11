@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.usfirst.frc.team3476.auto.Action;
 
+import edu.wpi.first.wpilibj.DriverStation;
+
 public final class Runner implements Action{
 
 	private ActionType actionType;
@@ -27,7 +29,9 @@ public final class Runner implements Action{
 		for (Action action : actionList) {
 
 			while (!action.isDone()) {
-				// do nothing
+				if(DriverStation.getInstance().isDisabled()){
+					break;
+				}
 			}
 		}
 		isDone = true;
@@ -38,7 +42,9 @@ public final class Runner implements Action{
 		for (Action action : actionList) {
 			action.start();
 			while (!action.isDone()) {
-				// do nothing
+				if(DriverStation.getInstance().isDisabled()){
+					break;
+				}
 			}
 		}
 		isDone = true;

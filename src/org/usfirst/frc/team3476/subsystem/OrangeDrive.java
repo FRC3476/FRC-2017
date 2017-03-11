@@ -103,7 +103,6 @@ public class OrangeDrive extends Threaded {
 	
 		leftTalon.changeControlMode(TalonControlMode.Speed);
 		rightTalon.changeControlMode(TalonControlMode.Speed);
-		configureTalons();
 		gyroInversed = false;
 		turningDriver.setOutputRange(216, -216);
 		turningDriver.setSetpoint(0);
@@ -111,6 +110,7 @@ public class OrangeDrive extends Threaded {
 
 	@Override
 	public synchronized void update() {
+		System.out.println(driveState);
 		switch (driveState) {
 		case MANUAL:
 			break;
@@ -127,7 +127,6 @@ public class OrangeDrive extends Threaded {
 		// low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 		if(driveState != DriveState.MANUAL){
 			driveState = DriveState.MANUAL;
-			configureTalons();
 		}
 		moveValue *= driveMultiplier;
 		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
@@ -152,7 +151,8 @@ public class OrangeDrive extends Threaded {
 		// double robotDiameter, Path robotPath)
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
-			configureTalons();
+			setBrake(true);
+			shiftUp();
 		}
 
 		if(autoState != AutoState.DRIVING){
@@ -166,7 +166,8 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setRotation(Rotation desiredRotation){
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
-			configureTalons();
+			setBrake(true);
+			shiftUp();
 		}
 
 		if(autoState != AutoState.ROTATING){
@@ -179,7 +180,8 @@ public class OrangeDrive extends Threaded {
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
 			gearState = GearState.TURNING;
-			configureTalons();
+			setBrake(true);
+			shiftUp();
 			updateDesiredAngle();
 			updateGearPath();
 		}
@@ -311,31 +313,13 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	private synchronized void configureTalons() {
-		switch(driveState){
-			case MANUAL:
-				leftTalon.enableBrakeMode(false);
-				rightTalon.enableBrakeMode(false);
-				leftSlaveTalon.enableBrakeMode(false);
-				rightSlaveTalon.enableBrakeMode(false);
-				break;
-			case AUTO:
-				shiftDown();
-				leftTalon.enableBrakeMode(true);
-				rightTalon.enableBrakeMode(true);
-				leftSlaveTalon.enableBrakeMode(true);
-				rightSlaveTalon.enableBrakeMode(true);
-				break;
-			case GEAR:
-				shiftDown();
-				leftTalon.enableBrakeMode(true);
-				rightTalon.enableBrakeMode(true);
-				leftSlaveTalon.enableBrakeMode(true);
-				rightSlaveTalon.enableBrakeMode(true);				
-				break;
-		}
+	public void setBrake(boolean isBraked){
+		leftTalon.enableBrakeMode(isBraked);
+		rightTalon.enableBrakeMode(isBraked);
+		leftSlaveTalon.enableBrakeMode(isBraked);
+		rightSlaveTalon.enableBrakeMode(isBraked);
+		
 	}
-
 	// TODO: Return wheel in inches or something
 	public double getLeftDistance() {
 		return leftTalon.getPosition() * Constants.WheelDiameter * Math.PI;

@@ -36,7 +36,7 @@ public final class Constants {
 	
 	public static int IntakeFeederId = 7; 
 	public static int StarFeederId = 6;
-	public static int MasterIntakeId = 8;
+	public static int MasterIntakeId = 16;
 	public static int SlaveIntakeId = 9;
 	public static int ForwardIntakeSolenoidId = 5;
 	public static int ReverseIntakeSolenoidId = 6;
@@ -45,13 +45,15 @@ public final class Constants {
 	public static int PegSensorId = 2;
 	public static int GearFlapSolenoidId = 0;
 	
-	public static int ClimberId = 10; 
+	public static int ClimberId = 10;  
+	
+	public static int Climber2Id = 8; 
 	
 	public static double TurretTicksPerRotations = 20000;
 	public static int LeftTurretId = 11; // change
 	public static int RightTurretId = 12; // change
 	
-	public static double TurningP = 0.01;
+	public static double TurningP = 0.02;
 	public static double TurningD = 0.18;
 	static NetworkTable table = NetworkTable.getTable("SmartDashboard");
 	

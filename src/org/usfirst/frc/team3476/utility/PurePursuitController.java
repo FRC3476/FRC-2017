@@ -38,9 +38,9 @@ public class PurePursuitController {
 		double radius = getRadius(robotPose, lookAheadDistance);
 		if(radius != 0){
 			if(isReversed){
-				return new OrangeDrive.DriveVelocity(-robotSpeed, -robotDiameter * (robotSpeed / radius) / 2);
+				return new OrangeDrive.DriveVelocity(-robotSpeed, -robotDiameter * (robotSpeed / radius) / 1.5);
 			} else {
-				return new OrangeDrive.DriveVelocity(robotSpeed, robotDiameter * (robotSpeed / radius) / 2);				
+				return new OrangeDrive.DriveVelocity(robotSpeed, robotDiameter * (robotSpeed / radius) / 1.5);				
 			}
 		} else {
 			if(isReversed){
@@ -76,9 +76,9 @@ public class PurePursuitController {
 		}
 		double radius = Math.pow(lookAheadPoint.getDistanceTo(robotPose.translationMat), 2) / (2 * Math.abs(lookAheadPointToRobot.getX()));
 		if (lookAheadPointToRobot.getX() > 0) {
-			return -radius;
-		} else {
 			return radius;
+		} else {
+			return -radius;
 		}
 	}
 

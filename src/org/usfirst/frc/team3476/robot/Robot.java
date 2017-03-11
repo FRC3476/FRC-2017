@@ -64,7 +64,8 @@ public class Robot extends IterativeRobot {
 	
 //	Turret leftTurret;
 //	Turret rightTurret;
-	CANTalon climber;
+	CANTalon climber, climber2;
+	double highestCurrent = 0;
 
 	NetworkTable table = NetworkTable.getTable("");
 	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
@@ -121,6 +122,8 @@ public class Robot extends IterativeRobot {
 //		rightTurret = new Turret(Constants.RightTurretId);
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
+		climber2 = new CANTalon(Constants.Climber2Id);
+		climber2.changeControlMode(TalonControlMode.PercentVbus);
 
 		robotState.addTask(mainExecutor);
 		orangeDrive.addTask(mainExecutor);
@@ -306,6 +309,7 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.setManualDrive(moveVal, turnVal);
+			orangeDrive.setBrake(xbox.getRawButton(3));
 		}
 		
 		if(xbox.getRawAxis(2) > 0.8){
@@ -362,11 +366,14 @@ public class Robot extends IterativeRobot {
 		}
 		
 		if (joystick.getRawButton(11)){
-			climber.set(.85);
+			climber.set(1);
+			climber2.set(1);
 		} else if(joystick.getRawButton(12)){
 			climber.set(0.4);
+			climber2.set(0.4);
 		} else {
 			climber.set(0);
+			climber2.set(0);
 		}
 	}
 
