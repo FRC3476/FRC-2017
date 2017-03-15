@@ -15,6 +15,7 @@ public class Turret {
 	private CANTalon turretTalon;
 
 	public Turret(int turretTalonId) {
+		
 		turretTalon = new CANTalon(turretTalonId);
 
 		turretTalon.enableBrakeMode(true);

@@ -11,6 +11,7 @@ import javax.script.ScriptException;
 
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
+import org.usfirst.frc.team3476.subsystem.GearMech;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -329,6 +330,7 @@ public class Robot extends IterativeRobot {
 			intake.setSucking(0);
 		}
 
+		//Intake Dropdown
 		if (joystick.getRawButton(5))
 		{
 			intake.setState(IntakeState.UP);
@@ -337,6 +339,15 @@ public class Robot extends IterativeRobot {
 		if (joystick.getRawButton(3))
 		{
 			intake.setState(IntakeState.DOWN);
+		}
+		//GearMech DropDown
+		if(joystick.getRawButton(7))
+		{
+			GearMech.moveDropdown(UP);
+		}
+		else if(joystick.getRawButton(13))
+		{
+			GearMech.moveDropdown(DOWN);
 		}
 		/*
 		if (joystick.getRawButton(7)) {
