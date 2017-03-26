@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
 import org.usfirst.frc.team3476.subsystem.GearMech;
+import org.usfirst.frc.team3476.subsystem.GearMech.GearState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -59,6 +60,7 @@ public class Robot extends IterativeRobot {
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Gear gear;
+	GearMech gearMech;
 	Intake intake;
 	CANTalon feeder = new CANTalon(Constants.IntakeFeederId);
 	CANTalon star = new CANTalon(Constants.StarFeederId);
@@ -119,6 +121,7 @@ public class Robot extends IterativeRobot {
 		orangeDrive = OrangeDrive.getInstance();
 		gear = Gear.getInstance();
 		intake = Intake.getInstance();
+		gearMech = GearMech.getInstance();
 //		leftTurret = new Turret(Constants.LeftTurretId);
 //		rightTurret = new Turret(Constants.RightTurretId);
 		climber = new CANTalon(Constants.ClimberId);
@@ -288,7 +291,7 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
-
+	boolean homed = false;
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
@@ -296,58 +299,152 @@ public class Robot extends IterativeRobot {
 		joystick.update();
 		double moveVal = -xbox.getRawAxis(1);
 		double turnVal = -xbox.getRawAxis(4);		
-
-		if (xbox.getRawButton(5))
-		{
-			orangeDrive.setNormal();
-		}
-		if (xbox.getRawButton(6))
-		{
-			orangeDrive.setInvert();
-		}
-
-		if(xbox.getRawButton(1)){
-			orangeDrive.setGearPath();
-		} else {
-			orangeDrive.setManualDrive(moveVal, turnVal);
-			orangeDrive.setBrake(xbox.getRawButton(3));
-		}
-		
-		if(xbox.getRawAxis(2) > 0.8){
-			orangeDrive.shiftUp();
-		}
-
-		if(xbox.getRawAxis(3) > 0.8){
-			orangeDrive.shiftDown();
-		}
-		
-		//ACTUAL STUFF
-		if(joystick.getPOV(0) == 180 ||  joystick.getPOV(0) == 225 || joystick.getPOV(0) == 135){
-			intake.setSucking(0.5);
-		} else if(joystick.getPOV(0) == 315 || joystick.getPOV(0) == 0 || joystick.getPOV(0) == 45){
-			intake.setSucking(-0.5);
-		} else {
-			intake.setSucking(0);
-		}
-
+				
+//		if (xbox.getRawButton(5))
+//		{
+//			orangeDrive.setNormal();
+//		}
+//		if (xbox.getRawButton(6))
+//		{
+//			orangeDrive.setInvert();
+//		}
+//
+//		if(xbox.getRawButton(1)){
+//			orangeDrive.setGearPath();
+//		} else {
+//			orangeDrive.setManualDrive(moveVal, turnVal);
+//			orangeDrive.setBrake(xbox.getRawButton(3));
+//		}
+//		
+//		if(xbox.getRawAxis(2) > 0.8){
+//			orangeDrive.shiftUp();
+//		}
+//
+//		if(xbox.getRawAxis(3) > 0.8){
+//			orangeDrive.shiftDown();
+//		}
+//		
+//		//ACTUAL STUFF
+//		if(joystick.getPOV(0) == 180 ||  joystick.getPOV(0) == 225 || joystick.getPOV(0) == 135){
+//			intake.setSucking(0.5);
+//		} else if(joystick.getPOV(0) == 315 || joystick.getPOV(0) == 0 || joystick.getPOV(0) == 45){
+//			intake.setSucking(-0.5);
+//		} else {
+//			intake.setSucking(0);
+//		}
 		//Intake Dropdown
-		if (joystick.getRawButton(5))
-		{
-			intake.setState(IntakeState.UP);
-		}
-		
-		if (joystick.getRawButton(3))
-		{
-			intake.setState(IntakeState.DOWN);
-		}
+//		if (joystick.getRawButton(5))
+//		{
+//			intake.setState(IntakeState.UP);
+//		}
+//		
+//		if (joystick.getRawButton(3))
+//		{
+//			intake.setState(IntakeState.DOWN);
+//		}
 		//GearMech DropDown
+		/*
 		if(joystick.getRawButton(7))
 		{
-			GearMech.moveDropdown(UP);
+			gearMech.moveDropDown(GearState.UP);
 		}
 		else if(joystick.getRawButton(13))
 		{
-			GearMech.moveDropdown(DOWN);
+			gearMech.moveDropDown(GearState.DOWN);//Do we always want to intake when the GearMech is down?
+		}*/
+		
+		
+		//orangeDrive.setManualDrive(moveVal, turnVal);
+		
+		if (xbox.getRisingEdge(1)) //replace with button
+		{
+			gearMech.manualPegInsert();
+		}
+
+		/*
+		if (xbox.getRawButton(3))
+		{
+			gearMech.changeControlMode(TalonControlMode.PercentVbus);
+			gearMech.setActuator(.2);
+		}
+		else if (xbox.getRawButton(4))
+		{
+			gearMech.changeControlMode(TalonControlMode.PercentVbus);
+			gearMech.setActuator(-.2);
+		}
+		else
+		{
+			gearMech.changeControlMode(TalonControlMode.PercentVbus);
+			gearMech.setActuator(0);
+		}*/
+		
+		if (xbox.getRawButton(2))
+		{
+			if (!homed)
+			{
+				gearMech.setActuator(.2);
+				if (gearMech.getCurrent() > 1.5)
+				{
+					gearMech.resetPosition();
+					gearMech.setActuator(0);
+					System.out.println("HOMED");
+					homed = true;
+				}
+			}
+			else
+			{
+				gearMech.setActuator(0);
+			}
+		}
+		
+		if (xbox.getRawButton(3))
+			gearMech.setActuator(.2);
+		else if (xbox.getRawButton(4))
+			gearMech.setActuator(-.2);
+		
+		if (xbox.getFallingEdge(3))
+			gearMech.setActuator(0);
+		if (xbox.getFallingEdge(4))
+			gearMech.setActuator(0);
+			
+		
+		if (xbox.getRisingEdge(7)){
+			//gearMech.changeControlMode(TalonControlMode.Position);
+			gearMech.setActuatorPosition(GearMech.DOWN);
+			System.out.println("Down " + GearMech.DOWN);
+		}
+		if (xbox.getRisingEdge(8)){
+			//gearMech.changeControlMode(TalonControlMode.Position);
+			gearMech.setActuatorPosition(GearMech.UP);
+			System.out.println("Up " + GearMech.UP);
+		}
+		if (xbox.getRisingEdge(9))
+		{
+			gearMech.setActuatorPosition(GearMech.PEG);
+		}
+		if (xbox.getRisingEdge(10))
+		{
+			gearMech.setActuatorPosition(GearMech.HOME);
+		}
+		
+		System.out.println("Current " + gearMech.getCurrent());
+		System.out.println("Voltage " + gearMech.getVoltage());
+		if (xbox.getRawButton(5))
+		{
+			gearMech.setSucking(.5);
+		}
+		else if (xbox.getRawButton(6))
+		{
+			gearMech.setSucking(-.5);
+		}
+		else
+		{
+			gearMech.setSucking(0);
+		}
+		
+		if(xbox.getRisingEdge(-1))
+		{
+			System.out.println("Position" + gearMech.getPosition());
 		}
 		/*
 		if (joystick.getRawButton(7)) {
@@ -359,33 +456,32 @@ public class Robot extends IterativeRobot {
 			star.set(0);
 		}
 		 */
-		if(joystick.getRawButton(9)){
-			gear.setGearMech(true);
-			gear.setRunningState(false);
-		} else {			
-			gear.setRunningState(true);
-		}
-
-		if(joystick.getRisingEdge(8)){
-			gear.toggleFlap();
-		}
-	
-		if(joystick.getRawButton(10)){
-			star.set(0.95);
-		} else {  
-			star.set(0);
-		}
-		
-		if (joystick.getRawButton(11)){
+//		if(joystick.getRawButton(9)){
+//			gear.setGearMech(true);
+//			gear.setRunningState(false);
+//		} else {			
+//			gear.setRunningState(true);
+//		}
+//
+//		if(joystick.getRisingEdge(8)){
+//			gear.toggleFlap();
+//		}
+//	
+//		if(joystick.getRawButton(10)){
+//			star.set(0.95);
+//		} else {  
+//			star.set(0);
+//		}
+//		
+		/*
+		if (xbox.getRawButton(2)){
 			climber.set(1);
 			climber2.set(1);
-		} else if(joystick.getRawButton(12)){
-			climber.set(0.4);
-			climber2.set(0.4);
 		} else {
 			climber.set(0);
 			climber2.set(0);
 		}
+		*/
 	}
 
 	@Override

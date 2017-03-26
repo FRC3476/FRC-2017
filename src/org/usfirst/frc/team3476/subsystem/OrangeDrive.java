@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class OrangeDrive extends Threaded {
 	public enum DriveState {
-		MANUAL, AUTO, GEAR
+		MANUAL, AUTO, GEAR, TEMP_GEAR
 	}
 	
 	public enum AutoState {
@@ -50,6 +50,8 @@ public class OrangeDrive extends Threaded {
 	private DriveState driveState = DriveState.MANUAL;
 	private AutoState autoState;
 	private GearState gearState;
+	
+	//private GearMech gearMech;
 	
 	private boolean gyroInversed;
 
@@ -106,11 +108,12 @@ public class OrangeDrive extends Threaded {
 		gyroInversed = false;
 		turningDriver.setOutputRange(216, -216);
 		turningDriver.setSetpoint(0);
+		
+		//gearMech = GearMech.getInstance();
 	}
 
 	@Override
 	public synchronized void update() {
-		System.out.println(driveState);
 		switch (driveState) {
 		case MANUAL:
 			break;
@@ -201,7 +204,7 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 	
-	private synchronized void setWheelVelocity(DriveVelocity setVelocity) {
+	public synchronized void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
 		if(setVelocity.wheelSpeed > 216){
 			DriverStation.getInstance();
@@ -211,7 +214,7 @@ public class OrangeDrive extends Threaded {
 		
 		leftTalon.setSetpoint((setVelocity.wheelSpeed + setVelocity.deltaSpeed) * 15);
 		rightTalon.setSetpoint((setVelocity.wheelSpeed - setVelocity.deltaSpeed) * 15);	
-		System.out.println(setVelocity.deltaSpeed);
+		//System.out.println(setVelocity.deltaSpeed);
 		NetworkTable.getTable("").putNumber("speed", leftTalon.getSpeed());
 		NetworkTable.getTable("").putNumber("setpoint", leftTalon.getSetpoint());
 		
@@ -277,6 +280,7 @@ public class OrangeDrive extends Threaded {
 		System.out.println("desired " + desiredAngle);
 		System.out.println("current " + getGyroAngle().getDegrees());
 		*/
+		
 		switch(gearState){
 			case TURNING:
 				if(Gear.getInstance().isPushed()){
@@ -287,7 +291,7 @@ public class OrangeDrive extends Threaded {
 				} 
 				break;
 			case DRIVING:
-				
+				//gearMech.setActuator(GearMech.PEG);
 				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
 				
 				double turningSpeed = turningDriver.update(error.getDegrees());
@@ -298,11 +302,12 @@ public class OrangeDrive extends Threaded {
 					setWheelVelocity(new DriveVelocity(0, 0));
 					gearState = GearState.REVERSING;
 					gearReverseTime = System.currentTimeMillis();
-					
 				}
 				break;
 			case REVERSING:
-				setWheelVelocity(new DriveVelocity(216, 0));
+				setWheelVelocity(new DriveVelocity(50, 0));
+				//gearMech.setActuator(GearMech.PEG_EJECT);
+				//gearMech.setSucking(.5);
 				if(System.currentTimeMillis() - gearReverseTime > 350){
 					gearState = GearState.DONE;
 				}

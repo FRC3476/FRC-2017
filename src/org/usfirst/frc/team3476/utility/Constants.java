@@ -41,16 +41,15 @@ public final class Constants {
 	public static int ForwardIntakeSolenoidId = 5;
 	public static int ReverseIntakeSolenoidId = 6;
 	
-	public static int GearMechActuatorID = 17;
-	public static int GearMechFeederID = 18;
+	public static int GearMechActuatorID = 8;
+	public static int GearMechFeederID = 9;
 
 	public static int GearSolenoidId = 2;
 	public static int PegSensorId = 2;
 	public static int GearFlapSolenoidId = 0;
 	
-	public static int ClimberId = 10;  
-	
-	public static int Climber2Id = 8; 
+	public static int ClimberId = 10;  	
+	public static int Climber2Id = 11; 
 	
 	public static double TurretTicksPerRotations = 20000;
 	public static int LeftTurretId = 11; // change

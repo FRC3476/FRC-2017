@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
+import org.usfirst.frc.team3476.subsystem.OrangeDrive.DriveVelocity;
 import org.usfirst.frc.team3476.utility.Constants;
 
 import com.ctre.CANTalon;
@@ -14,12 +15,14 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class GearMech {
 	
-	public enum GearState {UP,DOWN};
+	public enum GearState {UP,DOWN,PEG};
 	private GearState currentState;
 	
-	final double UP = 0, DOWN = 0;//Default Values, Do not have tick positions
+	private OrangeDrive orangeDrive;
 	
-	private static final GearMech MechInstance = new GearMech();
+	public static final double UP = -.04, DOWN = -.31, PEG = -.11, PEG_EJECT = -.25, HOME = -.005; //Default Values, Do not have tick positions
+	
+	private static final GearMech gearMechInstance = new GearMech();
 	
 	CANTalon actuatorTalon, gearFeederTalon;
 	
@@ -28,50 +31,98 @@ public class GearMech {
 	private PowerDistributionPanel pdPanel;
 	*/
 	
+	public static GearMech getInstance(){
+		return gearMechInstance;
+	}
+	
 	private GearMech() {
 		  
 		  gearFeederTalon = new CANTalon(Constants.GearMechFeederID);
 		  gearFeederTalon.changeControlMode(TalonControlMode.PercentVbus);
 		  
 		  actuatorTalon = new CANTalon(Constants.GearMechActuatorID);
-		  actuatorTalon.changeControlMode(TalonControlMode.PercentVbus);
+		  actuatorTalon.changeControlMode(TalonControlMode.Position);
+		  actuatorTalon.configPeakOutputVoltage(2.4, -2.4);
 		 
-		  actuatorTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 10);//These are all default values so far
 		  actuatorTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);//
-		  actuatorTalon.configEncoderCodesPerRev(1024);//We don't know the gear ratio yet
-		  }
+		  actuatorTalon.configEncoderCodesPerRev(1024);
+		  
+		  actuatorTalon.setPosition(0);
+		  orangeDrive = OrangeDrive.getInstance();
+    }
 	
 	
 	public void setPID(double P, double I, double D){
 		actuatorTalon.setPID(P, I, D);
 	}
 	
+	public double getPosition(){
+		return actuatorTalon.getPosition();
+		
+	}
 	
 	public synchronized void moveDropDown(GearState setState){
-		if(setState == GearState.DOWN){
-			actuatorTalon.set(DOWN);
+		if(setState == GearState.DOWN) {
+			actuatorTalon.setSetpoint(DOWN);
+			currentState = setState;
+		} else if (setState == GearState.UP){
+			actuatorTalon.setSetpoint(UP);
 			currentState = setState;
 		} else {
-			actuatorTalon.set(UP);
+			actuatorTalon.setSetpoint(PEG);
 			currentState = setState;
 		}
+	}
+	
+	public synchronized void manualPegInsert(){
+		setActuatorPosition(PEG_EJECT);
+		gearFeederTalon.set(-.3);
+		//orangeDrive.setWheelVelocity(new DriveVelocity(-10, -10));
+		orangeDrive.setManualDrive(-.2, 0);
+		long currentTime = System.currentTimeMillis();
+		while(System.currentTimeMillis() - currentTime < 2000)
+		{
+			
+		}
+		//orangeDrive.setWheelVelocity(new DriveVelocity(0, 0));
+		orangeDrive.setManualDrive(0, 0);
+		gearFeederTalon.set(0);
+		//setActuatorPosition(UP);
 	}
 	
 	public synchronized GearState getState(){
 		return currentState;
 	}
 	
-	public void setSucking(double isSucking){
-		gearFeederTalon.set(isSucking);
+	public void setSucking(double suck){
+		gearFeederTalon.set(suck);
 	}
 	
-	public void setFeeder(boolean isFeeding)
+	public void setActuator(double val)
 	{
-		if (isFeeding){
-			gearFeederTalon.set(-1);
-		} else {
-			gearFeederTalon.set(0);
-		}
+		actuatorTalon.changeControlMode(TalonControlMode.PercentVbus);
+		actuatorTalon.set(val);
 	}
+	
+	public void setActuatorPosition(double val)
+	{
+		actuatorTalon.changeControlMode(TalonControlMode.Position);
+		actuatorTalon.setSetpoint(val);
+	}
+	
+	public double getCurrent()
+	{
+		return actuatorTalon.getOutputCurrent();
+	}
+	
+	public void resetPosition()
+	{
+		actuatorTalon.setPosition(0);
+	}
+
+	public double getVoltage() {
+		return actuatorTalon.getOutputVoltage();
+	}
+	
 	
 }
