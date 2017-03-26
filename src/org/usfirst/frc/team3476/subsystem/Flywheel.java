@@ -17,10 +17,7 @@ public class Flywheel {
 	private double setpoint;
 	private double toleranceRange = 50;
 
-
-	private DigitalInput ballSensor;
-
-	public Flywheel(int masterTalonId, int slaveTalonId, int ballSensorId) {
+	public Flywheel(int masterTalonId, int slaveTalonId) {
 		masterTalon = new CANTalon(masterTalonId);
 		masterTalon.changeControlMode(TalonControlMode.Speed);
 		slaveTalon = new CANTalon(slaveTalonId);
@@ -33,20 +30,22 @@ public class Flywheel {
 		
 		masterTalon.enableBrakeMode(false);
 		slaveTalon.enableBrakeMode(false);
-
+		
 		masterTalon.reverseOutput(true);
-		masterTalon.reverseSensor(false);
+		masterTalon.reverseSensor(true);
 		slaveTalon.reverseOutput(true);
 
 		masterTalon.clearStickyFaults();
 		slaveTalon.clearStickyFaults();
-	
-		ballSensor = new DigitalInput(ballSensorId);
-
+		
+		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_100Ms);
+		masterTalon.SetVelocityMeasurementWindow(64);
+		
+		masterTalon.configPeakOutputVoltage(0, -12);
 	}
 
-	public synchronized void setSetpoint(double setpoint) {
-		this.setpoint = setpoint;
+	public void setSetpoint(double setpoint) {
+		masterTalon.changeControlMode(TalonControlMode.Speed);
 		masterTalon.setSetpoint(setpoint);
 	}
 
@@ -62,8 +61,8 @@ public class Flywheel {
 		return masterTalon.getSpeed();
 	}
 
-	public synchronized double getSetpoint() {
-		return setpoint;
+	public double getSetpoint() {
+		return masterTalon.getSetpoint();
 	}
 
 	public void enable() {
@@ -86,20 +85,25 @@ public class Flywheel {
 	public void setVelocityMeasurementPeriod(VelocityMeasurementPeriod periodMs){
 		masterTalon.SetVelocityMeasurementPeriod(periodMs);
 	}
-	
 
 	public void setVelocityMeasurementWindow(int periodMs){
 		masterTalon.SetVelocityMeasurementWindow(periodMs);
 	}
 	
-	public boolean get()
-	{
-		return ballSensor.get();
-	}
-	
 	public void setPercent(double percent){
 		masterTalon.changeControlMode(TalonControlMode.PercentVbus);
 		masterTalon.set(percent);
+	}
+	
+	public double getOutputVoltage(){
+		return masterTalon.getOutputVoltage();
+	}
+	
+	public void config()
+	{
+		masterTalon.enableBrakeMode(false);
+		slaveTalon.enableBrakeMode(false);
+		masterTalon.configPeakOutputVoltage(0, -12);
 	}
 
 }

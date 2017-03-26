@@ -11,16 +11,10 @@ public class PurePursuitController {
 	 * 5. Actual path looks like a spline
 	 */
 	
-	private double lookAheadDistance;
-	private double robotSpeed;
-	private double robotDiameter;
 	private Path robotPath;
 	private boolean isReversed;
 
-	public PurePursuitController(double lookAheadDistance, double robotSpeed, double robotDiameter, Path robotPath, boolean isReversed) {
-		this.lookAheadDistance = lookAheadDistance;
-		this.robotSpeed = robotSpeed;
-		this.robotDiameter = robotDiameter;
+	public PurePursuitController(Path robotPath, boolean isReversed) {
 		this.robotPath = robotPath;
 		this.isReversed = isReversed;
 
@@ -35,19 +29,18 @@ public class PurePursuitController {
 		if (isDone(robotPose)) {
 			return new OrangeDrive.DriveVelocity(0, 0);
 		}
-		double radius = getRadius(robotPose, lookAheadDistance);
+		
+		double radius = getRadius(robotPose, Constants.LookAheadDistance);// + robotPath.update(robotPose.translationMat));
+		double robotSpeed = robotPath.getPathSpeed();
+		
+		if(isReversed){
+			robotSpeed *= -1;
+		}
+		
 		if(radius != 0){
-			if(isReversed){
-				return new OrangeDrive.DriveVelocity(-robotSpeed, -robotDiameter * (robotSpeed / radius) / 1.5);
-			} else {
-				return new OrangeDrive.DriveVelocity(robotSpeed, robotDiameter * (robotSpeed / radius) / 1.5);				
-			}
+			return new OrangeDrive.DriveVelocity(robotSpeed, Constants.DriveBaseDiameter * (robotSpeed / radius) / (2 * Constants.WheelScrub));		
 		} else {
-			if(isReversed){
-				return new OrangeDrive.DriveVelocity(-robotSpeed, 0);
-			} else {
-				return new OrangeDrive.DriveVelocity(robotSpeed, 0);				
-			}
+			return new OrangeDrive.DriveVelocity(robotSpeed, 0);
 		}
 
 		// TODO: Lower wheel speed as you get closer to endpoint

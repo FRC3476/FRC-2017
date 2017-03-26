@@ -1,7 +1,10 @@
 package org.usfirst.frc.team3476.utility;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 
 public class Path {
@@ -17,8 +20,18 @@ public class Path {
 	public void addWaypoint(Waypoint nextPoint) {
 		pathPoints.add(nextPoint);
 	}
+	
+	public synchronized double update(Translation robotPose){
+		Waypoint prevPoint = pathPoints.get(0);
+		Waypoint currentPoint = pathPoints.get(1);	
+		Rotation pathAngle = prevPoint.getPosition().getAngleTo(currentPoint.getPosition());
+		Translation robotToPath = robotPose.rotateBy(pathAngle.inverse());
+		prevPoint.setPosition(new Translation(prevPoint.getPosition().getX(), robotToPath.getY()).rotateBy(pathAngle));
+		double distance = Math.abs(robotToPath.getX() - prevPoint.getPosition().getX());
+		return distance;		
+	}
 
-	public Translation getLookAheadPoint(Translation robotPose, double lookAheadDistance) {
+	public synchronized Translation getLookAheadPoint(Translation robotPose, double lookAheadDistance) {
 		Waypoint prevPoint = null;
 		for (Waypoint pathPoint : pathPoints) {
 			if (lookAheadDistance <= pathPoint.position.getDistanceTo(robotPose)) {
@@ -39,13 +52,28 @@ public class Path {
 				double sqrtDiscriminant = Math.sqrt(lookAheadDistance * dR2 - D * D);
 				
 				Translation negativePoint = new Translation((D * dY - (dY < 0 ? -1 : 1) * dX * sqrtDiscriminant) / sqrtDiscriminant,
-															(-D * dX - Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);
+						(-D * dX - Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);
 				Translation positivePoint = new Translation((D * dY + (dY < 0 ? -1 : 1) * dX * sqrtDiscriminant) / sqrtDiscriminant,
-						(-D * dX + Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);
-				
-				// select the best point
-				
-				currentPathSpeed = prevPoint.getSpeed();
+						(-D * dX + Math.abs(dY) * sqrtDiscriminant) / sqrtDiscriminant);				
+				// select the best point				
+				currentPathSpeed = pathPoint.getSpeed();
+				Translation startToEnd = prevPoint.getPosition().inverse().translateBy(pathPoint.getPosition());
+				Translation startToNegative = prevPoint.getPosition().inverse().translateBy(negativePoint);
+				Translation startToPositive = prevPoint.getPosition().inverse().translateBy(positivePoint);
+				double negDotProduct = startToEnd.getX() * startToNegative.getX() + startToEnd.getY() * startToNegative.getY();	
+				double posDotProduct = startToEnd.getX() * startToPositive.getX() + startToEnd.getY() * startToPositive.getY();			
+				if (posDotProduct < 0 && negDotProduct >= 0) {
+					return negativePoint;
+				} else if (posDotProduct >= 0 && negDotProduct < 0) {
+					return positivePoint;
+				} else {
+					if (Math.abs(posDotProduct) <= Math.abs(negDotProduct)) {
+						return positivePoint;
+					} else {
+						return negativePoint;
+					}
+				}
+
 			}
 			pathPoints.remove(prevPoint);
 			prevPoint = pathPoint;
@@ -59,7 +87,7 @@ public class Path {
 		return pathPoints.get(pathPoints.size() - 1).getPosition();
 	}
 	
-	public double getPathSpeed(){
+	public synchronized double getPathSpeed(){
 		return currentPathSpeed;
 	}
 
@@ -72,10 +100,14 @@ public class Path {
 			drivingSpeed = speed;
 		}
 
-		public Translation getPosition() {
+		public synchronized Translation getPosition() {
 			return position;
 		}
 
+		public synchronized void setPosition(Translation newPosition){
+			position = newPosition;
+		}
+		
 		public double getSpeed() {
 			return drivingSpeed;
 		}
