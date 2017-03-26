@@ -38,7 +38,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private enum GearState {
-		TURNING, DRIVING, REVERSING, DONE
+		DRIVING, REVERSING, DONE
 	}
 	
 	public enum ShiftState {
@@ -48,11 +48,11 @@ public class OrangeDrive extends Threaded {
 	private double quickStopAccumulator;
 	private double lastTime;
 	private double lastValue;
+	private double gearReversingTime;
 	
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
 	private Rotation desiredAngle;
-	private double gearReverseTime;
 	
 	private Rotation gyroOffset;
 	
@@ -61,6 +61,7 @@ public class OrangeDrive extends Threaded {
 	private AutoState autoState;
 	private GearState gearState;
 
+	private Gear gear = Gear.getInstance();
 	private static final OrangeDrive driveInstance = new OrangeDrive();
 
 	private CANTalon leftTalon, rightTalon, leftSlaveTalon, rightSlaveTalon;
@@ -174,11 +175,12 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setGearPath() {
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
-			gearState = GearState.TURNING;
+			gearState = GearState.DRIVING;
 			setBrake(true);
-			shiftUp();
+			shiftDown();
 			updateDesiredAngle();
 			updateGearPath();
+			gearReversingTime = System.currentTimeMillis();
 		}
 	}
 	
@@ -187,7 +189,8 @@ public class OrangeDrive extends Threaded {
 			double cameraAngle = Dashcomm.get("angle", 0);
 			double distance = Dashcomm.get("distance", 0);
 			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
-			Translation offset = new Translation(5.5, -10);
+			// three inches forward
+			Translation offset = new Translation(0, -3);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
 			return true;
 		} else {
@@ -271,36 +274,24 @@ public class OrangeDrive extends Threaded {
 		*/
 		
 		switch(gearState){
-			case TURNING:
-				if(Gear.getInstance().isPushed()){
-					gearState = GearState.REVERSING;
-				} else if (updateRotation()) {
-					gearState = GearState.DRIVING;
-					System.out.println("DRIVING");
-				} 
-				break;
 			case DRIVING:
-				//gearMech.setActuator(GearMech.PEG);
-				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
 				
-				double turningSpeed = turningDriver.update(error.getDegrees());
-				turningSpeed = OrangeUtility.donut(turningSpeed, 11);
-				
-				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
-				if(Gear.getInstance().isPushed()){
-					setWheelVelocity(new DriveVelocity(0, 0));
-					gearState = GearState.REVERSING;
-				}
 				break;
 			case REVERSING:
-				setWheelVelocity(new DriveVelocity(50, 0));
-				//gearMech.setActuator(GearMech.PEG_EJECT);
-				//gearMech.setSucking(.5);
-				if(System.currentTimeMillis() - gearReverseTime > 350){
+				gear.setActuator(-0.2);
+				gear.setSucking(-0.2);
+				/*
+				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());				
+				double turningSpeed = turningDriver.update(error.getDegrees());
+				turningSpeed = OrangeUtility.donut(turningSpeed, 11);
+				*/
+				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, 0));
+				if(System.currentTimeMillis() - gearReversingTime > 1000){
 					gearState = GearState.DONE;
 				}
 				break;
 			case DONE:
+				gear.setSucking(0);
 				setWheelVelocity(new DriveVelocity(0, 0));
 				break;
 		}
@@ -342,13 +333,7 @@ public class OrangeDrive extends Threaded {
 		
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
-		double dt = System.nanoTime() - lastTime;
-		double accel = (moveValue - lastValue) / dt;
-		if(accel < -Constants.MaxAcceleration){
-			moveValue = lastValue - Constants.MaxAcceleration * dt;
-		} else if(accel > Constants.MaxAcceleration){
-			moveValue = lastValue + Constants.MaxAcceleration * dt;
-		}
+		
 		
 		double leftMotorSpeed;
 		double rightMotorSpeed;
@@ -386,30 +371,42 @@ public class OrangeDrive extends Threaded {
 		
 		if(shiftState == shiftState.AUTO){
 			if(getGear()){
-	        	if(Math.abs(getSpeed()) > 60){
+	        	leftMotorSpeed *= 70;
+	        	rightMotorSpeed *= 70;
+	        	if(Math.abs(getSpeed()) > 70){
 	        		shiftUp();
 	        		rightTalon.setP(0.1);
 	        		rightTalon.setF(0.1453);
 	        		leftTalon.setP(0.1);
 	        		leftTalon.setF(0.1453);
 	        	}
-	        	leftMotorSpeed *= 70;
-	        	rightMotorSpeed *= 70;
 	        } else {
-	        	if(Math.abs(getSpeed()) < 50){
+	        	leftMotorSpeed *= 200;
+	        	rightMotorSpeed *= 200;
+	        	if(Math.abs(getSpeed()) < 55){
 	        		shiftDown();
 	        		rightTalon.setP(0.3);
 	        		rightTalon.setF(0.3923);
 	        		leftTalon.setP(0.3);
 	        		leftTalon.setF(0.3923);
 	        	}
-	        	leftMotorSpeed *= 200;
-	        	rightMotorSpeed *= 200;
 	        }
 		}
-		lastTime = System.nanoTime();
-		lastValue = moveValue;
-		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
+		
+		double dt = (Timer.getFPGATimestamp() - lastTime);
+		
+		double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
+		double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
+		
+		double accel = (moveSpeed - lastValue) / dt;
+		if(accel < -Constants.MaxAcceleration){
+			moveSpeed = lastValue - Constants.MaxAcceleration * dt;
+		} else if(accel > Constants.MaxAcceleration){
+			moveSpeed = lastValue + Constants.MaxAcceleration * dt;
+		}		
+		lastTime = System.currentTimeMillis();
+		lastValue = moveSpeed;
+		setWheelVelocity(new DriveVelocity(moveSpeed, turnSpeed));
 	}
 	
 	public void setShiftState(ShiftState state){

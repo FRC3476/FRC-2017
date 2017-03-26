@@ -11,8 +11,7 @@ import javax.script.ScriptException;
 
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
-import org.usfirst.frc.team3476.subsystem.GearMech;
-import org.usfirst.frc.team3476.subsystem.GearMech.GearState;
+import org.usfirst.frc.team3476.subsystem.Gear.GearState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -61,51 +60,24 @@ public class Robot extends IterativeRobot {
 	Controller joystick = new Controller(1);
 
 	double speed = 3000;
-	double itrats = 0;
 	CANTalon hopper = new CANTalon(6);
 	CANTalon spinningHopper = new CANTalon(7);
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
-	double angle = 0;
-	
-	/*
-	Gear gear;
-	GearMech gearMech;
-	Intake intake;
-	CANTalon feeder = new CANTalon(Constants.IntakeFeederId);
-	CANTalon star = new CANTalon(Constants.StarFeederId);
-	
-//	Turret leftTurret;
-//	Turret rightTurret;
+	double gearSpeed = 0.1;
+	Gear gearMech;
 	CANTalon climber;
-
-	NetworkTable table = NetworkTable.getTable("");
-	NetworkTable graph = NetworkTable.getTable("SmartDashboard");
-	*/
+	CANTalon climberSlave;
+	boolean homed = false;
+	boolean lowExposure = true;
+	boolean slowDrive = false;
+	
 	DigitalOutput turnOnJetson = new DigitalOutput(0);
-	/*
-	ScriptEngineManager manager;
-	ScriptEngine engine;
-	
-	String code;
-	String helperCode;
-	
-	
-	MjpegServer mainStreamer;
-	
-	MjpegServer secondStreamer;
-	MjpegServer thirdStreamer;
-	
-	UsbCamera gearCamera;
-	
-	UsbCamera boilerCamera;
-	UsbCamera driverCamera;
-	*/
 	DigitalOutput led =  new DigitalOutput(4);
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
-	// TODO: Determine best number of threads
+	
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 
 	/**
@@ -127,6 +99,13 @@ public class Robot extends IterativeRobot {
 		robotState = RobotTracker.getInstance();
 		orangeDrive = OrangeDrive.getInstance();
 		shooter = Shooter.getInstance();
+		gearMech = Gear.getInstance();
+		
+		climber = new CANTalon(Constants.ClimberId);
+		climber.changeControlMode(TalonControlMode.PercentVbus);
+		climberSlave = new CANTalon(Constants.Climber2Id);
+		climberSlave.changeControlMode(TalonControlMode.Follower);
+		climberSlave.set(climber.getDeviceID());
 		/*
 		gear = Gear.getInstance();
 		intake = Intake.getInstance();
@@ -134,13 +113,12 @@ public class Robot extends IterativeRobot {
 //		leftTurret = new Turret(Constants.LeftTurretId);
 //		rightTurret = new Turret(Constants.RightTurretId);
 		/*
-		climber = new CANTalon(Constants.ClimberId);
-		climber.changeControlMode(TalonControlMode.PercentVbus);
+
 		*/
 		robotState.addTask(mainExecutor);
 		orangeDrive.addTask(mainExecutor);
 		shooter.addTask(mainExecutor);
-		//gear.addTask(mainExecutor);
+		gearMech.addTask(mainExecutor);
 
 		/*
 		manager = new ScriptEngineManager();
@@ -175,7 +153,7 @@ public class Robot extends IterativeRobot {
 		//double start = System.currentTimeMillis();
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
-		//gear.setRunningState(true);
+		gearMech.setRunningState(true);
 		orangeDrive.setOffset(Rotation.fromDegrees(180));
 		robotState.resetPose();
 		/*
@@ -283,9 +261,10 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		robotState.setRunningState(true);
-	//	orangeDrive.setRunningState(true);
+		orangeDrive.setRunningState(true);
 		shooter.setRunningState(true);
-		//gear.setRunningState(true);
+		
+		gearMech.setRunningState(true);
 		/*
 		mainExecutor.scheduleAtFixedRate(new Runnable(){
 			@Override
@@ -296,12 +275,12 @@ public class Robot extends IterativeRobot {
 			}
 		}, 0, 50, TimeUnit.MILLISECONDS);
 		*/
+		gearMech.homeActuator();
 	}
 
 	/**
 	 * This function is called periodically during operator control
 	 */
-	boolean homed = false;
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
@@ -309,8 +288,9 @@ public class Robot extends IterativeRobot {
 		joystick.update();
 		double moveVal = -xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
+		gearMech.configTalons();
 		
-		if(xbox.getRawButton(1)){
+		/*if(xbox.getRawButton(1)){
 			hopper.set(-1);
 			spinningHopper.set(-0.5);
 		} else {
@@ -324,8 +304,63 @@ public class Robot extends IterativeRobot {
 			shooter.setState(ShooterState.IDLE);
 		}
 	
-		shooter.setSpeed(speed);
-		orangeDrive.arcadeDrive(moveVal, rotateVal);
+		shooter.setSpeed(speed);*/
+		
+		if (xbox.getRawButton(1)){
+			orangeDrive.setGearPath();
+		}
+		
+		if (xbox.getRawAxis(3) > .8){
+			gearMech.setActuator(gearSpeed);
+		}
+		
+		if (xbox.getRawAxis(2) > .8){
+			gearMech.setActuator(-gearSpeed);
+		}
+		else if (xbox.getRawButton(5)){
+			gearMech.setSucking(-.5);
+		}
+		else{
+			gearMech.setSucking(0);
+		}
+		
+		if (xbox.getRisingEdge(8)){
+			gearSpeed += 0.01;
+		}
+		
+		if (xbox.getRisingEdge(6)){
+			gearSpeed -= 0.01;
+		}
+		
+		
+		if (xbox.getRawButton(2)){
+			climber.set(.85);
+		} else {
+			climber.set(0);
+		}
+		
+		if (xbox.getRisingEdge(-1))
+		{
+			if (slowDrive)
+				slowDrive = false;
+			else
+				slowDrive = true;
+		}
+		
+		if (slowDrive)
+			orangeDrive.arcadeDrive(.5 * -moveVal, .5 * rotateVal);
+		else
+			orangeDrive.arcadeDrive(-moveVal, rotateVal);
+		
+		if (xbox.getRisingEdge(-1))
+		{
+			if (lowExposure)
+				lowExposure = false;
+			else
+				lowExposure = true;
+					
+		}
+		Dashcomm.put("lowExposure", lowExposure);
 		
 		/*
 		if(xbox.getRawAxis(2) > 0.8){
@@ -340,7 +375,7 @@ public class Robot extends IterativeRobot {
 		*/
 		
 		
-		
+		/*
 		//know what hood angle and flywheel rpm we need to be at for diff distances
 		if(xbox.getRisingEdge(5)){
 			speed += 50;
@@ -358,7 +393,7 @@ public class Robot extends IterativeRobot {
 			System.out.println(speed);
 			System.out.println("shooter " + shooter.getSpeed());
 			System.out.println("power " + shooter.getPower()/12);
-		}
+		}*/
 		
 		/*if (xbox.getRawButton(7))
 			turret.setAngle(Rotation.fromDegrees(30));
@@ -422,11 +457,6 @@ public class Robot extends IterativeRobot {
 			star.set(0);
 		}
 		
-		if (joystick.getRawButton(11)){
-			climber.set(.85);
-		} else {
-			climber.set(0);
-		}
 			
 		if(joystick.getRawButton(12)){
 			climber.set(0.4);
@@ -445,7 +475,7 @@ public class Robot extends IterativeRobot {
 		}
 		//gear.setRunningState(false);
 		shooter.setRunningState(false);
-		
+		gearMech.setRunningState(false);
 		//shooters.endTask();
 		
 		//shooters.setRunningState(false);
