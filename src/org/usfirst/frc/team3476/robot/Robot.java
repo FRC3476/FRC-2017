@@ -11,6 +11,8 @@ import javax.script.ScriptException;
 
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
+import org.usfirst.frc.team3476.subsystem.GearMech;
+import org.usfirst.frc.team3476.subsystem.GearMech.GearState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -69,6 +71,7 @@ public class Robot extends IterativeRobot {
 	
 	/*
 	Gear gear;
+	GearMech gearMech;
 	Intake intake;
 	CANTalon feeder = new CANTalon(Constants.IntakeFeederId);
 	CANTalon star = new CANTalon(Constants.StarFeederId);
@@ -127,7 +130,7 @@ public class Robot extends IterativeRobot {
 		/*
 		gear = Gear.getInstance();
 		intake = Intake.getInstance();
-		*/
+		gearMech = GearMech.getInstance();
 //		leftTurret = new Turret(Constants.LeftTurretId);
 //		rightTurret = new Turret(Constants.RightTurretId);
 		/*
@@ -298,7 +301,7 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
-
+	boolean homed = false;
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
@@ -379,15 +382,18 @@ public class Robot extends IterativeRobot {
 		} else {
 			intake.setSucking(0);
 		}
-
-		if (joystick.getRawButton(5))
+		else if (xbox.getRawButton(6))
 		{
-			intake.setState(IntakeState.UP);
+			gearMech.setSucking(-.5);
+		}
+		else
+		{
+			gearMech.setSucking(0);
 		}
 		
-		if (joystick.getRawButton(3))
+		if(xbox.getRisingEdge(-1))
 		{
-			intake.setState(IntakeState.DOWN);
+			System.out.println("Position" + gearMech.getPosition());
 		}
 		
 		if (joystick.getRawButton(7)) {

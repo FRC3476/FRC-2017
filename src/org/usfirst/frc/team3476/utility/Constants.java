@@ -43,6 +43,9 @@ public final class Constants {
 	public static int SlaveIntakeId = 9;
 	public static int ForwardIntakeSolenoidId = 5;
 	public static int ReverseIntakeSolenoidId = 6;
+	
+	public static int GearMechActuatorID = 8;
+	public static int GearMechFeederID = 9;
 
 	public static int GearSolenoidId = 2;
 	public static int PegSensorId = 2;

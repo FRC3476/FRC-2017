@@ -17,6 +17,7 @@ public class Turret {
 	//I-ZONE: 400
 	//Don't delete this
 	public Turret(int turretTalonId) {
+		
 		turretTalon = new CANTalon(turretTalonId);
 
 		turretTalon.enableBrakeMode(true);

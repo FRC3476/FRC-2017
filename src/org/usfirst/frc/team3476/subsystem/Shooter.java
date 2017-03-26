@@ -1,14 +1,11 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Constants;
-import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import edu.wpi.first.wpilibj.Servo;
 
 public class Shooter extends Threaded {
-	
 	public enum ShooterState {
 		HOMING, SHOOTING, IDLE
 	}
