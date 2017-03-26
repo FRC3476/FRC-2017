@@ -383,22 +383,30 @@ public class OrangeDrive extends Threaded {
 		}
 
 		// 18 ft per sec -> 216 inches per sec
-		/*
+		
 		if(shiftState == shiftState.AUTO){
 			if(getGear()){
-	        	if(Math.abs(getSpeed()) > 304){
+	        	if(Math.abs(getSpeed()) > 60){
 	        		shiftUp();
+	        		rightTalon.setP(0.1);
+	        		rightTalon.setF(0.1453);
+	        		leftTalon.setP(0.1);
+	        		leftTalon.setF(0.1453);
 	        	}
+	        	leftMotorSpeed *= 70;
+	        	rightMotorSpeed *= 70;
 	        } else {
-	        	if(Math.abs(getSpeed()) < 266){
+	        	if(Math.abs(getSpeed()) < 50){
 	        		shiftDown();
+	        		rightTalon.setP(0.3);
+	        		rightTalon.setF(0.3923);
+	        		leftTalon.setP(0.3);
+	        		leftTalon.setF(0.3923);
 	        	}
+	        	leftMotorSpeed *= 200;
+	        	rightMotorSpeed *= 200;
 	        }
 		}
-		*/
-		
-		leftMotorSpeed *= 70;
-		rightMotorSpeed *= 70;
 		lastTime = System.nanoTime();
 		lastValue = moveValue;
 		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
@@ -460,7 +468,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	public double getSpeed(){
-		return (leftTalon.getSpeed() + rightTalon.getSpeed()) / 2;
+		return ((leftTalon.getSpeed() + rightTalon.getSpeed()) / 60) * Constants.WheelDiameter * Math.PI;
 	}
 	/*
 	public void drive(double moveValue, double turnValue)

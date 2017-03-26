@@ -78,16 +78,34 @@ public class GearMech {
 		setActuatorPosition(PEG_EJECT);
 		gearFeederTalon.set(-.3);
 		//orangeDrive.setWheelVelocity(new DriveVelocity(-10, -10));
-		orangeDrive.setManualDrive(-.2, 0);
 		long currentTime = System.currentTimeMillis();
 		while(System.currentTimeMillis() - currentTime < 2000)
 		{
 			
 		}
 		//orangeDrive.setWheelVelocity(new DriveVelocity(0, 0));
-		orangeDrive.setManualDrive(0, 0);
 		gearFeederTalon.set(0);
 		//setActuatorPosition(UP);
+	}
+	
+	public void homeGearMech()
+	{
+		boolean homed = false;
+		setActuator(.2);
+		long startTime = System.currentTimeMillis();
+		while(System.currentTimeMillis() - startTime < 3000)
+		{
+			if (getCurrent() > 1.5)
+			{
+					resetPosition();
+					System.out.println("HOMED");
+					homed = true;
+					break;
+			}
+		}
+		if (!homed)
+			System.out.println("Failed to home the gear mech");
+		setActuator(0);
 	}
 	
 	public synchronized GearState getState(){
