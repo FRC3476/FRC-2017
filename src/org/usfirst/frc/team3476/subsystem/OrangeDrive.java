@@ -49,10 +49,12 @@ public class OrangeDrive extends Threaded {
 	private double lastTime;
 	private double lastValue;
 	private double gearReversingTime;
+	private double gearInitialDistance;
 	
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
 	private Rotation desiredAngle;
+	private double desiredDistance;
 	
 	private Rotation gyroOffset;
 	
@@ -180,7 +182,8 @@ public class OrangeDrive extends Threaded {
 			setBrake(true);
 			shiftDown();
 			updateDesiredAngle();
-			updateGearPath();
+			gearInitialDistance = getDistance();
+			updateGearPath();			
 		}
 	}
 	
@@ -199,17 +202,19 @@ public class OrangeDrive extends Threaded {
 	public synchronized boolean updateDesiredAngle(){
 		if(Dashcomm.get("isVisible", 0) != 0){
 			double cameraAngle = Dashcomm.get("angle", 0);
-			double distance = Dashcomm.get("distance", 0);
-			Translation targetPosition = Translation.fromAngleDistance(distance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
+			desiredDistance = Dashcomm.get("distance", 0);
+			Translation targetPosition = Translation.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
 			// three inches forward
 			Translation offset = new Translation(0, -3);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
 			return true;
 		} else {
 			desiredAngle = getGyroAngle();
+			desiredDistance = 0;
 			return false;
 		}
 	}
+	
 	
 	public synchronized void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
@@ -332,6 +337,10 @@ public class OrangeDrive extends Threaded {
 
 	public double getRightDistance() {
 		return rightTalon.getPosition() * Constants.WheelDiameter * Math.PI;
+	}
+	
+	public double getDistance() {
+		return (getLeftDistance() + getRightDistance()) / 2;
 	}
 	
 	public Rotation getGyroAngle(){
