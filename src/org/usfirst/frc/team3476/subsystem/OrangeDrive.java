@@ -143,6 +143,16 @@ public class OrangeDrive extends Threaded {
 			return 0;
 		}
 	}
+	
+	public double scaleValues(double rawValue, double minInput, double maxInput, double minOutput, double maxOutput){
+		if (Math.abs(rawValue) >= minInput) {
+			double scaledValue = (rawValue * (Math.abs(rawValue) - minInput)) / ((maxInput - minInput) * Math.abs(rawValue));
+			return scaledValue;
+			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
+		} else {
+			return 0;
+		}
+	}
 
 	public synchronized void setAutoPath(Path autoPath, boolean isReversed) {
 		//robotState = RobotTracker.getInstance();
@@ -273,7 +283,7 @@ public class OrangeDrive extends Threaded {
 		//System.out.println(error.getDegrees());
 		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
 			double turningSpeed = turningDriver.update(error.getDegrees());
-			turningSpeed = OrangeUtility.donut(turningSpeed, 30);
+			
 			setWheelVelocity(new DriveVelocity(0, turningSpeed));	
 			return false;
 		} else {	
@@ -292,16 +302,17 @@ public class OrangeDrive extends Threaded {
 		
 		switch(gearState){
 			case TURNING:
-				if(true/*gear.isPushed()*/){
- 					gearState = GearState.REVERSING;
- 				} else if (updateRotation()) {
+				if (updateRotation()) {
+					gearReversingTime = System.currentTimeMillis();
  					gearState = GearState.DRIVING;
  					System.out.println("DRIVING");
  				} 
 				break;
 			case DRIVING:
-
-				gearReversingTime = System.currentTimeMillis();
+  				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());  				
+  				double turningSpeed = turningDriver.update(error.getDegrees());
+  				
+				setWheelVelocity(new DriveVelocity(Constants.GearSpeed, turningSpeed));
 				break;
 			case REVERSING:
 				gear.setSucking(-0.4);
