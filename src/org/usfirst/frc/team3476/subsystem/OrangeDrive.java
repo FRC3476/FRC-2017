@@ -37,7 +37,7 @@ public class OrangeDrive extends Threaded {
 		DRIVING, ROTATING, DONE
 	}
 	
-	private enum GearState {
+	private enum GearDrivingState {
 		TURNING, DRIVING, REVERSING, DONE
 	}
 	
@@ -61,7 +61,7 @@ public class OrangeDrive extends Threaded {
 	private ShiftState shiftState = ShiftState.AUTO;
 	private DriveState driveState = DriveState.MANUAL;
 	private AutoState autoState;
-	private GearState gearState;
+	private GearDrivingState gearState;
 
 	private Gear gear = Gear.getInstance();
 	private static final OrangeDrive driveInstance = new OrangeDrive();
@@ -134,21 +134,23 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	
-	public double scaleJoystickValues(double rawValue){
-		if (Math.abs(rawValue) >= Constants.MinimumControllerInput) {
-			double scaledValue = (rawValue * (Math.abs(rawValue) - Constants.MinimumControllerInput)) / ((0.85) * Math.abs(rawValue));
-			return scaledValue;
-			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
-		} else {
-			return 0;
-		}
+	public double scaleJoystickValues(double rawValue){		
+		return scaleValues(rawValue, Constants.MinimumControllerInput, Constants.MaximumControllerInput, Constants.MinimumControllerOutput, Constants.MaximumControllerOutput);
 	}
 	
 	public double scaleValues(double rawValue, double minInput, double maxInput, double minOutput, double maxOutput){
+		// scales ranges IE. 0.15 - 1 to 0 - 1
+		// the absolute value of the rawValue under minimum are treated as 0 
+		// negative values also work
 		if (Math.abs(rawValue) >= minInput) {
-			double scaledValue = (rawValue * (Math.abs(rawValue) - minInput)) / ((maxInput - minInput) * Math.abs(rawValue));
+
+			// (((rawValue - minInput) / (maxInput - minInput)) * (maxOutput - minOutput))  + minOutput
+			double scaledValue = ((((rawValue - minInput) / (maxInput - minInput)) * (maxOutput - minOutput))  + minOutput);
+			if(rawValue < 0){
+				scaledValue *= -1;
+			}
+	
 			return scaledValue;
-			// 0.7 = Constants.MaximumControllerInput - Constants.MinimumControllerInput
 		} else {
 			return 0;
 		}
@@ -188,7 +190,7 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setGearPath() {
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
-			gearState = GearState.DRIVING;
+			gearState = GearDrivingState.DRIVING;
 			setBrake(true);
 			shiftDown();
 			updateDesiredAngle();
@@ -200,7 +202,7 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setManualGearPath(){
 		if(driveState != DriveState.GEAR){
 			driveState = DriveState.GEAR;
-			gearState = GearState.REVERSING;
+			gearState = GearDrivingState.REVERSING;
 			setBrake(true);
 			shiftDown();
 			updateDesiredAngle();
@@ -253,7 +255,7 @@ public class OrangeDrive extends Threaded {
 				return true;
 			}
 		case GEAR:
-			return gearState == GearState.DONE;
+			return gearState == GearDrivingState.DONE;
 		}
 		return true;
 	}
@@ -302,34 +304,36 @@ public class OrangeDrive extends Threaded {
 		
 		switch(gearState){
 			case TURNING:
+				// rotate until within tolerance
 				if (updateRotation()) {
 					gearReversingTime = System.currentTimeMillis();
- 					gearState = GearState.DRIVING;
+ 					gearState = GearDrivingState.DRIVING;
  					System.out.println("DRIVING");
  				} 
 				break;
 			case DRIVING:
+				// drive towards target
   				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());  				
-  				double turningSpeed = turningDriver.update(error.getDegrees());
-  				
-				setWheelVelocity(new DriveVelocity(Constants.GearSpeed, turningSpeed));
+  				double turningSpeed = turningDriver.update(error.getDegrees());  				
+				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
+				// checks if the distance traveled is correct
+				if(getDistance() - gearInitialDistance > desiredDistance){
+					gearState = GearDrivingState.REVERSING;
+				}
 				break;
 			case REVERSING:
+				// do reversing procedure
 				gear.setSucking(-0.4);
 				setWheelVelocity(new DriveVelocity(Constants.GearSpeed, 0));
 				gear.setActuator(-.1);
-				/*
-				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());				
-				double turningSpeed = turningDriver.update(error.getDegrees());
-				turningSpeed = OrangeUtility.donut(turningSpeed, 11);
-				*/
 				if(System.currentTimeMillis() - gearReversingTime > 1000){
-					gearState = GearState.DONE;
+					gear.setSucking(0);
+					setWheelVelocity(new DriveVelocity(0, 0));
+					gearState = GearDrivingState.DONE;
 				}
 				break;
 			case DONE:
-				gear.setSucking(0);
-				setWheelVelocity(new DriveVelocity(0, 0));
+				// done so do nothing
 				break;
 		}
 	}
@@ -371,14 +375,13 @@ public class OrangeDrive extends Threaded {
 		if(driveState != DriveState.MANUAL){
 			driveState = DriveState.MANUAL;
 		}
-		double now = Timer.getFPGATimestamp();
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
 		
 		
 		double leftMotorSpeed;
 		double rightMotorSpeed;
-
+		// Square values but keep sign
 		if (moveValue >= 0.0) {
 			moveValue = moveValue * moveValue;
 		} else {
@@ -389,7 +392,7 @@ public class OrangeDrive extends Threaded {
 		} else {
 			rotateValue = -(rotateValue * rotateValue);
 		}
-
+		// Get highest correct speed for left/right wheels
 		if (moveValue > 0.0) {
 			if (rotateValue > 0.0) {
 				leftMotorSpeed = moveValue - rotateValue;
@@ -408,13 +411,14 @@ public class OrangeDrive extends Threaded {
 			}
 		}
 
-		// 18 ft per sec -> 216 inches per sec
-		
+		// Units in in/s
+		// Shift if the current speed is over a certain point
+		// 90 % of low gear speed
 		if(shiftState == shiftState.AUTO){
 			if(getGear()){
 	        	leftMotorSpeed *= 70;
 	        	rightMotorSpeed *= 70;
-	        	if(Math.abs(getSpeed()) > 70){
+	        	if(Math.abs(getSpeed()) > 63){
 	        		shiftUp();
 	        		rightTalon.setP(0.1);
 	        		rightTalon.setF(0.1453);
@@ -424,7 +428,7 @@ public class OrangeDrive extends Threaded {
 	        } else {
 	        	leftMotorSpeed *= 200;
 	        	rightMotorSpeed *= 200;
-	        	if(Math.abs(getSpeed()) < 55){
+	        	if(Math.abs(getSpeed()) < 56){
 	        		shiftDown();
 	        		rightTalon.setP(0.3);
 	        		rightTalon.setF(0.3923);
@@ -434,6 +438,10 @@ public class OrangeDrive extends Threaded {
 	        }
 		}
 		
+		// get acceleration
+		// assumes that wheel speed pid works
+		// works by limiting how much higher/lower we can set the speed		
+		double now = Timer.getFPGATimestamp();
 		double dt = (now - lastTime);
 		
 		double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
@@ -453,6 +461,7 @@ public class OrangeDrive extends Threaded {
 	public void setShiftState(ShiftState state){
 		shiftState = state;
 	}
+	
 	public void cheesyDrive(double moveValue, double rotateValue, boolean isQuickTurn){
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
@@ -508,27 +517,6 @@ public class OrangeDrive extends Threaded {
 	public double getSpeed(){
 		return ((leftTalon.getSpeed() + rightTalon.getSpeed()) / 60) * Constants.WheelDiameter * Math.PI;
 	}
-	/*
-	public void drive(double moveValue, double turnValue)
-	{
-		if (Math.abs(moveValue) >= Constants.MinimumControllerInput) {
-			moveValue = (moveValue * (Math.abs(moveValue) - 0.3)) / ((0.7) * Math.abs(moveValue));
-		} else {
-			moveValue = 0;
-		}
-
-		if (Math.abs(turnValue) >= Constants.MinimumControllerInput) {
-			turnValue = turnValue * (Math.abs(turnValue) - Constants.MinimumControllerInput)
-					/ (Constants.MaximumControllerInput - Constants.MinimumControllerInput) * Math.abs(turnValue);
-		} else {
-			turnValue = 0;
-		}
-		
-		driveBase.setSafetyEnabled(false);
-		driveBase.arcadeDrive(moveValue, turnValue);
-		
-	}
-	*/	 
 	
 	public void shiftDown(){
 		driveShifters.set(true);

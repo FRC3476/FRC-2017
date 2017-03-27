@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Servo;
 
 public class Shooter extends Threaded {
 	public enum ShooterState {
-		HOMING, SHOOTING, IDLE
+		HOME, READY, SHOOT, IDLE
 	}
 	
 	public enum TurretState {
@@ -56,7 +56,7 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case AIMED:
-					//updateDesiredAngle();
+					updateDesiredAngle();
 					if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).getDegrees()) > 0.5) {
 						turretState = TurretState.AIMING;
 					}
@@ -67,17 +67,26 @@ public class Shooter extends Threaded {
 		}
 		
 		switch(currentState){
-			case SHOOTING:
+			case READY:
 				if(turretState == TurretState.IDLE){
-					discardFrames = 25;
+					discardFrames = 15;
+					updateDesiredAngle();
+					turretState = TurretState.AIMING;
+				}
+			break;
+			case SHOOT:
+				if(turretState == TurretState.IDLE){
+					discardFrames = 15;
 					updateDesiredAngle();
 					turretState = TurretState.AIMING;
 				} else {
-
 					flywheel.setSetpoint(speed);
 				}
+				if(turretState == TurretState.AIMED && flywheel.isDone()){
+					// run hopper
+				}
 				break;
-			case HOMING:
+			case HOME:
 				break;
 			case IDLE:
 				turretState = TurretState.IDLE;
@@ -96,10 +105,12 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void updateDesiredAngle(){
-		double angleOff = Dashcomm.get("boilerAngle", 0);
-		discardFrames++;
-		if(discardFrames > 25){
-			desiredAngle = desiredAngle.rotateBy(Rotation.fromDegrees(angleOff));
+		if(currentState != ShooterState.SHOOT && turretState != TurretState.AIMED){
+			double angleOff = Dashcomm.get("boilerAngle", 0);
+			discardFrames++;
+			if(discardFrames > 15){
+				desiredAngle = desiredAngle.rotateBy(Rotation.fromDegrees(angleOff));
+			}
 		}
 	}
 	
