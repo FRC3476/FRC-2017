@@ -12,6 +12,7 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Gear extends Threaded {
@@ -21,10 +22,12 @@ public class Gear extends Threaded {
 	
 	double calibrationStartTime;
 	
-	public static final double UP = -.04, DOWN = -.33, PEG = -.11, HOME = 0; //Default Values, Do not have tick positions
+	public static final double UP = -.033, DOWN = -.333, PEG = -.11, HOME = 0, PEG_EJECT = -.25; //Default Values, Do not have tick positions
 	
 	
 	private static final Gear gearMechInstance = new Gear();
+	
+	private DigitalInput pegSensor;
 	
 	CANTalon actuatorTalon, gearFeederTalon;
 	
@@ -44,14 +47,16 @@ public class Gear extends Threaded {
 		  
 		  actuatorTalon = new CANTalon(Constants.GearMechActuatorID);
 		  actuatorTalon.changeControlMode(TalonControlMode.Position);
-		  actuatorTalon.configPeakOutputVoltage(2.4, -2.4);
-		  actuatorTalon.configNominalOutputVoltage(.7, -.5);
+		  actuatorTalon.configPeakOutputVoltage(6, -6);
+		  actuatorTalon.configNominalOutputVoltage(1.0, 0);
 		 
 		  actuatorTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		  actuatorTalon.configEncoderCodesPerRev(1024);
 		  actuatorTalon.setPosition(0);
 		  
-		  actuatorTalon.setPID(0.1, 0, 0);
+		  actuatorTalon.setPID(0.5, .0002, 0);
+		  
+		  pegSensor = new DigitalInput(Constants.PegSensorId);
     }
 	
 	
@@ -61,6 +66,10 @@ public class Gear extends Threaded {
 	
 	public synchronized void setState(GearState state)
 	{
+		if (state == GearState.DOWN)
+		{
+			calibrationStartTime = System.currentTimeMillis();
+		}
 		currentState = state;
 		update();
 	}
@@ -87,7 +96,7 @@ public class Gear extends Threaded {
 		actuatorTalon.set(val);
 	}
 	
-	private synchronized void setActuatorPosition(double val){
+	public void setActuatorPosition(double val){
 		actuatorTalon.changeControlMode(TalonControlMode.Position);
 		actuatorTalon.setSetpoint(val);
 	}
@@ -102,13 +111,28 @@ public class Gear extends Threaded {
 	
 	public void configTalons()
 	{
-		  actuatorTalon.configPeakOutputVoltage(2.4, -2.4);
-		  actuatorTalon.configNominalOutputVoltage(.7, -.5);
+		  actuatorTalon.configPeakOutputVoltage(6, -6);
+		  actuatorTalon.configNominalOutputVoltage(1.0, 0);
+	}
+	
+	public synchronized void manualPegInsert()
+	{
+		setActuator(-.15);
+		gearFeederTalon.set(-.3);
+		//orangeDrive.setWheelVelocity(new DriveVelocity(-10, -10));
+		long currentTime = System.currentTimeMillis();
+		while(System.currentTimeMillis() - currentTime < 2000)
+		{
+		 			
+		}
+		//orangeDrive.setWheelVelocity(new DriveVelocity(0, 0));
+		gearFeederTalon.set(0);
+		setActuator(0);
+		//setActuatorPosition(UP);
 	}
 
 	@Override
 	public synchronized void update() {
-		System.out.println(currentState);
 		switch(currentState){
 			case MANUAL:
 				break;
@@ -121,8 +145,8 @@ public class Gear extends Threaded {
 				currentState = GearState.DONE;
 				break;
 			case HOME:
-				setActuator(0.2);
-				if (getCurrent() > 2){
+				setActuator(0.3);
+				if (getCurrent() > 3){
 					actuatorTalon.setPosition(HOME);
 					System.out.println("HOMED");
 					currentState = GearState.DONE;
@@ -136,7 +160,8 @@ public class Gear extends Threaded {
 				break;
 			case DOWN:
 				setActuator(-0.2);
-				if (getCurrent() > 1){
+				//setActuatorPosition(DOWN);
+				if (getCurrent() > 1.5){
 					actuatorTalon.setPosition(DOWN);
 					System.out.println("DOWN");
 					currentState = GearState.DONE;
@@ -151,6 +176,11 @@ public class Gear extends Threaded {
 			case DONE:
 				break;
 		}
+		
+		//public boolean isPushed()
+		//{
+		//	return !pegSensor.get();
+		//}
 		
 	}
 	

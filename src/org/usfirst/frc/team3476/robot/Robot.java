@@ -35,6 +35,7 @@ import com.ctre.CANTalon.VelocityMeasurementPeriod;
 
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -65,7 +66,7 @@ public class Robot extends IterativeRobot {
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
-	double gearSpeed = 0.1;
+	double gearSpeed = 0.15;
 	Gear gearMech;
 	CANTalon climber;
 	CANTalon climberSlave;
@@ -79,6 +80,7 @@ public class Robot extends IterativeRobot {
 	Future<?> logger;
 	
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
+	private double voltage = 0;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -100,6 +102,12 @@ public class Robot extends IterativeRobot {
 		orangeDrive = OrangeDrive.getInstance();
 		shooter = Shooter.getInstance();
 		gearMech = Gear.getInstance();
+		
+		//CameraServer.getInstance().startAutomaticCapture();
+		
+		UsbCamera cam = new UsbCamera("cam", 0);
+		MjpegServer server = new MjpegServer("server", 1180);
+		server.setSource(cam);
 		
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
@@ -281,6 +289,9 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
+	
+	boolean oldAxis = false;
+	
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
@@ -306,40 +317,80 @@ public class Robot extends IterativeRobot {
 	
 		shooter.setSpeed(speed);*/
 		
-		if (xbox.getRawButton(1)){
-			orangeDrive.setGearPath();
-		}
 		
-		if (xbox.getRawAxis(3) > .8){
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
+			orangeDrive.setManualGearPath();
+		} else if (orangeDrive.isDone()){
+			if(slowDrive){
+				orangeDrive.arcadeDrive(.75 * -moveVal, .75 * rotateVal);
+			} else {
+				orangeDrive.arcadeDrive(-moveVal, rotateVal);
+			}
+		} 
+		/*
+		if (xbox.getPOV() == 0){
 			gearMech.setActuator(gearSpeed);
-		}
-		
-		if (xbox.getRawAxis(2) > .8){
+		} else if (xbox.getPOV() == 180){
 			gearMech.setActuator(-gearSpeed);
 		}
-		else if (xbox.getRawButton(5)){
+		
+		if (xbox.getRisingEdge(3))
+		{
+			gearMech.setActuator(0);
+		}*/
+		
+		if (xbox.getRawAxis(2) > .8 || joystick.getRawButton(3)){
+			gearMech.setSucking(.5);
+		}
+		else if (xbox.getRawButton(5) || joystick.getRawButton(4)) {
 			gearMech.setSucking(-.5);
 		}
 		else{
 			gearMech.setSucking(0);
 		}
 		
-		if (xbox.getRisingEdge(8)){
-			gearSpeed += 0.01;
+		
+		
+		
+		
+		if ((!oldAxis && xbox.getRawAxis(3) > .8) || joystick.getRisingEdge(8))
+		{
+			gearMech.setState(GearState.DOWN);
+			System.out.println("Down");
+		}
+		else if (xbox.getRisingEdge(6) || joystick.getRisingEdge(10))
+		{
+			gearMech.setState(GearState.PEG);
 		}
 		
-		if (xbox.getRisingEdge(6)){
-			gearSpeed -= 0.01;
-		}
+		//System.out.println("Current: " + gearMech.getCurrent());
+		//System.out.println("Voltage: " + gearMech.getVoltage());
 		
-		
-		if (xbox.getRawButton(2)){
+		if (joystick.getRawButton(9)){
 			climber.set(.85);
-		} else {
+			System.out.println("Climbing");
+		} else if (joystick.getRawButton(7)) {
+			climber.set(.425);
+			System.out.println("Climbing");
+		}
+		else {
 			climber.set(0);
 		}
 		
-		if (xbox.getRisingEdge(-1))
+		if (xbox.getRisingEdge(9))
 		{
 			if (slowDrive)
 				slowDrive = false;
@@ -347,20 +398,42 @@ public class Robot extends IterativeRobot {
 				slowDrive = true;
 		}
 		
-		if (slowDrive)
-			orangeDrive.arcadeDrive(.5 * -moveVal, .5 * rotateVal);
-		else
-			orangeDrive.arcadeDrive(-moveVal, rotateVal);
+		Dashcomm.put("SlowDrive", slowDrive);
 		
 		if (xbox.getRisingEdge(-1))
 		{
-			if (lowExposure)
+			if (lowExposure) {
 				lowExposure = false;
-			else
+			} else {
 				lowExposure = true;
-					
+			}
+			Dashcomm.put("LowExposure", lowExposure);		
 		}
-		Dashcomm.put("lowExposure", lowExposure);
+		
+		
+		//System.out.println("Current: " + gearMech.getCurrent());
+		//System.out.println("Voltage: " + gearMech.getVoltage());
+		
+		
+		oldAxis = xbox.getRawAxis(3) > .8;
+		
+		/*
+		if (xbox.getRisingEdge(5))
+		{
+			voltage  -= .05;
+		}
+		else if (xbox.getRisingEdge(6))
+		{
+			voltage += .05;
+		}
+		
+		System.out.println(voltage);
+		gearMech.setActuator(voltage);
+		*/
+		
+		
+		
+		
 		
 		/*
 		if(xbox.getRawAxis(2) > 0.8){
