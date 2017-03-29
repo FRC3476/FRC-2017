@@ -127,7 +127,7 @@ public class Shooter extends Threaded {
 					updateDesiredAngle();
 				} else {
 					flywheel.setSetpoint(speed);
-					if(turretState == TurretState.AIMED){
+					if(turretState == TurretState.AIMED && flywheel.isDone()){
 						hopper.set(-1);
 						spinningHopper.set(-0.55);
 						redwheel.set(-0.8);

@@ -1,0 +1,9 @@
+var gearTrack = new PutGearOn();
+var calibrate = new SetGear(GearState.DOWN);
+var gearSet = new SetGear(GearState.PEG);
+var drive1 = new Drive(0,70,50, true);
+var rotate1 = new Rotate(-130);
+var print1 = new PrintWait("about to track gear", 600);
+
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, calibrate, drive1, gearSet, rotate1, print1, gearTrack);
+mainRunner.start();

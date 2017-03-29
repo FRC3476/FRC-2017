@@ -1,0 +1,16 @@
+//Controller Constants
+MinimumControllerInput = .15
+MaximumControllerInput = 1
+MinimumControllerOutput = 0
+MaximumControllerOutput = 1
+
+
+//Vision Constants
+GearAngleTolerance = 
+
+//Drive Base Constants
+WheelDiameter = 
+
+
+//Turret Constants
+TurretTicksPerRotations = 
