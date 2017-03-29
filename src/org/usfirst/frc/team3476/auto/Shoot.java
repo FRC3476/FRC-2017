@@ -1,26 +1,22 @@
 package org.usfirst.frc.team3476.auto;
 
+import org.usfirst.frc.team3476.subsystem.Shooter;
+import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
+
 public class Shoot implements Action {
-	int speedleft;
-	int speedright;
-
-	public Shoot(int leftspeed, int rightspeed) {
-		speedleft = leftspeed;
-		speedright = rightspeed;
-	}
-
-	public Shoot(int speed) {
-		speedleft = speedright = speed;
+	private Shooter shooter = Shooter.getInstance();
+	
+	public Shoot() {
 	}
 
 	@Override
 	public void start() {
-
+		shooter.setState(ShooterState.SHOOT);
 	}
 
 	@Override
 	public boolean isDone() {
-		return false;
+		return true;
 	}
 
 }

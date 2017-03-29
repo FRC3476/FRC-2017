@@ -10,19 +10,21 @@ import org.usfirst.frc.team3476.utility.Path.Waypoint;
 public class Drive implements Action {
 	Path setPath;
 	OrangeDrive drive = OrangeDrive.getInstance();
+	boolean reversed;
 
 	/*public Drive(Path path) {
 		setPath = path;
 	}*/
-	public Drive(double x, double y, double speed)
+	public Drive(double x, double y, double speed, boolean reversed)
 	{
 		setPath = new Path(new Waypoint(x,y,speed));
+		this.reversed = reversed;
 	}
 
 	@Override
 	public void start() {
 		RobotTracker.getInstance().resetPose();
-		drive.setAutoPath(setPath, true);
+		drive.setAutoPath(setPath, reversed);
 	}
 
 	@Override

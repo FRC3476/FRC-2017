@@ -176,14 +176,11 @@ public class Gear extends Threaded {
 			case DONE:
 				break;
 		}
-		
-		//public boolean isPushed()
-		//{
-		//	return !pegSensor.get();
-		//}
-		
 	}
 	
+	public boolean isPushed(){
+		return !pegSensor.get();
+	}
 	
 }
 

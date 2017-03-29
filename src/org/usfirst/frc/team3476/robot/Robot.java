@@ -15,6 +15,7 @@ import org.usfirst.frc.team3476.subsystem.Gear.GearState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.subsystem.OrangeDrive.DriveState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
@@ -60,9 +61,7 @@ public class Robot extends IterativeRobot {
 	Controller xbox = new Controller(0);
 	Controller joystick = new Controller(1);
 
-	double speed = 3000;
-	CANTalon hopper = new CANTalon(6);
-	CANTalon spinningHopper = new CANTalon(7);
+	double speed = 4000;
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
@@ -74,6 +73,14 @@ public class Robot extends IterativeRobot {
 	boolean lowExposure = true;
 	boolean slowDrive = false;
 	
+	
+
+  	ScriptEngineManager manager;
+  	ScriptEngine engine;
+  	
+  	String code;
+  	String helperCode;
+  	
 	DigitalOutput turnOnJetson = new DigitalOutput(0);
 	DigitalOutput led =  new DigitalOutput(4);
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
@@ -104,11 +111,11 @@ public class Robot extends IterativeRobot {
 		gearMech = Gear.getInstance();
 		
 		//CameraServer.getInstance().startAutomaticCapture();
-		
+		/*
 		UsbCamera cam = new UsbCamera("cam", 0);
 		MjpegServer server = new MjpegServer("server", 1180);
 		server.setSource(cam);
-		
+		*/
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 		climberSlave = new CANTalon(Constants.Climber2Id);
@@ -128,20 +135,13 @@ public class Robot extends IterativeRobot {
 		shooter.addTask(mainExecutor);
 		gearMech.addTask(mainExecutor);
 
-		/*
+		
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 		
 		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
-		engine.put("DriverStation", DriverStation.getInstance());		
-		
-		driverCamera = new UsbCamera("driverCam", 0);
-				
-		//Main streamer is used to switch between camera streams
-		mainStreamer = new MjpegServer("gearStream", 1180);
-		mainStreamer.setSource(gearCamera);
-		*/
+		engine.put("DriverStation", DriverStation.getInstance());				
 	}
 
 	/**
@@ -162,9 +162,9 @@ public class Robot extends IterativeRobot {
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gearMech.setRunningState(true);
-		orangeDrive.setOffset(Rotation.fromDegrees(180));
+		//orangeDrive.setOffset(Rotation.fromDegrees(180));
 		robotState.resetPose();
-		/*
+		
 		try {
 			engine.eval(code);
 			
@@ -174,7 +174,7 @@ public class Robot extends IterativeRobot {
 		
 		// inversed
 		
-		
+		/*
 		
 		Path drivingPath = new Path(new Waypoint(0, 30, 30));
 		//drivingPath.addWaypoint(new Waypoint(0, 30, 0));
@@ -233,10 +233,11 @@ public class Robot extends IterativeRobot {
 			}
 		}
 		
-		*/
+		
 		Path drive = new Path(new Waypoint(0, 0, 10));
 		drive.addWaypoint(new Waypoint(10, 100, 10));
 		orangeDrive.setAutoPath(drive, true);
+		*/
 	}
 
 	/**
@@ -249,7 +250,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledPeriodic(){
-		/*
+		
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
 		if(engine == null){
@@ -263,7 +264,7 @@ public class Robot extends IterativeRobot {
 		{
 			e.printStackTrace();
 		}
-		*/		
+				
 	}
 	
 	@Override
@@ -284,6 +285,7 @@ public class Robot extends IterativeRobot {
 		}, 0, 50, TimeUnit.MILLISECONDS);
 		*/
 		gearMech.homeActuator();
+		shooter.setHome();
 	}
 
 	/**
@@ -299,48 +301,29 @@ public class Robot extends IterativeRobot {
 		joystick.update();
 		double moveVal = -xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		gearMech.configTalons();
-		
-		/*if(xbox.getRawButton(1)){
-			hopper.set(-1);
-			spinningHopper.set(-0.5);
-		} else {
-			spinningHopper.set(0);
-			hopper.set(0);
-		}
+		//gearMech.configTalons();
 		
 		if(xbox.getRawButton(2)){
-			shooter.setState(ShooterState.SHOOTING);
+			shooter.setState(ShooterState.SHOOT);
+		} else if(xbox.getRawButton(3)){
+			shooter.setHome();
 		} else {
 			shooter.setState(ShooterState.IDLE);
 		}
+		
 	
-		shooter.setSpeed(speed);*/
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		shooter.setSpeed(speed);
+		orangeDrive.arcadeDrive(moveVal, rotateVal);
+		/*
 		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
 			orangeDrive.setManualGearPath();
-		} else if (orangeDrive.isDone()){
+		} else if (orangeDrive.getState() != DriveState.GEAR || orangeDrive.isDone()){
 			if(slowDrive){
-				orangeDrive.arcadeDrive(.75 * -moveVal, .75 * rotateVal);
+				orangeDrive.arcadeDrive(.75 * moveVal, .75 * rotateVal);
 			} else {
-				orangeDrive.arcadeDrive(-moveVal, rotateVal);
 			}
 		} 
-		/*
+		
 		if (xbox.getPOV() == 0){
 			gearMech.setActuator(gearSpeed);
 		} else if (xbox.getPOV() == 180){
@@ -351,7 +334,7 @@ public class Robot extends IterativeRobot {
 		{
 			gearMech.setActuator(0);
 		}*/
-		
+		/*
 		if (xbox.getRawAxis(2) > .8 || joystick.getRawButton(3)){
 			gearMech.setSucking(.5);
 		}
@@ -448,7 +431,7 @@ public class Robot extends IterativeRobot {
 		*/
 		
 		
-		/*
+		
 		//know what hood angle and flywheel rpm we need to be at for diff distances
 		if(xbox.getRisingEdge(5)){
 			speed += 50;
@@ -459,7 +442,7 @@ public class Robot extends IterativeRobot {
 			//angle -= 1;
 			//turret.setManual(-0.1);
 		}
-		
+		/*
 		itrats++;
 		if(itrats % 5 == 0){
 

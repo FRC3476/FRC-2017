@@ -32,9 +32,13 @@ public class Turret {
 
 	public void setAngle(Rotation setAngle) {
 		turretTalon.changeControlMode(TalonControlMode.Position);
-		turretTalon.setSetpoint((setAngle.getRadians() / (2 * Math.PI)) * Constants.TurretTicksPerRotations);
+		turretTalon.setSetpoint(angleToTicks(setAngle));
 	}
 
+	public double angleToTicks(Rotation setAngle){
+		return (setAngle.getRadians() / (2 * Math.PI)) * Constants.TurretTicksPerRotations;
+	}
+	
 	public Rotation getAngle() {
 		return Rotation.fromRadians((turretTalon.getPosition() / Constants.TurretTicksPerRotations) * 2 * Math.PI );
 	}
@@ -58,5 +62,9 @@ public class Turret {
 	public void setManual(double power)	{
 		turretTalon.changeControlMode(TalonControlMode.PercentVbus);
 		turretTalon.setSetpoint(power);
+	}
+	
+	public void resetPosition(){
+		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(30)));
 	}
 }
