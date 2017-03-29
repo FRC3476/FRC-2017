@@ -32,7 +32,9 @@ public class Turret {
 
 	public void setAngle(Rotation setAngle) {
 		turretTalon.changeControlMode(TalonControlMode.Position);
-		turretTalon.setSetpoint(angleToTicks(setAngle));
+		if(setAngle.getDegrees() < 90 && setAngle.getDegrees() > -90){
+			turretTalon.setSetpoint(angleToTicks(setAngle));
+		}
 	}
 
 	public double angleToTicks(Rotation setAngle){

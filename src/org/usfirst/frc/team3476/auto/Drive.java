@@ -9,7 +9,6 @@ import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 public class Drive implements Action {
 	Path setPath;
-	OrangeDrive drive = OrangeDrive.getInstance();
 	boolean reversed;
 
 	/*public Drive(Path path) {
@@ -24,12 +23,12 @@ public class Drive implements Action {
 	@Override
 	public void start() {
 		RobotTracker.getInstance().resetPose();
-		drive.setAutoPath(setPath, reversed);
+		OrangeDrive.getInstance().setAutoPath(setPath, reversed);
 	}
 
 	@Override
 	public boolean isDone() {
-		return drive.isDone();
+		return OrangeDrive.getInstance().isDone();
 	}
 
 }

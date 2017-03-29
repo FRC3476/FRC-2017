@@ -164,6 +164,7 @@ public class Robot extends IterativeRobot {
 		shooter.setRunningState(true);
 		orangeDrive.setOffset(Rotation.fromDegrees(180));
 		robotState.resetPose();
+		shooter.setHome();
 		
 		try {
 			engine.eval(code);

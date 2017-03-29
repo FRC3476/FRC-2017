@@ -240,12 +240,9 @@ public class OrangeDrive extends Threaded {
 			double cameraAngle = Dashcomm.get("gearAngle", 0);			
 			desiredDistance = Dashcomm.get("gearDistance", 0);
 			Translation targetPosition = Translation.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
-			// three inches forward
 			Translation offset = new Translation(0.5, -9.5);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());	
-			//System.out.println(cameraAngle);
-			return true;
-		
+			return true;		
 		} else {
 			desiredAngle = getGyroAngle();
 			desiredDistance = 0;

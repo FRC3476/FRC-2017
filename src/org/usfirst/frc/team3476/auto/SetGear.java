@@ -4,7 +4,7 @@ import org.usfirst.frc.team3476.subsystem.Gear;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
 
 public class SetGear implements Action{
-	Gear gear = Gear.getInstance();
+	
 	GearState wantedState;
 	
 	public SetGear(GearState state){
@@ -13,12 +13,12 @@ public class SetGear implements Action{
 	
 	@Override
 	public void start() {
-		gear.setState(wantedState);
+		Gear.getInstance().setState(wantedState);
 	}
 
 	@Override
 	public boolean isDone() {
-		return gear.isDone();
+		return Gear.getInstance().isDone();
 	}
 
 }
