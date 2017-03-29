@@ -6,6 +6,7 @@ import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
@@ -58,11 +59,15 @@ public class Shooter extends Threaded {
 		flywheel = new Flywheel(Constants.LeftMasterFlywheelId, Constants.LeftSlaveFlywheelId);
 		homeSensor = new DigitalInput(1);
 	}
-	
+	int cnt = 0;
 	@Override
 	public synchronized void update() {
-		System.out.println("turretState " + turretState);
-		System.out.println("shootingState " + currentState);
+		cnt++;
+		if (cnt % 5 == 0)
+		{
+			System.out.println("TurretState: " + turretState);
+			System.out.println("ShootingState: " + currentState);
+		}
 		switch(turretState){
 			case AIMING:
 				turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(1)));
@@ -72,7 +77,7 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case AIMED:
-				//updateDesiredAngle();
+				updateDesiredAngle();
 				if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(1)).getDegrees()) > 0.5) {
 					turretState = TurretState.AIMING;
 				}

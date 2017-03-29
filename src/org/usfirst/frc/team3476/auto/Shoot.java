@@ -5,13 +5,16 @@ import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 
 public class Shoot implements Action {
 	private Shooter shooter = Shooter.getInstance();
+	private double speed;
 	
-	public Shoot() {
+	public Shoot(double speed) {
+		this.speed = speed;
 	}
 
 	@Override
 	public void start() {
 		shooter.setState(ShooterState.SHOOT);
+		shooter.setSpeed(speed);
 	}
 
 	@Override

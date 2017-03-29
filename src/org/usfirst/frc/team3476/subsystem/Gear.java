@@ -54,9 +54,10 @@ public class Gear extends Threaded {
 		  actuatorTalon.configEncoderCodesPerRev(1024);
 		  actuatorTalon.setPosition(0);
 		  
-		  actuatorTalon.setPID(0.5, .0002, 0);
+		  actuatorTalon.setPID(1, 0, 0);
 		  
 		  pegSensor = new DigitalInput(Constants.PegSensorId);
+		  currentState = GearState.DONE;
     }
 	
 	
@@ -66,12 +67,11 @@ public class Gear extends Threaded {
 	
 	public synchronized void setState(GearState state)
 	{
-		if (state == GearState.DOWN)
+		if (state == GearState.DOWN || state == GearState.HOME)
 		{
 			calibrationStartTime = System.currentTimeMillis();
 		}
 		currentState = state;
-		update();
 	}
 	
 	public double getPosition(){
@@ -133,6 +133,7 @@ public class Gear extends Threaded {
 
 	@Override
 	public synchronized void update() {
+		System.out.println(currentState);
 		switch(currentState){
 			case MANUAL:
 				break;
@@ -151,7 +152,7 @@ public class Gear extends Threaded {
 					System.out.println("HOMED");
 					currentState = GearState.DONE;
 					setActuator(0);
-				} else if (System.currentTimeMillis() - calibrationStartTime > 2000){
+				} else if (System.currentTimeMillis() - calibrationStartTime > 1000){
 					actuatorTalon.setPosition(HOME);
 					System.out.println("FAILED TO HOME. USING CURRENT POSITION AS HOME");
 					currentState = GearState.DONE;
@@ -161,7 +162,7 @@ public class Gear extends Threaded {
 			case DOWN:
 				setActuator(-0.2);
 				//setActuatorPosition(DOWN);
-				if (getCurrent() > 1.5){
+				if (getCurrent() > 1){
 					actuatorTalon.setPosition(DOWN);
 					System.out.println("DOWN");
 					currentState = GearState.DONE;
@@ -181,6 +182,8 @@ public class Gear extends Threaded {
 	public boolean isPushed(){
 		return !pegSensor.get();
 	}
-	
+	public synchronized boolean isDone(){
+		return currentState == GearState.DONE;
+	}
 }
 

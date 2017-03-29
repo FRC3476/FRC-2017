@@ -18,9 +18,9 @@ public final class Constants {
 	public static double MaxAcceleration = 300;
 	public static double LookAheadDistance = 40;
 	public static double WheelScrub = 0.9;
-	public static double GearSpeed = 12;
+	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
-	public static double CameraAngleOffset = 1;
+	public static double CameraAngleOffset = -0.5;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
 	public static double WheelDiameter = 4;
@@ -59,7 +59,7 @@ public final class Constants {
 	// 
 	public static int RightTurretId = 12; // change
 	
-	public static double TurningP = 0.02;
+	public static double TurningP = 0.01;
 	public static double TurningD = 0.18;
 	static NetworkTable table = NetworkTable.getTable("SmartDashboard");
 	
