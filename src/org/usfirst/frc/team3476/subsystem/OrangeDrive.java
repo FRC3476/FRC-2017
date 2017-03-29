@@ -544,7 +544,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	public double getSpeed(){
-		return ((leftTalon.getSpeed() + rightTalon.getSpeed()) / 60) * Constants.WheelDiameter * Math.PI;
+		return ((leftTalon.getSpeed() + rightTalon.getSpeed()) / 120) * Constants.WheelDiameter * Math.PI;
 	}
 	
 	public void shiftDown(){
@@ -571,7 +571,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	public void zeroSensors(){
-		gyroSensor.reset();
+		//gyroSensor.reset();
 		leftTalon.setPosition(0);
 		rightTalon.setPosition(0);
 	}

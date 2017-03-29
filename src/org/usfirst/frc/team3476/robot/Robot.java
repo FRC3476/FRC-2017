@@ -532,6 +532,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void disabledInit() {
 		orangeDrive.resetState();
+		shooter.resetState();
 		
 		robotState.setRunningState(false);
 		orangeDrive.setRunningState(false);		
