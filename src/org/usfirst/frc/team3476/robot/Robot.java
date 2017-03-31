@@ -299,8 +299,8 @@ public class Robot extends IterativeRobot {
 		
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
-		} else if(Math.abs(joystick.getRawAxis(0)) > 0.5 && -joystick.getRawAxis(1) > 0.5) {
-			Translation stickLocation = new Translation(joystick.getRawAxis(0), -joystick.getRawAxis(1));
+		} else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || Math.abs(joystick.getRawAxis(1)) > 0.5) {
+			Translation stickLocation = new Translation(joystick.getRawAxis(0), Math.abs(joystick.getRawAxis(1)));
 			Rotation angle = new Translation(0, 0).getAngleTo(stickLocation);
 			shooter.setTurretAngle(angle);
 		} else{
