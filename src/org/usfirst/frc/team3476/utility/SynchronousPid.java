@@ -42,7 +42,7 @@ public class SynchronousPid {
 		m_F = F;
 	}
 
-	public double update(double input) {
+	public synchronized double update(double input) {
 		m_error = m_setpoint - input;
 		if (m_continuous) {
 			if (Math.abs(m_error) > (m_maximumInput - m_minimumInput) / 2) {
@@ -78,7 +78,7 @@ public class SynchronousPid {
 		return m_result;
 	}
 
-	public void setSetpoint(double setpoint) {
+	public synchronized void setSetpoint(double setpoint) {
 		if (m_maximumInput > m_minimumInput) {
 			if (setpoint > m_maximumInput) {
 				m_setpoint = m_maximumInput;
@@ -92,48 +92,48 @@ public class SynchronousPid {
 		}
 	}
 
-	public void setInputRange(double maximumInput, double minimumInput) {
+	public synchronized void setInputRange(double maximumInput, double minimumInput) {
 		m_maximumInput = maximumInput;
 		m_minimumInput = minimumInput;
 	}
 
-	public void setOutputRange(double maximumOutput, double minimumOutput) {
+	public synchronized void setOutputRange(double maximumOutput, double minimumOutput) {
 		m_maximumOutput = maximumOutput;
 		m_minimumOutput = minimumOutput;
 	}
 
-	public double getLastResult() {
+	public synchronized double getLastResult() {
 		return m_result;
 	}
 
-	public double getError() {
+	public synchronized double getError() {
 		return m_error;
 	}
 
-	public boolean isDone() {
+	public synchronized boolean isDone() {
 		return m_error < m_tolerance;
 	}
 
-	public void setPIDF(double P, double I, double D, double F) {
+	public synchronized void setPIDF(double P, double I, double D, double F) {
 		m_P = P;
 		m_I = I;
 		m_D = D;
 		m_F = F;
 	}
 
-	public void setP(double P) {
+	public synchronized void setP(double P) {
 		m_P = P;
 	}
 
-	public void setI(double I) {
+	public synchronized void setI(double I) {
 		m_I = I;
 	}
 
-	public void setD(double D) {
+	public synchronized void setD(double D) {
 		m_D = D;
 	}
 
-	public void setF(double F) {
+	public synchronized void setF(double F) {
 		m_F = F;
 	}
 

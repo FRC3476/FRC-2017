@@ -38,7 +38,7 @@ public class OrangeDrive extends Threaded {
 		TIMED, DRIVING, ROTATING, DONE
 	}
 	
-	private enum GearDrivingState {
+	public enum GearDrivingState {
 		TURNING, DRIVING, REVERSING, DONE
 	}
 	
@@ -50,7 +50,6 @@ public class OrangeDrive extends Threaded {
 	private double lastTime;
 	private double lastValue;
 	private double gearReversingTime;
-	private double gearInitialDistance;
 	
 	private double driveStartTime;
 	private double driveTime;
@@ -218,7 +217,6 @@ public class OrangeDrive extends Threaded {
 			setBrake(true);
 			shiftUp();
 			updateDesiredAngle();
-			gearInitialDistance = getDistance();
 			updateGearPath();			
 		}
 	}
@@ -236,7 +234,7 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public synchronized boolean updateDesiredAngle(){
-		if(Dashcomm.get("isGearVisible", 0) != 0){
+		if(Dashcomm.get("isGearVisible", false)){
 			double cameraAngle = Dashcomm.get("gearAngle", 0);			
 			desiredDistance = Dashcomm.get("gearDistance", 0);
 			Translation targetPosition = Translation.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
@@ -452,13 +450,13 @@ public class OrangeDrive extends Threaded {
 			if(getGear()){
 	        	leftMotorSpeed *= 70;
 	        	rightMotorSpeed *= 70;
-	        	if(Math.abs(getSpeed()) > 63){
+	        	if(Math.abs(getSpeed()) > 56){
 	        		shiftUp();
 	        	}
 	        } else {
 	        	leftMotorSpeed *= 200;
 	        	rightMotorSpeed *= 200;
-	        	if(Math.abs(getSpeed()) < 56){
+	        	if(Math.abs(getSpeed()) < 45){
 	        		shiftDown();
 	        	}
 	        }
@@ -589,6 +587,11 @@ public class OrangeDrive extends Threaded {
 	public synchronized DriveState getState(){
 		return driveState;
 	}
+
+	public synchronized GearDrivingState getGearState(){
+		return gearState;
+	}
+	
 	
 	public static class DriveVelocity {
 		public double wheelSpeed;

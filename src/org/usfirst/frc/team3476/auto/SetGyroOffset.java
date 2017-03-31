@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3476.auto;
 
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.utility.Rotation;
 
 public class SetGyroOffset implements Action{
@@ -14,6 +15,7 @@ public class SetGyroOffset implements Action{
 	@Override
 	public void start() {
 		OrangeDrive.getInstance().setOffset(offset);
+		RobotTracker.getInstance().resetPose();
 	}
 
 	@Override

@@ -11,10 +11,12 @@ public class Interpolable {
 		sortedList = new TreeMap<Double, Double>();
 	}
 	
-	public Double interpolate(Double key){
+	public synchronized Double interpolate(Double key){
 		Entry<Double, Double> highest = sortedList.ceilingEntry(key);
 		Entry<Double, Double> lowest = sortedList.floorEntry(key);
-		if(lowest == null){
+		if(lowest == null && highest == null){
+			return 0.0;
+		} else if(lowest == null){
 			return highest.getValue();
 		} else if (highest == null){
 			return lowest.getValue();
@@ -24,7 +26,7 @@ public class Interpolable {
 		}
 	}
 	
-	public void addNumber(Double key, Double value){
+	public synchronized void addNumber(Double key, Double value){
 		sortedList.put(key, value);
 	}
 }

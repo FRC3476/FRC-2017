@@ -3,6 +3,7 @@ package org.usfirst.frc.team3476.subsystem;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Rotation;
+import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Shooter extends Threaded {
 	public enum ShooterState {
@@ -47,6 +49,7 @@ public class Shooter extends Threaded {
 	double flwhl;
 	private double discardFrames;
 	private Rotation desiredAngle;
+	private boolean homed;
 	
 	private OrangeDrive orangeDrive;
 	private Turret turret;
@@ -70,20 +73,25 @@ public class Shooter extends Threaded {
 	
 	private Shooter(){
 		RUNNINGSPEED = 10;
-		hood = new Servo(0);
+		hood = new Servo(Constants.ServoId);
 		hood.setBounds(1,0,0,0,2);
 		currentState = ShooterState.IDLE;
 		turretState = TurretState.IDLE;
+		hopperState = HopperState.STOPPED;
 		desiredAngle = new Rotation();
 		turret = new Turret(Constants.RightTurretId);
-		flywheel = new Flywheel(Constants.LeftMasterFlywheelId, Constants.LeftSlaveFlywheelId);
+		flywheel = new Flywheel(Constants.MasterFlywheelId, Constants.SlaveFlywheelId);
 		homeSensor = new DigitalInput(1);
 		orangeDrive = OrangeDrive.getInstance();
 		hopper = Hopper.getInstance();
+		speed = 3800;
+		homed = false;
 	}
 	
 	@Override
 	public synchronized void update() {
+		NetworkTable.getTable("/shooter").putNumber("rpms", flywheel.getSpeed());
+		NetworkTable.getTable("/shooter").putNumber("setpoint", speed);
 		switch(hopperState){
 			case RUNNING:
 				hopper.setRun(true);
@@ -122,16 +130,19 @@ public class Shooter extends Threaded {
 					turret.setManual(0);
 					turret.resetPosition();
 					turretState = TurretState.IDLE;
+					homed = true;
 					break;
 				}
-				if(System.currentTimeMillis() - startHome > 1000){
-					startHome = System.currentTimeMillis();
-					if(homingState == HomingState.LEFT){	
-						System.out.println("failed to home");
+
+				if(homingState == HomingState.LEFT){	
+					if(System.currentTimeMillis() - startHome > 2000){
 						turretState = TurretState.IDLE;
-					} else {
-						homingState = HomingState.LEFT;
 					}
+				} else {
+					if(System.currentTimeMillis() - startHome > 1000){
+						startHome = System.currentTimeMillis();
+						homingState = HomingState.LEFT;
+						}
 				}
 				break;
 			case IDLE:
@@ -156,11 +167,10 @@ public class Shooter extends Threaded {
 					updateDesiredAngle();
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
-					flwhl = System.currentTimeMillis();
 				} else {
 					flywheel.setSetpoint(speed);
 					if(turretAutoState == TurretAutoState.AIMED){
-						if (System.currentTimeMillis() - flwhl > 2000) {
+						if (flywheel.isDone()) {
 							hopperState = HopperState.RUNNING;
 						}
 					}
@@ -171,7 +181,7 @@ public class Shooter extends Threaded {
 					turretState = TurretState.IDLE;
 					//turret.setAngle(Rotation.fromDegrees(45).rotateBy(orangeDrive.getGyroAngle().inverse()));
 				}
-				flywheel.setPercent(0);
+				flywheel.setVoltage(0.75);
 				hood.set(1);
 				hopperState = HopperState.STOPPED;
 				break;
@@ -197,7 +207,7 @@ public class Shooter extends Threaded {
 		if(currentState == ShooterState.SHOOT && turretAutoState == TurretAutoState.AIMED){
 			//System.out.println("");
 		} else {
-			double angleOff = Dashcomm.get("boilerAngle", 0);
+			double angleOff = Dashcomm.get("boilerXAngle", 0);
 			discardFrames++;
 			if(discardFrames > 15){
 				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(angleOff));
@@ -228,5 +238,9 @@ public class Shooter extends Threaded {
 				return turretState == TurretState.HOME;
 		}
 		return true;
+	}
+	
+	public boolean isHomed(){
+		return homed;
 	}
 }

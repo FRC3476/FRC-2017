@@ -24,8 +24,8 @@ public class Hopper {
 	public void setRun(boolean isRunning){
 		if(isRunning){
 			turretFeeder.set(-1);
-			blenderMotor.set(-0.55);
-			motivatorWheel.set(-0.8);
+			blenderMotor.set(-0.45);
+			motivatorWheel.set(-0.6);
 		} else {
 			turretFeeder.set(0);
 			blenderMotor.set(0);

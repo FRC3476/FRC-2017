@@ -15,6 +15,7 @@ import org.usfirst.frc.team3476.subsystem.Gear.GearState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
+import org.usfirst.frc.team3476.subsystem.OrangeDrive.GearDrivingState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
@@ -60,7 +61,7 @@ public class Robot extends IterativeRobot {
 	Controller xbox = new Controller(0);
 	Controller joystick = new Controller(1);
 
-	double speed = 3000;
+	double speed = 3800;
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
@@ -70,7 +71,7 @@ public class Robot extends IterativeRobot {
 	CANTalon climberSlave;
 	boolean homed = false;
 	boolean lowExposure = true;
-	boolean slowDrive = false;
+
 	
 	DigitalOutput turnOnJetson = new DigitalOutput(0);
 	DigitalOutput led =  new DigitalOutput(4);
@@ -99,6 +100,7 @@ public class Robot extends IterativeRobot {
 			// do nothing
 		}
 		turnOnJetson.set(true);
+		NetworkTable.globalDeleteAll();	
 		
 		led.set(true);
 		//Subsystems
@@ -108,29 +110,27 @@ public class Robot extends IterativeRobot {
 		gearMech = Gear.getInstance();
 		
 		//CameraServer.getInstance().startAutomaticCapture();
-		
+		/*
 		UsbCamera cam = new UsbCamera("cam", 0);
 		MjpegServer server = new MjpegServer("server", 1180);
-		server.setSource(cam);
+		server.setSource(cam);*/
 		
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-		/*
-		gear = Gear.getInstance();
-		intake = Intake.getInstance();
-		gearMech = GearMech.getInstance();
-//		leftTurret = new Turret(Constants.LeftTurretId);
-//		rightTurret = new Turret(Constants.RightTurretId);
-		/*
-
-		*/
+		
 		robotState.addTask(mainExecutor);
 		orangeDrive.addTask(mainExecutor);
 		shooter.addTask(mainExecutor);
 		gearMech.addTask(mainExecutor);
+		
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(320, 240);
+		
+		//CameraServer.getInstance().addAxisCamera("boilerCamera", "10.34.76.8:1183/?action=stream");
+		//CameraServer.getInstance().addAxisCamera("gearCamera", "10.34.76.8:1182/?action=stream");
 
 		
 		manager = new ScriptEngineManager();
@@ -140,7 +140,8 @@ public class Robot extends IterativeRobot {
 		
 		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
-		engine.put("DriverStation", DriverStation.getInstance());				
+		engine.put("DriverStation", DriverStation.getInstance());	
+		Dashcomm.put("isJetsonOn", false);
 	}
 
 	/**
@@ -161,10 +162,11 @@ public class Robot extends IterativeRobot {
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gearMech.setRunningState(true);
-		shooter.setRunningState(true);
-		orangeDrive.setOffset(Rotation.fromDegrees(180));
-		robotState.resetPose();
-		shooter.setHome();
+		shooter.setRunningState(true);	
+		if(!shooter.isHomed()){		
+			shooter.setHome();
+		}
+		//orangeDrive.setOffset(Rotation.fromDegrees(180));
 		
 		try {
 			engine.eval(code);
@@ -172,73 +174,7 @@ public class Robot extends IterativeRobot {
 		} catch (ScriptException e) {
 			System.out.println(e);
 		}
-		
-		// inversed
-		/*
-		
-		
-		Path drivingPath = new Path(new Waypoint(0, 30, 30));
-		//drivingPath.addWaypoint(new Waypoint(0, 30, 0));
-		orangeDrive.setAutoPath(drivingPath, true);
-		while(!orangeDrive.isDone()){
-			
-		}
-		
-		double start = System.currentTimeMillis();
-		while(System.currentTimeMillis() - start < 750){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		
 
-		//System.out.println("setting rotate");
-		
-		//orangeDrive.setRotation(Rotation.fromDegrees(30));
-		
-		orangeDrive.setGearPath();
-		while(!orangeDrive.isDone()){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		orangeDrive.setManualDrive(0, 0);		
-		
-		orangeDrive.setAutoPath(new Path(new Waypoint(0, 83, 20)), true);
-		while(!orangeDrive.isDone()){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		
-		orangeDrive.setRotation(Rotation.fromDegrees(130));
-		while(!orangeDrive.isDone()){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		
-		double start = System.currentTimeMillis();
-		while(System.currentTimeMillis() - start < 1000){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		
-		orangeDrive.setGearPath();
-
-	
-		while(!orangeDrive.isDone()){
-			if(DriverStation.getInstance().isOperatorControl()){
-				break;
-			}
-		}
-		
-		
-		Path drive = new Path(new Waypoint(0, 0, 10));
-		drive.addWaypoint(new Waypoint(10, 100, 10));
-		orangeDrive.setAutoPath(drive, true);
-		*/
 	}
 
 	/**
@@ -285,7 +221,9 @@ public class Robot extends IterativeRobot {
 			}
 		}, 0, 50, TimeUnit.MILLISECONDS);
 		*/
-		gearMech.homeActuator();
+		if(!shooter.isHomed()){
+			shooter.setHome();
+		}
 	}
 
 	/**
@@ -301,70 +239,38 @@ public class Robot extends IterativeRobot {
 		joystick.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-	//	gearMech.configTalons();
 		
-		/*if(xbox.getRawButton(1)){
-			hopper.set(-1);
-			spinningHopper.set(-0.5);
-		} else {
-			spinningHopper.set(0);
-			hopper.set(0);
-		}
-		
-		if(xbox.getRawButton(2)){
-			shooter.setState(ShooterState.SHOOTING);
-		} else {
-			shooter.setState(ShooterState.IDLE);
-		}
-	
-		shooter.setSpeed(speed);*/		
-		
-		System.out.println(gearMech.isPushed());		
-		
-		if (xbox.getRisingEdge(1) || joystick.getRisingEdge(12)){
-			orangeDrive.setGearPath();
-		} else if (orangeDrive.isDone()){
-			if(slowDrive){
-				orangeDrive.arcadeDrive(.75 * moveVal, .75 * rotateVal);
-			} else {
-				orangeDrive.arcadeDrive(moveVal, rotateVal);
+		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
+			orangeDrive.setManualGearPath();
+		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
+			if(orangeDrive.getGearState() != GearDrivingState.DONE){
+				gearMech.setState(GearState.PEG);
 			}
-		} 
-		/*
-		if (xbox.getPOV() == 0){
-			gearMech.setActuator(gearSpeed);
-		} else if (xbox.getPOV() == 180){
-			gearMech.setActuator(-gearSpeed);
+		} else {
+			orangeDrive.arcadeDrive(moveVal, rotateVal);
 		}
-		
-		if (xbox.getRisingEdge(3))
-		{
-			gearMech.setActuator(0);
-		}*/
 		
 		if (xbox.getRawAxis(2) > .8 || joystick.getRawButton(3)){
 			gearMech.setSucking(.5);
 		}
-		else if (xbox.getRawButton(5) || joystick.getRawButton(4)) {
+		else if (xbox.getRawButton(5) || joystick.getRawButton(2)) {
+			gearMech.setSucking(-.25);
+		} else if (joystick.getRawButton(4)){
 			gearMech.setSucking(-.5);
 		}
 		else{
 			gearMech.setSucking(0);
 		}
 		
-		
-		
-		
-		
-		
 		if ((!oldAxis && xbox.getRawAxis(3) > .8) || joystick.getRisingEdge(8))
 		{
 			gearMech.setState(GearState.DOWN);
-			System.out.println("Down");
 		}
 		else if (xbox.getRisingEdge(6) || joystick.getRisingEdge(10))
 		{
 			gearMech.setState(GearState.PEG);
+		} else if(joystick.getRisingEdge(5)){
+			gearMech.homeActuator();
 		}
 		
 		//System.out.println("Current: " + gearMech.getCurrent());
@@ -381,16 +287,6 @@ public class Robot extends IterativeRobot {
 			climber.set(0);
 		}
 		
-		if (xbox.getRisingEdge(9))
-		{
-			if (slowDrive)
-				slowDrive = false;
-			else
-				slowDrive = true;
-		}
-		
-		Dashcomm.put("SlowDrive", slowDrive);
-		
 		if (xbox.getRisingEdge(-1))
 		{
 			if (lowExposure) {
@@ -401,31 +297,19 @@ public class Robot extends IterativeRobot {
 			Dashcomm.put("LowExposure", lowExposure);		
 		}
 		
-		
-		//System.out.println("Current: " + gearMech.getCurrent());
-		//System.out.println("Voltage: " + gearMech.getVoltage());
+		if(joystick.getRawButton(1)){
+			shooter.setState(ShooterState.SHOOT);
+		} else if(Math.abs(joystick.getRawAxis(0)) > 0.5 && -joystick.getRawAxis(1) > 0.5) {
+			Translation stickLocation = new Translation(joystick.getRawAxis(0), -joystick.getRawAxis(1));
+			Rotation angle = new Translation(0, 0).getAngleTo(stickLocation);
+			shooter.setTurretAngle(angle);
+		} else{
+			shooter.setState(ShooterState.IDLE);	
+		}		
 		
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
-		
-		/*
-		if (xbox.getRisingEdge(5))
-		{
-			voltage  -= .05;
-		}
-		else if (xbox.getRisingEdge(6))
-		{
-			voltage += .05;
-		}
-		
-		System.out.println(voltage);
-		gearMech.setActuator(voltage);
-		*/
-		
-		
-		
-		
-		
+				
 		/*
 		if(xbox.getRawAxis(2) > 0.8){
 			orangeDrive.setShiftState(ShiftState.MANUAL);
@@ -438,96 +322,9 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 		
-		
-		/*
-		//know what hood angle and flywheel rpm we need to be at for diff distances
-		if(xbox.getRisingEdge(5)){
-			speed += 50;
-			//angle += 1;
-			//turret.setManual(0.1);
-		} else if(xbox.getRisingEdge(6)){
-			speed -= 50;
-			//angle -= 1;
-			//turret.setManual(-0.1);
-		}
-		
-		itrats++;
-		if(itrats % 5 == 0){
 
-			System.out.println(speed);
-			System.out.println("shooter " + shooter.getSpeed());
-			System.out.println("power " + shooter.getPower()/12);
-		}*/
 		
-		/*if (xbox.getRawButton(7))
-			turret.setAngle(Rotation.fromDegrees(30));
-		else if (xbox.getRawButton(8))
-			turret.setAngle(Rotation.fromDegrees(-30));
-		else if (xbox.getRawButton(9))
-			turret.setAngle(Rotation.fromDegrees(0));
-		else
-			turret.setAngle(Rotation.fromDegrees(angle));
-		turret.setAngle(Rotation.fromDegrees(xbox.getRawAxis(1) * 30));
-		
-		Dashcomm.put("shooter/rpms", shooter.getSpeed());
-		Dashcomm.put("shooter/setpoint", shooter.getSetpoint());
-		Dashcomm.put("shooter/motorOutput", shooter.getOutputVoltage());
-		//ACTUAL STUFF
-		/*
-		if(joystick.getPOV(0) == 180 ||  joystick.getPOV(0) == 225 || joystick.getPOV(0) == 135){
-			intake.setSucking(0.5);
-		} else if(joystick.getPOV(0) == 315 || joystick.getPOV(0) == 0 || joystick.getPOV(0) == 45){
-			intake.setSucking(-0.5);
-		} else {
-			intake.setSucking(0);
-		}
-		else if (xbox.getRawButton(6))
-		{
-			gearMech.setSucking(-.5);
-		}
-		else
-		{
-			gearMech.setSucking(0);
-		}
-		
-		if(xbox.getRisingEdge(-1))
-		{
-			System.out.println("Position" + gearMech.getPosition());
-		}
-		
-		if (joystick.getRawButton(7)) {
-			shooter1.setPercent(0.5);
-			shooter2.setPercent(0.5);
-		} else {
-			shooter1.setPercent(0);
-			shooter2.setPercent(0);
-			star.set(0);
-		}
-		 
-		if(joystick.getRawButton(9)){
-			gear.setGearMech(true);
-			gear.setRunningState(false);
-		} else {			
-			gear.setRunningState(true);
-		}
-
-		if(joystick.getRisingEdge(8)){
-			gear.toggleFlap();
-		}
 	
-		if(joystick.getRawButton(10)){
-			star.set(0.95);
-		} else {  
-			star.set(0);
-		}
-		
-			
-		if(joystick.getRawButton(12)){
-			climber.set(0.4);
-		} else {
-			feeder.set(0);
-		}	
-		*/	
 	}
 
 	@Override

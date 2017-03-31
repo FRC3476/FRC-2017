@@ -22,7 +22,7 @@ public class Gear extends Threaded {
 	
 	double calibrationStartTime;
 	
-	public static final double UP = -.033, DOWN = -.333, PEG = -.11, HOME = 0, PEG_EJECT = -.25; //Default Values, Do not have tick positions
+	public static final double UP = -.033, DOWN = -.333, PEG = -.09, HOME = 0, PEG_EJECT = -.25; //Default Values, Do not have tick positions
 	
 	
 	private static final Gear gearMechInstance = new Gear();
@@ -54,7 +54,7 @@ public class Gear extends Threaded {
 		  actuatorTalon.configEncoderCodesPerRev(1024);
 		  actuatorTalon.setPosition(0);
 		  
-		  actuatorTalon.setPID(1, 0, 0);
+		  actuatorTalon.setPID(1.2, 0, 0);
 		  
 		  pegSensor = new DigitalInput(Constants.PegSensorId);
 		  currentState = GearState.DONE;
@@ -133,7 +133,6 @@ public class Gear extends Threaded {
 
 	@Override
 	public synchronized void update() {
-		System.out.println(currentState);
 		switch(currentState){
 			case MANUAL:
 				break;
@@ -160,9 +159,9 @@ public class Gear extends Threaded {
 				}
 				break;
 			case DOWN:
-				setActuator(-0.2);
+				setActuator(-0.3);
 				//setActuatorPosition(DOWN);
-				if (getCurrent() > 1){
+				if (getCurrent() > 3){
 					actuatorTalon.setPosition(DOWN);
 					System.out.println("DOWN");
 					currentState = GearState.DONE;

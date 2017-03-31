@@ -1,10 +1,11 @@
 var gyroOffset = new SetGyroOffset(180);
-var calibrate = new SetGear(GearState.HOME);
+var calibrate = new SetGear(GearState.DOWN);
 var drive1 = new Drive(0,70,50, true);
 var gearSet = new SetGear(GearState.PEG);
 var rotate1 = new Rotate(130);
 var print1 = new PrintWait("about to track gear", 600);
 var gearTrack = new PutGearOn();
+var shoot = new Shoot(4150);
 
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, drive1, gearSet, rotate1, print1, gearTrack);
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, drive1, gearSet, rotate1, print1, gearTrack, shoot);
 mainRunner.start();

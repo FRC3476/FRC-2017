@@ -15,13 +15,13 @@ public final class Constants {
 	public static double MinimumControllerOutput = 0;
 	public static double MaximumControllerOutput = 1;
 
-	public static double MaxAcceleration = 300;
+	public static double MaxAcceleration = 250;
 	public static double LookAheadDistance = 40;
 	public static double WheelScrub = 0.9;
 	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
-	public static double CameraAngleOffset = -0.5;
-	public static double TurretCameraOffset = 0;
+	public static double CameraAngleOffset = 0;
+	public static double TurretCameraOffset = -2.25;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
 	public static double WheelDiameter = 4;
@@ -32,10 +32,8 @@ public final class Constants {
 	public static int RightSlaveDriveId = 5;
 	public static int ShifterSolenoidId = 3;
 
-	public static int LeftMasterFlywheelId = 15;
-	public static int LeftSlaveFlywheelId = 16; 
-	public static int RightMasterFlywheelId = 13;
-	public static int RightSlaveFlywheelId = 14; 
+	public static int MasterFlywheelId = 13;
+	public static int SlaveFlywheelId = 14; 
 	public static int LeftBallSensorId = 22;
 	public static int RightBallSensorId = 23;
 	
@@ -54,11 +52,12 @@ public final class Constants {
 	public static int GearFlapSolenoidId = 0;
 	
 	public static int ClimberId = 10; 
-	public static int Climber2Id = 11;
+	public static int Climber2Id = 17;
 	
 	public static double TurretTicksPerRotations = 4096 * (180 / 24);
 	// 
 	public static int RightTurretId = 12; // change
+	public static int ServoId = 2;
 	
 	public static double TurningP = 0.01;
 	public static double TurningD = 0.18;
