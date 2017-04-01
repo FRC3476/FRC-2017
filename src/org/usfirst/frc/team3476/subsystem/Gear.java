@@ -22,7 +22,7 @@ public class Gear extends Threaded {
 	
 	double calibrationStartTime;
 	
-	public static final double UP = -.033, DOWN = -.333, PEG = -.09, HOME = 0, PEG_EJECT = -.25; //Default Values, Do not have tick positions
+	public static final double UP = -.033, DOWN = -.355, PEG = -.09, HOME = 0, PEG_EJECT = -.25; //Default Values, Do not have tick positions
 	
 	
 	private static final Gear gearMechInstance = new Gear();

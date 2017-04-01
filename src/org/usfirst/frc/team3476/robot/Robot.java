@@ -19,6 +19,7 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive.GearDrivingState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
+import org.usfirst.frc.team3476.subsystem.Shooter.HopperState;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.Turret;
 import org.usfirst.frc.team3476.utility.Constants;
@@ -60,8 +61,9 @@ public class Robot extends IterativeRobot {
 
 	Controller xbox = new Controller(0);
 	Controller joystick = new Controller(1);
+	Controller buttonBox = new Controller(2);
 
-	double speed = 3800;
+	double speed = Constants.InitialFlywheelSpeed;
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
@@ -162,7 +164,8 @@ public class Robot extends IterativeRobot {
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gearMech.setRunningState(true);
-		shooter.setRunningState(true);	
+		shooter.setRunningState(true);
+		orangeDrive.resetGyro();
 		if(!shooter.isHomed()){		
 			shooter.setHome();
 		}
@@ -237,6 +240,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		xbox.update();
 		joystick.update();
+		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
 		
@@ -299,16 +303,29 @@ public class Robot extends IterativeRobot {
 		
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
-		} else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || Math.abs(joystick.getRawAxis(1)) > 0.5) {
+		} /*else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || joystick.getRawAxis(1) > 0.5) {
 			Translation stickLocation = new Translation(joystick.getRawAxis(0), Math.abs(joystick.getRawAxis(1)));
 			Rotation angle = new Translation(0, 0).getAngleTo(stickLocation);
 			shooter.setTurretAngle(angle);
-		} else{
+		}*/ else{
 			shooter.setState(ShooterState.IDLE);	
 		}		
 		
+		if(buttonBox.getRisingEdge(1)){
+			speed += 50;
+			shooter.setSpeed(speed);
+		} else if(buttonBox.getRisingEdge(2)) {
+			speed -= 50;
+			shooter.setSpeed(speed);
+			System.out.println(speed);
+		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
+		if(buttonBox.getRawButton(3)){
+			shooter.setHopper(HopperState.RUNNING);
+		} else {
+			shooter.setHopper(HopperState.STOPPED);			
+		}
 				
 		/*
 		if(xbox.getRawAxis(2) > 0.8){

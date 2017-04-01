@@ -21,7 +21,7 @@ public final class Constants {
 	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
 	public static double CameraAngleOffset = 0;
-	public static double TurretCameraOffset = -2.25;
+	public static double TurretCameraOffset = -2;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
 	public static double WheelDiameter = 4;
@@ -36,6 +36,7 @@ public final class Constants {
 	public static int SlaveFlywheelId = 14; 
 	public static int LeftBallSensorId = 22;
 	public static int RightBallSensorId = 23;
+	public static double InitialFlywheelSpeed = 3350;
 	
 	public static int IntakeFeederId = 7; 
 	public static int StarFeederId = 6;

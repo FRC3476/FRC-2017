@@ -2,6 +2,7 @@ package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Interpolable;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
@@ -46,7 +47,6 @@ public class Shooter extends Threaded {
 	private TurretAutoState turretAutoState;
 	private HomingState homingState;
 
-	double flwhl;
 	private double discardFrames;
 	private Rotation desiredAngle;
 	private boolean homed;
@@ -58,8 +58,10 @@ public class Shooter extends Threaded {
 	private DigitalInput homeSensor;
 	private Hopper hopper;
 	
-	private double speed;
+	private double desiredSpeed;
 	private double startHome;
+	
+	private Interpolable lookupTable;
 	
 	public static Shooter getInstance(){
 		return shooterInstance;
@@ -84,14 +86,16 @@ public class Shooter extends Threaded {
 		homeSensor = new DigitalInput(1);
 		orangeDrive = OrangeDrive.getInstance();
 		hopper = Hopper.getInstance();
-		speed = 3800;
+		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
+		
+		lookupTable.addNumber(10.0, 10.0);
 	}
 	
 	@Override
 	public synchronized void update() {
 		NetworkTable.getTable("/shooter").putNumber("rpms", flywheel.getSpeed());
-		NetworkTable.getTable("/shooter").putNumber("setpoint", speed);
+		NetworkTable.getTable("/shooter").putNumber("setpoint", desiredSpeed);
 		switch(hopperState){
 			case RUNNING:
 				hopper.setRun(true);
@@ -111,7 +115,7 @@ public class Shooter extends Threaded {
 						}
 						break;
 					case AIMED:
-						//updateDesiredAngle();
+						updateDesiredAngle();
 						if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(-Constants.TurretCameraOffset)).getDegrees()) > .5) {
 							turretAutoState = TurretAutoState.AIMING;
 						}
@@ -146,7 +150,7 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case IDLE:
-				turret.setManual(0);
+				turret.setAngle(Rotation.fromDegrees(0));
 				break;
 		}
 		
@@ -158,7 +162,7 @@ public class Shooter extends Threaded {
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
 				} else {
-					flywheel.setSetpoint(speed);
+					flywheel.setSetpoint(desiredSpeed);
 				}
 			break;
 			case SHOOT:
@@ -168,16 +172,16 @@ public class Shooter extends Threaded {
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
 				} else {
-					flywheel.setSetpoint(speed);
+					flywheel.setSetpoint(desiredSpeed);
 					if(turretAutoState == TurretAutoState.AIMED){
 						if (flywheel.isDone()) {
-							hopperState = HopperState.RUNNING;
+							hopperState = HopperState.RUNNING;							
 						}
 					}
 				}
 				break;
 			case IDLE:
-				if(turretState != TurretState.HOME){
+				if(turretState != TurretState.HOME || turretState != TurretState.MANUAL){
 					turretState = TurretState.IDLE;
 					//turret.setAngle(Rotation.fromDegrees(45).rotateBy(orangeDrive.getGyroAngle().inverse()));
 				}
@@ -200,17 +204,17 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void setSpeed(double speed){
-		this.speed = speed;
+		this.desiredSpeed = speed;
 	}
 	
 	public synchronized void updateDesiredAngle(){
 		if(currentState == ShooterState.SHOOT && turretAutoState == TurretAutoState.AIMED){
 			//System.out.println("");
 		} else {
-			double angleOff = Dashcomm.get("boilerXAngle", 0);
 			discardFrames++;
 			if(discardFrames > 15){
-				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(angleOff));
+				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));
+				desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));		
 			}
 		}
 	}
@@ -229,18 +233,24 @@ public class Shooter extends Threaded {
 	}
 	
 	public boolean isDone(){
+		/*
 		switch(currentState){
 			case READY:
 				return turretAutoState == TurretAutoState.AIMED;		
 			case SHOOT:
 				return hopperState == HopperState.RUNNING;
 			case IDLE:
-				return turretState == TurretState.HOME;
+				return turretState != TurretState.HOME;
 		}
+		*/
 		return true;
 	}
 	
 	public boolean isHomed(){
 		return homed;
+	}
+	
+	public void setHopper(HopperState state){
+		hopperState = state;
 	}
 }
