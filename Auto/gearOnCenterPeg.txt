@@ -1,6 +1,8 @@
+
+var print = new PrintWait("gearOnCenterPeg", 1);
 var gyroOffset = new SetGyroOffset(180);
 var gearTrack = new PutGearOn();
-var calibrate = new SetGear(GearState.HOME);
+var calibrate = new SetGear(GearState.DOWN);
 var gearSet = new SetGear(GearState.PEG);
 var print1 = new PrintWait("about to track gear", 600);
 
