@@ -13,8 +13,8 @@ public class Shoot implements Action {
 
 	@Override
 	public void start() {
-		shooter.setState(ShooterState.SHOOT);
 		shooter.setSpeed(speed);
+		shooter.setState(ShooterState.SHOOT);
 	}
 
 	@Override

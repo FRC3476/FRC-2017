@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Interpolable;
@@ -24,11 +25,6 @@ public class Shooter extends Threaded {
 	
 	public enum TurretState {
 		AUTO, IDLE, HOME, MANUAL
-	}
-	
-
-	public enum HopperState {
-		RUNNING, STOPPED
 	}
 	
 	public enum TurretAutoState {
@@ -88,7 +84,7 @@ public class Shooter extends Threaded {
 		hopper = Hopper.getInstance();
 		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
-		
+		lookupTable = new Interpolable();
 		lookupTable.addNumber(10.0, 10.0);
 	}
 	
@@ -96,14 +92,8 @@ public class Shooter extends Threaded {
 	public synchronized void update() {
 		NetworkTable.getTable("/shooter").putNumber("rpms", flywheel.getSpeed());
 		NetworkTable.getTable("/shooter").putNumber("setpoint", desiredSpeed);
-		switch(hopperState){
-			case RUNNING:
-				hopper.setRun(true);
-				break;
-			case STOPPED:
-				hopper.setRun(false);
-				break;
-		}
+		NetworkTable.getTable("/shooter").putNumber("angle", turret.getAngle().getDegrees());
+		hopper.setState(hopperState);
 		switch(turretState){
 			case AUTO:
 				switch(turretAutoState){
@@ -150,7 +140,7 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case IDLE:
-				turret.setAngle(Rotation.fromDegrees(0));
+				//turret.setAngle(Rotation.fromDegrees(-30));
 				break;
 		}
 		
@@ -181,11 +171,11 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case IDLE:
-				if(turretState != TurretState.HOME || turretState != TurretState.MANUAL){
+				if(turretState != TurretState.HOME && turretState != TurretState.MANUAL){
 					turretState = TurretState.IDLE;
 					//turret.setAngle(Rotation.fromDegrees(45).rotateBy(orangeDrive.getGyroAngle().inverse()));
 				}
-				flywheel.setVoltage(0.75);
+				flywheel.setVoltage(0);
 				hood.set(1);
 				hopperState = HopperState.STOPPED;
 				break;
@@ -213,8 +203,12 @@ public class Shooter extends Threaded {
 		} else {
 			discardFrames++;
 			if(discardFrames > 15){
-				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));
-				desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));		
+				if(Dashcomm.get("isBoilerVisible", false)){
+					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));
+				} else {
+					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
+				}
+				//desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));		
 			}
 		}
 	}

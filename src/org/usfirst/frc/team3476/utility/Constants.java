@@ -20,8 +20,8 @@ public final class Constants {
 	public static double WheelScrub = 0.9;
 	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
-	public static double CameraAngleOffset = 0;
-	public static double TurretCameraOffset = -2;
+	public static double CameraAngleOffset = 0.5;
+	public static double TurretCameraOffset = -0.75;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
 	public static double WheelDiameter = 4;
@@ -31,7 +31,7 @@ public final class Constants {
 	public static int RightMasterDriveId = 4;
 	public static int RightSlaveDriveId = 5;
 	public static int ShifterSolenoidId = 3;
-
+// 165 / 70.5
 	public static int MasterFlywheelId = 13;
 	public static int SlaveFlywheelId = 14; 
 	public static int LeftBallSensorId = 22;

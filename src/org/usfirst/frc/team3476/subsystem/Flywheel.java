@@ -15,7 +15,7 @@ public class Flywheel {
 	private CANTalon masterTalon, slaveTalon;
 
 	private double setpoint;
-	private double toleranceRange = 50;
+	private double toleranceRange = 120;
 
 	public Flywheel(int masterTalonId, int slaveTalonId) {
 		masterTalon = new CANTalon(masterTalonId);
@@ -41,7 +41,7 @@ public class Flywheel {
 		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_100Ms);
 		masterTalon.SetVelocityMeasurementWindow(64);
 		masterTalon.setNominalClosedLoopVoltage(12);
-		masterTalon.setPID(0.01, 0, 0, 0.0278, 0, 0, 0);
+		masterTalon.setPID(0.01, 0, 0, 0.0277, 0, 0, 0);
 		
 		masterTalon.configPeakOutputVoltage(12, 0);
 	}
@@ -56,7 +56,7 @@ public class Flywheel {
 	}
 
 	public boolean isDone() {
-		return (Math.abs(setpoint - masterTalon.getSpeed()) < toleranceRange);
+		return (Math.abs(masterTalon.getSetpoint() - masterTalon.getSpeed()) < toleranceRange);
 	}
 
 	public double getSpeed() {

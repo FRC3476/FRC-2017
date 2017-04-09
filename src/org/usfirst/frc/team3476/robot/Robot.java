@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
+import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -19,7 +20,6 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive.GearDrivingState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
-import org.usfirst.frc.team3476.subsystem.Shooter.HopperState;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.Turret;
 import org.usfirst.frc.team3476.utility.Constants;
@@ -309,7 +309,27 @@ public class Robot extends IterativeRobot {
 			shooter.setTurretAngle(angle);
 		}*/ else{
 			shooter.setState(ShooterState.IDLE);	
-		}		
+		}	
+		
+		if(buttonBox.getRawButton(5)){
+			shooter.setTurretAngle(Rotation.fromDegrees(-82));
+			shooter.setSpeed(3250);
+		} else if(buttonBox.getRawButton(6)){
+			shooter.setTurretAngle(Rotation.fromDegrees(-60));
+			shooter.setSpeed(3900);			
+		} else if(buttonBox.getRawButton(7)){
+			shooter.setTurretAngle(Rotation.fromDegrees(60));
+			shooter.setSpeed(3750);
+		}else if(buttonBox.getRawButton(8)){
+			shooter.setTurretAngle(Rotation.fromDegrees(82));
+			shooter.setSpeed(3250);
+		} else if(buttonBox.getRawButton(9)){
+			shooter.setTurretAngle(Rotation.fromDegrees(-87));
+			shooter.setSpeed(3600);
+		} else if(buttonBox.getRawButton(10)){
+			shooter.setTurretAngle(Rotation.fromDegrees(87));
+			shooter.setSpeed(3500);
+		} 
 		
 		if(buttonBox.getRisingEdge(1)){
 			speed += 50;
@@ -323,6 +343,8 @@ public class Robot extends IterativeRobot {
 		oldAxis = xbox.getRawAxis(3) > .8;
 		if(buttonBox.getRawButton(3)){
 			shooter.setHopper(HopperState.RUNNING);
+		} else if(buttonBox.getRawButton(4)) {
+			shooter.setHopper(HopperState.BACKWARDS);			
 		} else {
 			shooter.setHopper(HopperState.STOPPED);			
 		}
@@ -338,7 +360,7 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setShiftState(ShiftState.AUTO);
 		}
 		*/
-		
+		  
 
 		
 	
