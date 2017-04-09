@@ -57,6 +57,7 @@ public class OrangeDrive extends Threaded {
 	private double driveMultiplier;
 	
 	private boolean dontShiftDown = false;
+	private boolean drivePercentVbus = false;
 	
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
@@ -252,7 +253,7 @@ public class OrangeDrive extends Threaded {
 		
 	}
 	
-	public synchronized void setWheelVelocity(DriveVelocity setVelocity) {
+	private void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
 		if(setVelocity.wheelSpeed > 216){
 			DriverStation.getInstance();
@@ -265,6 +266,14 @@ public class OrangeDrive extends Threaded {
 	
 	}
 
+	private void setWheelPower(DriveVelocity setVelocity){
+		leftTalon.changeControlMode(TalonControlMode.PercentVbus);
+		rightTalon.changeControlMode(TalonControlMode.PercentVbus);
+		leftTalon.set(setVelocity.wheelSpeed + setVelocity.deltaSpeed);
+		//power is reversed for right side
+		rightTalon.set(-(setVelocity.wheelSpeed - setVelocity.deltaSpeed));
+	}
+	
 	public synchronized boolean isDone() {
 		switch (driveState) {
 		case MANUAL:
@@ -451,38 +460,41 @@ public class OrangeDrive extends Threaded {
 		// 90 % of low gear speed
 		if(shiftState == shiftState.AUTO){
 			if(getGear()){
-	        	leftMotorSpeed *= 70;
-	        	rightMotorSpeed *= 70;
 	        	if(Math.abs(getSpeed()) > 56){
 	        		shiftUp();
 	        	}
 	        } else {
-	        	leftMotorSpeed *= 200;
-	        	rightMotorSpeed *= 200;
 	        	if(Math.abs(getSpeed()) < 45){
 	        		shiftDown();
 	        	}
 	        }
 		}
 		
-		// get acceleration
-		// assumes that wheel speed pid works
-		// works by limiting how much higher/lower we can set the speed		
-		double now = Timer.getFPGATimestamp();
-		double dt = (now - lastTime);
-		
-		double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
-		double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
-		
-		double accel = (moveSpeed - lastValue) / dt;
-		if(accel < -Constants.MaxAcceleration){
-			moveSpeed = lastValue - Constants.MaxAcceleration * dt;
-		} else if(accel > Constants.MaxAcceleration){
-			moveSpeed = lastValue + Constants.MaxAcceleration * dt;
-		}		
-		lastTime = now;
-		lastValue = moveSpeed;
-		setWheelVelocity(new DriveVelocity(moveSpeed, turnSpeed));
+		if(drivePercentVbus){
+			
+		} else {
+			leftMotorSpeed *= driveMultiplier;
+			rightMotorSpeed *= driveMultiplier;
+			
+			// get acceleration
+			// assumes that wheel speed pid works
+			// works by limiting how much higher/lower we can set the speed		
+			double now = Timer.getFPGATimestamp();
+			double dt = (now - lastTime);
+			
+			double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
+			double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
+			
+			double accel = (moveSpeed - lastValue) / dt;
+			if(accel < -Constants.MaxAcceleration){
+				moveSpeed = lastValue - Constants.MaxAcceleration * dt;
+			} else if(accel > Constants.MaxAcceleration){
+				moveSpeed = lastValue + Constants.MaxAcceleration * dt;
+			}		
+			lastTime = now;
+			lastValue = moveSpeed;
+			setWheelVelocity(new DriveVelocity(moveSpeed, turnSpeed));
+		}
 	}
 	
 	public synchronized void arcadeDrivePercent(double moveValue, double rotateValue) {
