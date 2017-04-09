@@ -54,6 +54,7 @@ public class OrangeDrive extends Threaded {
 	
 	private double driveStartTime;
 	private double driveTime;
+	private double driveMultiplier;
 	
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
@@ -75,7 +76,6 @@ public class OrangeDrive extends Threaded {
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
 	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);	
-	private int driveMultiplier = 1;
 	
 	public static OrangeDrive getInstance() {
 		return driveInstance;
@@ -124,9 +124,10 @@ public class OrangeDrive extends Threaded {
 		
 		leftTalon.changeControlMode(TalonControlMode.Speed);
 		rightTalon.changeControlMode(TalonControlMode.Speed);
-		turningDriver.setOutputRange(70, -70);
+		turningDriver.setOutputRange(200, -200);
 		turningDriver.setSetpoint(0);
 		gyroOffset = new Rotation();
+		shiftUp();
 	}
 
 	@Override
@@ -173,7 +174,7 @@ public class OrangeDrive extends Threaded {
 		if(driveState != DriveState.AUTO){
 			driveState = DriveState.AUTO;
 			setBrake(true);
-			shiftDown();
+			shiftUp();
 		}
 
 		if(autoState != AutoState.DRIVING){
@@ -185,11 +186,9 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	public synchronized void setAutoTime(double speed, double time){
-		if(driveState != DriveState.AUTO){
-			driveState = DriveState.AUTO;
-			setBrake(true);
-			shiftDown();
-		}
+		driveState = DriveState.AUTO;
+		setBrake(true);
+		shiftUp();
 
 		if(autoState != AutoState.TIMED){
 			autoState = AutoState.TIMED;					
@@ -203,7 +202,8 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setRotation(Rotation desiredRotation){
 		driveState = DriveState.AUTO;
 		setBrake(true);
-		shiftDown();
+		shiftUp();
+		
 		if(autoState != AutoState.ROTATING){
 			autoState = AutoState.ROTATING;
 		}
@@ -249,7 +249,6 @@ public class OrangeDrive extends Threaded {
 		}
 		
 	}
-	
 	
 	public synchronized void setWheelVelocity(DriveVelocity setVelocity) {
 		// inches per sec to rotations per min
@@ -314,7 +313,7 @@ public class OrangeDrive extends Threaded {
 		//System.out.println(error.getDegrees());
 		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
 			double turningSpeed = turningDriver.update(error.getDegrees());		
-			turningSpeed = scaleValues(turningSpeed, 0, 70, 20, 70);
+			turningSpeed = scaleValues(turningSpeed, 0, 200, 30, 200);
 			setWheelVelocity(new DriveVelocity(0, turningSpeed));	
 			return false;
 		} else {	
@@ -529,19 +528,18 @@ public class OrangeDrive extends Threaded {
 		// 90 % of low gear speed
 		if(shiftState == shiftState.AUTO){
 			if(getGear()){
-	        	leftMotorSpeed *= 70;
-	        	rightMotorSpeed *= 70;
 	        	if(Math.abs(getSpeed()) > 56){
 	        		shiftUp();
 	        	}
 	        } else {
-	        	leftMotorSpeed *= 200;
-	        	rightMotorSpeed *= 200;
 	        	if(Math.abs(getSpeed()) < 45){
 	        		shiftDown();
 	        	}
 	        }
 		}
+		
+		leftMotorSpeed *= driveMultiplier;
+		rightMotorSpeed *= driveMultiplier;
 		
 		// get acceleration
 		// assumes that wheel speed pid works
@@ -609,14 +607,16 @@ public class OrangeDrive extends Threaded {
 		return ((leftTalon.getSpeed() + rightTalon.getSpeed()) / 120) * Constants.WheelDiameter * Math.PI;
 	}
 	
-	public void shiftDown(){
+	public synchronized void shiftDown(){
+		driveMultiplier = 70;
 		driveShifters.set(true);
 		rightTalon.setP(0.3);
 		rightTalon.setF(0.3923);
 		leftTalon.setP(0.3);
 		leftTalon.setF(0.3923);
 	}
-	public void shiftUp(){
+	public synchronized void shiftUp(){
+		driveMultiplier = 200;
 		driveShifters.set(false);
 		rightTalon.setP(0.1);
 		rightTalon.setF(0.1453);
