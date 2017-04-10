@@ -471,7 +471,9 @@ public class OrangeDrive extends Threaded {
 		}
 		
 		if(drivePercentVbus){
-			
+			double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
+			double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
+			setWheelPower(new DriveVelocity(moveSpeed, turnSpeed));
 		} else {
 			leftMotorSpeed *= driveMultiplier;
 			rightMotorSpeed *= driveMultiplier;
