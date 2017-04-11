@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -243,7 +244,7 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		
+		xbox.setRumble(RumbleType.kLeftRumble, 0);
 		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
@@ -265,7 +266,7 @@ public class Robot extends IterativeRobot {
 		else{
 			gearMech.setSucking(0);
 		}
-		
+		/*
 		if ((!oldAxis && xbox.getRawAxis(3) > .8) || joystick.getRisingEdge(8))
 		{
 			gearMech.setState(GearState.DOWN);
@@ -276,7 +277,14 @@ public class Robot extends IterativeRobot {
 		} else if(joystick.getRisingEdge(5)){
 			gearMech.homeActuator();
 		}
-		
+		*/
+		if(xbox.getRawAxis(3) > .8){
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftDown();
+		} else {
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftUp();			
+		}
 		//System.out.println("Current: " + gearMech.getCurrent());
 		//System.out.println("Voltage: " + gearMech.getVoltage());
 		
