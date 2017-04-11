@@ -360,10 +360,11 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setShiftState(ShiftState.AUTO);
 		}
 		*/
-		  
-
 		
-	
+		if(xbox.getRawButton(8) && xbox.getRisingEdge(7) || xbox.getRawButton(7) && xbox.getRisingEdge(8)){
+			orangeDrive.toggleSimpleDrive();
+		}
+			
 	}
 
 	@Override

@@ -644,6 +644,14 @@ public class OrangeDrive extends Threaded {
 		leftTalon.setF(0.1453);
 	}
 	
+	public synchronized void toggleSimpleDrive(){
+		if(drivePercentVbus){
+			drivePercentVbus = false;			
+		} else {
+			drivePercentVbus = true;			
+		}
+	}
+	
 	public boolean getGear(){
 		return driveShifters.get();
 	}
