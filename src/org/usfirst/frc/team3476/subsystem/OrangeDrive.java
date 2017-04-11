@@ -552,8 +552,8 @@ public class OrangeDrive extends Threaded {
             leftMotorSpeed += overPower * (-1.0 - rightMotorSpeed);
             rightMotorSpeed = -1.0;
         }
-		leftMotorSpeed *= 216;
-		rightMotorSpeed *= 216;
+		leftMotorSpeed *= driveMultiplier;
+		rightMotorSpeed *= driveMultiplier;
 		
 		setWheelVelocity(new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));		
 	}
@@ -568,17 +568,12 @@ public class OrangeDrive extends Threaded {
 		} else {
 			
 			driveMultiplier = 70;
-			/*
+			
 			driveShifters.set(true);
 			rightTalon.setP(0.3);
 			rightTalon.setF(0.3923);
 			leftTalon.setP(0.3);
 			leftTalon.setF(0.3923);
-			*/
-			rightTalon.setP(0.1);
-			rightTalon.setF(0.1453);
-			leftTalon.setP(0.1);
-			leftTalon.setF(0.1453);
 		}
 	}
 	public synchronized void shiftUp(){

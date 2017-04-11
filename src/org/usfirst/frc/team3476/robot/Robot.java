@@ -244,7 +244,6 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		xbox.setRumble(RumbleType.kLeftRumble, 0);
 		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
