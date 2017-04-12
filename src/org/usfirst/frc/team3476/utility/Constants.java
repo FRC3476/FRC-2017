@@ -31,6 +31,7 @@ public final class Constants {
 	public static int RightMasterDriveId = 4;
 	public static int RightSlaveDriveId = 5;
 	public static int ShifterSolenoidId = 3;
+	public static boolean ShifterHighDefault = true;
 // 165 / 70.5
 	public static int MasterFlywheelId = 13;
 	public static int SlaveFlywheelId = 14; 
@@ -56,6 +57,7 @@ public final class Constants {
 	public static int Climber2Id = 17;
 	
 	public static double TurretTicksPerRotations = 4096 * (180 / 24);
+	public static boolean TurretEnabled = true;
 	// 
 	public static int RightTurretId = 12; // change
 	public static int ServoId = 2;

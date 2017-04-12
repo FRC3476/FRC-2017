@@ -35,8 +35,7 @@ public class Shooter extends Threaded {
 		LEFT, RIGHT
 	}
 	
-	private static final Shooter shooterInstance = new Shooter();
-	
+	private static final Shooter shooterInstance = new Shooter();	
 	private ShooterState currentState;
 	private TurretState turretState;
 	private HopperState hopperState;
@@ -94,56 +93,57 @@ public class Shooter extends Threaded {
 		NetworkTable.getTable("/shooter").putNumber("setpoint", desiredSpeed);
 		NetworkTable.getTable("/shooter").putNumber("angle", turret.getAngle().getDegrees());
 		hopper.setState(hopperState);
-		switch(turretState){
-			case AUTO:
-				switch(turretAutoState){
-					case AIMING:				
-						turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
-						if(turret.isDone()){
-							discardFrames = 0;
-							turretAutoState = TurretAutoState.AIMED;
-						}
-						break;
-					case AIMED:
-						updateDesiredAngle();
-						if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(-Constants.TurretCameraOffset)).getDegrees()) > .5) {
-							turretAutoState = TurretAutoState.AIMING;
-						}
-						break;
-				}				
-				break;					
-			case MANUAL:
-				break;
-			case HOME:
-				if(homingState == HomingState.RIGHT){
-					turret.setManual(0.2);
-				} else {
-					turret.setManual(-0.2);
-				}
-				if(!homeSensor.get()){
-					turret.setManual(0);
-					turret.resetPosition();
-					turretState = TurretState.IDLE;
-					homed = true;
+		if(Constants.TurretEnabled){
+			switch(turretState){
+				case AUTO:
+					switch(turretAutoState){
+						case AIMING:				
+							turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
+							if(turret.isDone()){
+								discardFrames = 0;
+								turretAutoState = TurretAutoState.AIMED;
+							}
+							break;
+						case AIMED:
+							updateDesiredAngle();
+							if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(-Constants.TurretCameraOffset)).getDegrees()) > .5) {
+								turretAutoState = TurretAutoState.AIMING;
+							}
+							break;
+					}				
+					break;					
+				case MANUAL:
 					break;
-				}
-
-				if(homingState == HomingState.LEFT){	
-					if(System.currentTimeMillis() - startHome > 2000){
-						turretState = TurretState.IDLE;
+				case HOME:
+					if(homingState == HomingState.RIGHT){
+						turret.setManual(0.2);
+					} else {
+						turret.setManual(-0.2);
 					}
-				} else {
-					if(System.currentTimeMillis() - startHome > 1000){
-						startHome = System.currentTimeMillis();
-						homingState = HomingState.LEFT;
+					if(!homeSensor.get()){
+						turret.setManual(0);
+						turret.resetPosition();
+						turretState = TurretState.IDLE;
+						homed = true;
+						break;
+					}
+	
+					if(homingState == HomingState.LEFT){	
+						if(System.currentTimeMillis() - startHome > 2000){
+							turretState = TurretState.IDLE;
 						}
-				}
-				break;
-			case IDLE:
-				//turret.setAngle(Rotation.fromDegrees(-30));
-				break;
+					} else {
+						if(System.currentTimeMillis() - startHome > 1000){
+							startHome = System.currentTimeMillis();
+							homingState = HomingState.LEFT;
+							}
+					}
+					break;
+				case IDLE:
+					//turret.setAngle(Rotation.fromDegrees(-30));
+					break;
+			}
 		}
-		
 		switch(currentState){
 			case READY:
 				if(turretState != TurretState.AUTO){
@@ -199,7 +199,6 @@ public class Shooter extends Threaded {
 	
 	public synchronized void updateDesiredAngle(){
 		if(currentState == ShooterState.SHOOT && turretAutoState == TurretAutoState.AIMED){
-			//System.out.println("");
 		} else {
 			discardFrames++;
 			if(discardFrames > 15){
@@ -208,7 +207,7 @@ public class Shooter extends Threaded {
 				} else {
 					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
 				}
-				//desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));		
+				//desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerDistance", 0));		
 			}
 		}
 	}

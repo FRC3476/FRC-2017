@@ -59,7 +59,6 @@ public class OrangeDrive extends Threaded {
 	
 	private boolean dontShiftDown = false;
 	private boolean drivePercentVbus = false;
-	private boolean shifterHighDefault = true;
 	
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	private SynchronousPid turningDriver = new SynchronousPid(Constants.TurningP, 0, Constants.TurningD, 0);
@@ -566,19 +565,19 @@ public class OrangeDrive extends Threaded {
 	public synchronized void shiftDown(){
 		if(dontShiftDown){
 			shiftUp();
-		} else {
-			
+		} else {	
 			driveMultiplier = 70;
-			driveShifters.set(shifterHighDefault);
+			driveShifters.set(Constants.ShifterHighDefault);
 			rightTalon.setP(0.3);
 			rightTalon.setF(0.3923);
 			leftTalon.setP(0.3);
 			leftTalon.setF(0.3923);
 		}
 	}
+	
 	public synchronized void shiftUp(){
 		driveMultiplier = 200;
-		driveShifters.set(!shifterHighDefault);
+		driveShifters.set(!Constants.ShifterHighDefault);
 		rightTalon.setP(0.1);
 		rightTalon.setF(0.1453);
 		leftTalon.setP(0.1);
