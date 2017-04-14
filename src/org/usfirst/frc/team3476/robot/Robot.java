@@ -178,6 +178,13 @@ public class Robot extends IterativeRobot {
 		} catch (ScriptException e) {
 			System.out.println(e);
 		}
+		
+		/*
+		Path curve = new Path(new Waypoint(0,0, 50));
+		curve.addWaypoint(new Waypoint(0, 120, 50));
+		curve.addWaypoint(new Waypoint(20, 120, 50));
+		orangeDrive.setAutoPath(curve, false);
+		*/
 
 	}
 
@@ -208,12 +215,12 @@ public class Robot extends IterativeRobot {
 		
 	}
 	
+	
 	@Override
 	public void teleopInit() {
-		robotState.setRunningState(true);
+		robotState.setRunningState(false);
 		orangeDrive.setRunningState(true);
-		shooter.setRunningState(true);
-		
+		shooter.setRunningState(false);		
 		gearMech.setRunningState(true);
 		/*
 		mainExecutor.scheduleAtFixedRate(new Runnable(){
@@ -244,7 +251,8 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		if (xbox.getRawButton(1) || joystick.getRawButton(12)){
+		/*
+		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)){
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
 			if(orangeDrive.getGearState() != GearDrivingState.DONE){
@@ -253,11 +261,17 @@ public class Robot extends IterativeRobot {
 		} else {
 			orangeDrive.arcadeDrive(moveVal, rotateVal);
 		}
+		*/
+		if(xbox.getRawButton(1)){
+			orangeDrive.setGearPath();
+		} else {
+			orangeDrive.arcadeDrive(moveVal, rotateVal);
+		}
 		
-		if (xbox.getRawAxis(2) > .8 || joystick.getRawButton(3)){
+		if (joystick.getRawButton(3)){
 			gearMech.setSucking(.5);
 		}
-		else if (xbox.getRawButton(5) || joystick.getRawButton(2)) {
+		else if (joystick.getRawButton(2)) {
 			gearMech.setSucking(-.25);
 		} else if (joystick.getRawButton(4)){
 			gearMech.setSucking(-.5);
@@ -265,21 +279,22 @@ public class Robot extends IterativeRobot {
 		else{
 			gearMech.setSucking(0);
 		}
-		/*
-		if ((!oldAxis && xbox.getRawAxis(3) > .8) || joystick.getRisingEdge(8))
+		
+		if (buttonBox.getRisingEdge(6) )
 		{
 			gearMech.setState(GearState.DOWN);
 		}
-		else if (xbox.getRisingEdge(6) || joystick.getRisingEdge(10))
+		else if (buttonBox.getRisingEdge(7))
 		{
 			gearMech.setState(GearState.PEG);
 		} else if(joystick.getRisingEdge(5)){
 			gearMech.homeActuator();
 		}
-		*/
+		
 		if(xbox.getRawAxis(3) > .8){
 			orangeDrive.setShiftState(ShiftState.MANUAL);
 			orangeDrive.shiftDown();
+			gearMech.setState(GearState.DOWN);
 		} else {
 			orangeDrive.setShiftState(ShiftState.MANUAL);
 			orangeDrive.shiftUp();			
@@ -287,7 +302,7 @@ public class Robot extends IterativeRobot {
 		//System.out.println("Current: " + gearMech.getCurrent());
 		//System.out.println("Voltage: " + gearMech.getVoltage());
 		
-		if (joystick.getRawButton(9)){
+		if (buttonBox.getRawButton(5)){
 			climber.set(.85);
 			System.out.println("Climbing");
 		} else if (joystick.getRawButton(7)) {
@@ -296,16 +311,6 @@ public class Robot extends IterativeRobot {
 		}
 		else {
 			climber.set(0);
-		}
-		
-		if (xbox.getRisingEdge(-1))
-		{
-			if (lowExposure) {
-				lowExposure = false;
-			} else {
-				lowExposure = true;
-			}
-			Dashcomm.put("LowExposure", lowExposure);		
 		}
 		
 		if(joystick.getRawButton(1)){
@@ -321,7 +326,7 @@ public class Robot extends IterativeRobot {
 		if(buttonBox.getRawButton(5)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-82));
 			shooter.setSpeed(3250);
-		} else if(buttonBox.getRawButton(6)){
+		} /*else if(buttonBox.getRawButton(6)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-60));
 			shooter.setSpeed(3900);			
 		} else if(buttonBox.getRawButton(7)){
@@ -330,7 +335,7 @@ public class Robot extends IterativeRobot {
 		}else if(buttonBox.getRawButton(8)){
 			shooter.setTurretAngle(Rotation.fromDegrees(82));
 			shooter.setSpeed(3250);
-		} else if(buttonBox.getRawButton(9)){
+		}*/ else if(buttonBox.getRawButton(9)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-87));
 			shooter.setSpeed(3600);
 		} else if(buttonBox.getRawButton(10)){
@@ -368,7 +373,7 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 		
-		if(xbox.getRawButton(8) && xbox.getRisingEdge(7) || xbox.getRawButton(7) && xbox.getRisingEdge(8)){
+		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
 			orangeDrive.toggleSimpleDrive();
 		}
 			

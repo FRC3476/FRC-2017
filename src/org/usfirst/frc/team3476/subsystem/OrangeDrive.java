@@ -41,7 +41,7 @@ public class OrangeDrive extends Threaded {
 	public enum GearDrivingState {
 		TURNING, DRIVING, REVERSING, DONE
 	}
-	
+
 	public enum ShiftState {
 		MANUAL, AUTO
 	}
@@ -133,7 +133,7 @@ public class OrangeDrive extends Threaded {
 		rightTalon.setPID(0.3, 0, 0, 0.3923, 0, 0, 0);
 		turningDriver.setOutputRange(200, -200);
 		turningDriver.setSetpoint(0);
-		gyroOffset = new Rotation();
+		gyroOffset = Rotation.fromDegrees(0);
 		shiftUp();
 	}
 
@@ -167,7 +167,6 @@ public class OrangeDrive extends Threaded {
 			if(rawValue < 0){
 				scaledValue *= -1;
 			}
-			System.out.println(scaledValue);
 			return scaledValue;
 		} else {
 			return 0;
@@ -202,7 +201,6 @@ public class OrangeDrive extends Threaded {
 		}
 		driveTime = time;
 		driveStartTime = System.currentTimeMillis();
-		System.out.println(System.currentTimeMillis());
 		setWheelVelocity(new DriveVelocity(speed, 0));
 	}
 	
@@ -242,9 +240,9 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized boolean updateDesiredAngle(){
 		if(Dashcomm.get("isGearVisible", false)){
-			double cameraAngle = Dashcomm.get("gearAngle", 0);			
+			double cameraAngle = Dashcomm.get("gearAngle", 0);
 			double desiredDistance = Dashcomm.get("gearDistance", 0);
-			gearDrivingTime = desiredDistance / Constants.GearSpeed;
+			gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.2;
 			Translation targetPosition = Translation.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
 			Translation offset = new Translation(0.5, -9.5);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
@@ -331,7 +329,7 @@ public class OrangeDrive extends Threaded {
 		//System.out.println(error.getDegrees());
 		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
 			double turningSpeed = turningDriver.update(error.getDegrees());		
-			//turningSpeed = scaleValues(turningSpeed, 0, 200, 30, 200);
+			turningSpeed = scaleValues(turningSpeed, 0, 1, 20, 100);
 			setWheelVelocity(new DriveVelocity(0, turningSpeed));	
 			return false;
 		} else {	
@@ -340,25 +338,22 @@ public class OrangeDrive extends Threaded {
 		}
 	}
 
-	private synchronized void updateGearPath() {				
+	private synchronized void updateGearPath() {
 		switch(gearState){
 			case TURNING:
-				if(gear.isPushed()){
- 					gearState = GearDrivingState.REVERSING;
- 					gearReversingTime = System.currentTimeMillis();
- 				} else if (updateRotation()) {
+				if (updateRotation()) {
  					gearStartTime = System.currentTimeMillis();
  					gearState = GearDrivingState.DRIVING;
  					System.out.println("DRIVING");
- 				} 
+ 				}
 				break;
 			case DRIVING:
 				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
   				//System.out.println("error" + error.getDegrees());
 				double turningSpeed = turningDriver.update(error.getDegrees());
-				//turningSpeed = scaleValues(turningSpeed, 0, 200, 20, 200);
+				turningSpeed = scaleValues(turningSpeed, 0, 1, 0, 200);
 				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
-				if(System.currentTimeMillis() - gearStartTime > gearDrivingTime){
+				if(System.currentTimeMillis() - gearStartTime > gearDrivingTime * 1000){
 					gearReversingTime = System.currentTimeMillis();
 					gearState = GearDrivingState.REVERSING;
 				}
@@ -366,7 +361,7 @@ public class OrangeDrive extends Threaded {
 			case REVERSING:
 				gear.setSucking(-0.4);
 				setWheelVelocity(new DriveVelocity(20, 0));
-				gear.setActuator(-.1);
+				gear.setActuator(-.3);
 				/*
 				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());				
 				double turningSpeed = turningDriver.update(error.getDegrees());
@@ -579,9 +574,9 @@ public class OrangeDrive extends Threaded {
 	public synchronized void shiftUp(){
 		driveMultiplier = 200;
 		driveShifters.set(!shifterHighDefault);
-		rightTalon.setP(0.1);
+		rightTalon.setP(0.4);
 		rightTalon.setF(0.1453);
-		leftTalon.setP(0.1);
+		leftTalon.setP(0.4);
 		leftTalon.setF(0.1453);
 	}
 	

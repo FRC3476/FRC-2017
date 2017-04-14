@@ -6,7 +6,7 @@ public final class Constants {
 	
 	private Constants() {
 	}
-
+	
 	// Constants
 	// Make these public
 
@@ -17,10 +17,9 @@ public final class Constants {
 
 	public static double MaxAcceleration = 250;
 	public static double LookAheadDistance = 40;
-	public static double WheelScrub = 0.9;
+	public static double WheelScrub = 0.8;
 	public static double GearSpeed = 50;
-	public static double cameraOffset = 5.5;
-	public static double CameraAngleOffset = 0.5;
+	public static double CameraAngleOffset = 1;
 	public static double TurretCameraOffset = -0.75;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
@@ -60,8 +59,8 @@ public final class Constants {
 	public static int RightTurretId = 12; // change
 	public static int ServoId = 2;
 	
-	public static double TurningP = 0.01;
-	public static double TurningD = 0.18;
+	public static double TurningP = 0.015;
+	public static double TurningD = 0;
 	static NetworkTable table = NetworkTable.getTable("SmartDashboard");
 	
 	public static void updateConstants(){
