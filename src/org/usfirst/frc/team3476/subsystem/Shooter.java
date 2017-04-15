@@ -84,7 +84,39 @@ public class Shooter extends Threaded {
 		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
 		lookupTable = new Interpolable();
-		lookupTable.addNumber(10.0, 10.0);
+		/*
+		0.8
+		lookupTable.addNumber(99.289, 3450.0);
+		lookupTable.addNumber(101.973, 3470.0);
+		lookupTable.addNumber(107.8, 3570.0);
+		lookupTable.addNumber(110.971, 3620.0);
+		lookupTable.addNumber(114.333, 3715.0);
+		lookupTable.addNumber(117.906, 3750.0);
+		lookupTable.addNumber(121.740, 3870.0);
+		lookupTable.addNumber(125.767, 3980.0);
+		lookupTable.addNumber(130.103, 4010.0);
+		lookupTable.addNumber(134.750, 4050.0);
+		lookupTable.addNumber(139.741, 4080.0);
+		lookupTable.addNumber(145.115, 4210.0);
+		lookupTable.addNumber(150.920, 4320.0);
+		lookupTable.addNumber(157.208, 4450.0);
+		*/
+		
+		lookupTable.addNumber(99.289, 3380.0);
+		lookupTable.addNumber(101.973, 3400.0);
+		lookupTable.addNumber(107.8, 3500.0);
+		lookupTable.addNumber(110.971, 3550.0);
+		lookupTable.addNumber(114.333, 3675.0);
+		lookupTable.addNumber(117.906, 3680.0);
+		lookupTable.addNumber(121.740, 3800.0);
+		lookupTable.addNumber(125.767, 3900.0);
+		lookupTable.addNumber(130.103, 3930.0);
+		lookupTable.addNumber(134.750, 3980.0);
+		lookupTable.addNumber(139.741, 4010.0);
+		lookupTable.addNumber(145.115, 4140.0);
+		lookupTable.addNumber(150.920, 4250.0);
+		lookupTable.addNumber(157.208, 4380.0);
+		
 	}
 	
 	@Override
@@ -105,10 +137,12 @@ public class Shooter extends Threaded {
 							}
 							break;
 						case AIMED:
-							updateDesiredAngle();
+							/*
 							if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(-Constants.TurretCameraOffset)).getDegrees()) > .5) {
 								turretAutoState = TurretAutoState.AIMING;
+								updateDesiredAngle();
 							}
+							*/
 							break;
 					}				
 					break;					
@@ -172,6 +206,7 @@ public class Shooter extends Threaded {
 				break;
 			case IDLE:
 				if(turretState != TurretState.HOME && turretState != TurretState.MANUAL){
+					turretAutoState = TurretAutoState.AIMING;
 					turretState = TurretState.IDLE;
 					//turret.setAngle(Rotation.fromDegrees(45).rotateBy(orangeDrive.getGyroAngle().inverse()));
 				}
@@ -204,10 +239,10 @@ public class Shooter extends Threaded {
 			if(discardFrames > 15){
 				if(Dashcomm.get("isBoilerVisible", false)){
 					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));
+					desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));
 				} else {
 					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
-				}
-				//desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerDistance", 0));		
+				}		
 			}
 		}
 	}
