@@ -128,10 +128,10 @@ public class Robot extends IterativeRobot {
 		orangeDrive.addTask(mainExecutor);
 		shooter.addTask(mainExecutor);
 		gearMech.addTask(mainExecutor);
-		
+		/*
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
-		
+		*/
 		//CameraServer.getInstance().addAxisCamera("boilerCamera", "10.34.76.8:1183/?action=stream");
 		//CameraServer.getInstance().addAxisCamera("gearCamera", "10.34.76.8:1182/?action=stream");
 
@@ -220,7 +220,7 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		robotState.setRunningState(false);
 		orangeDrive.setRunningState(true);
-		shooter.setRunningState(false);		
+		shooter.setRunningState(true);
 		gearMech.setRunningState(true);
 		/*
 		mainExecutor.scheduleAtFixedRate(new Runnable(){
@@ -312,7 +312,7 @@ public class Robot extends IterativeRobot {
 		else {
 			climber.set(0);
 		}
-		
+	
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
 		} /*else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || joystick.getRawAxis(1) > 0.5) {
@@ -325,29 +325,24 @@ public class Robot extends IterativeRobot {
 		
 		if(buttonBox.getRawButton(5)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-82));
-			shooter.setSpeed(3250);
-		} /*else if(buttonBox.getRawButton(6)){
+		} else if(buttonBox.getRawButton(6)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-60));
-			shooter.setSpeed(3900);			
 		} else if(buttonBox.getRawButton(7)){
 			shooter.setTurretAngle(Rotation.fromDegrees(60));
-			shooter.setSpeed(3750);
 		}else if(buttonBox.getRawButton(8)){
 			shooter.setTurretAngle(Rotation.fromDegrees(82));
-			shooter.setSpeed(3250);
-		}*/ else if(buttonBox.getRawButton(9)){
+		} else if(buttonBox.getRawButton(9)){
 			shooter.setTurretAngle(Rotation.fromDegrees(-87));
-			shooter.setSpeed(3600);
 		} else if(buttonBox.getRawButton(10)){
 			shooter.setTurretAngle(Rotation.fromDegrees(87));
-			shooter.setSpeed(3500);
 		} 
 		
+		
 		if(buttonBox.getRisingEdge(1)){
-			speed += 50;
+			speed += 10;
 			shooter.setSpeed(speed);
 		} else if(buttonBox.getRisingEdge(2)) {
-			speed -= 50;
+			speed -= 10;
 			shooter.setSpeed(speed);
 			System.out.println(speed);
 		}
@@ -383,18 +378,13 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		orangeDrive.resetState();
 		shooter.resetState();
-		
 		robotState.setRunningState(false);
 		orangeDrive.setRunningState(false);		
 		if (logger != null) {
 			logger.cancel(true);
 		}
-		//gear.setRunningState(false);
 		shooter.setRunningState(false);
 		gearMech.setRunningState(false);
-		//shooters.endTask();
-		
-		//shooters.setRunningState(false);
 	}
 
 	/**
