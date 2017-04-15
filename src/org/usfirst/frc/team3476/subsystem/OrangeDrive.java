@@ -128,8 +128,6 @@ public class OrangeDrive extends Threaded {
 		leftTalon.changeControlMode(TalonControlMode.Speed);
 		rightTalon.changeControlMode(TalonControlMode.Speed);
 		
-		leftTalon.setPID(0.3, 0, 0, 0.3923, 0, 0, 0);
-		rightTalon.setPID(0.3, 0, 0, 0.3923, 0, 0, 0);
 		turningDriver.setOutputRange(200, -200);
 		turningDriver.setSetpoint(0);
 		gyroOffset = new Rotation();
@@ -578,9 +576,9 @@ public class OrangeDrive extends Threaded {
 	public synchronized void shiftUp(){
 		driveMultiplier = 200;
 		driveShifters.set(!Constants.ShifterHighDefault);
-		rightTalon.setP(0.1);
+		rightTalon.setP(0.45);
 		rightTalon.setF(0.1453);
-		leftTalon.setP(0.1);
+		leftTalon.setP(0.45);
 		leftTalon.setF(0.1453);
 	}
 	

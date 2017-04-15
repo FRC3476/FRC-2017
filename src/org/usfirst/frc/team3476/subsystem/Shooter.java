@@ -104,19 +104,18 @@ public class Shooter extends Threaded {
 		
 		lookupTable.addNumber(99.289, 3380.0);
 		lookupTable.addNumber(101.973, 3400.0);
-		lookupTable.addNumber(107.8, 3500.0);
+		lookupTable.addNumber(107.800, 3500.0);
 		lookupTable.addNumber(110.971, 3550.0);
 		lookupTable.addNumber(114.333, 3675.0);
 		lookupTable.addNumber(117.906, 3680.0);
 		lookupTable.addNumber(121.740, 3800.0);
-		lookupTable.addNumber(125.767, 3900.0);
+		lookupTable.addNumber(125.767, 3910.0);
 		lookupTable.addNumber(130.103, 3930.0);
 		lookupTable.addNumber(134.750, 3980.0);
-		lookupTable.addNumber(139.741, 4010.0);
+		lookupTable.addNumber(139.741, 4020.0);
 		lookupTable.addNumber(145.115, 4140.0);
-		lookupTable.addNumber(150.920, 4250.0);
-		lookupTable.addNumber(157.208, 4380.0);
-		
+		lookupTable.addNumber(150.920, 4210.0);
+		lookupTable.addNumber(157.208, 4320.0);
 	}
 	
 	@Override
@@ -163,11 +162,11 @@ public class Shooter extends Threaded {
 					}
 	
 					if(homingState == HomingState.LEFT){	
-						if(System.currentTimeMillis() - startHome > 2000){
+						if(System.currentTimeMillis() - startHome > 1500){
 							turretState = TurretState.IDLE;
 						}
 					} else {
-						if(System.currentTimeMillis() - startHome > 1000){
+						if(System.currentTimeMillis() - startHome > 1500){
 							startHome = System.currentTimeMillis();
 							homingState = HomingState.LEFT;
 							}

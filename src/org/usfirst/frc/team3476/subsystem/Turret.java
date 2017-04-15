@@ -23,9 +23,9 @@ public class Turret {
 		turretTalon.enableBrakeMode(true);
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		turretTalon.reverseSensor(true);
-		turretTalon.configPeakOutputVoltage(2.4, -2.4);
+		turretTalon.configPeakOutputVoltage(4.8, -4.8);
 		turretTalon.configNominalOutputVoltage(1.1, -1.1);
-		turretTalon.setPID(0.6, 0, 0);
+		turretTalon.setPID(0.7, 0, 0);
 		turretTalon.setPosition(0);
 		tolerance = 0.5;
 		//1024 * (140/24)
@@ -33,7 +33,7 @@ public class Turret {
 
 	public void setAngle(Rotation setAngle) {
 		turretTalon.changeControlMode(TalonControlMode.Position);
-		if(setAngle.getDegrees() < 90 && setAngle.getDegrees() > -90){
+		if(setAngle.getDegrees() < 120 && setAngle.getDegrees() > -120){
 			turretTalon.setSetpoint(angleToTicks(setAngle));
 		}
 	}
