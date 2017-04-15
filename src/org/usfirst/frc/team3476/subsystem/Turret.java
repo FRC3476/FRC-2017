@@ -24,7 +24,7 @@ public class Turret {
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		turretTalon.reverseSensor(true);
 		turretTalon.configPeakOutputVoltage(2.4, -2.4);
-		turretTalon.configNominalOutputVoltage(1.05, -1.05);
+		turretTalon.configNominalOutputVoltage(1.1, -1.1);
 		turretTalon.setPID(0.6, 0, 0);
 		turretTalon.setPosition(0);
 		tolerance = 0.5;
