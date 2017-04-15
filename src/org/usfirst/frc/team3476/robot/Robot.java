@@ -178,6 +178,13 @@ public class Robot extends IterativeRobot {
 		} catch (ScriptException e) {
 			System.out.println(e);
 		}
+		
+		/*
+		Path curve = new Path(new Waypoint(0,0, 50));
+		curve.addWaypoint(new Waypoint(0, 120, 50));
+		curve.addWaypoint(new Waypoint(20, 120, 50));
+		orangeDrive.setAutoPath(curve, false);
+		*/
 
 	}
 
@@ -207,6 +214,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 	}
+	
 	
 	@Override
 	public void teleopInit() {
@@ -243,6 +251,68 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
+		/*
+		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)){
+			orangeDrive.setManualGearPath();
+		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
+			if(orangeDrive.getGearState() != GearDrivingState.DONE){
+				gearMech.setState(GearState.PEG);
+			}
+		} else {
+			orangeDrive.arcadeDrive(moveVal, rotateVal);
+		}
+		*/
+		if(xbox.getRawButton(1)){
+			orangeDrive.setGearPath();
+		} else {
+			orangeDrive.arcadeDrive(moveVal, rotateVal);
+		}
+		
+		if (joystick.getRawButton(3)){
+			gearMech.setSucking(.5);
+		}
+		else if (joystick.getRawButton(2)) {
+			gearMech.setSucking(-.25);
+		} else if (joystick.getRawButton(4)){
+			gearMech.setSucking(-.5);
+		}
+		else{
+			gearMech.setSucking(0);
+		}
+		
+		if (buttonBox.getRisingEdge(6) )
+		{
+			gearMech.setState(GearState.DOWN);
+		}
+		else if (buttonBox.getRisingEdge(7))
+		{
+			gearMech.setState(GearState.PEG);
+		} else if(joystick.getRisingEdge(5)){
+			gearMech.homeActuator();
+		}
+		
+		if(xbox.getRawAxis(3) > .8){
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftDown();
+			gearMech.setState(GearState.DOWN);
+		} else {
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftUp();			
+		}
+		//System.out.println("Current: " + gearMech.getCurrent());
+		//System.out.println("Voltage: " + gearMech.getVoltage());
+		
+		if (buttonBox.getRawButton(5)){
+			climber.set(.85);
+			System.out.println("Climbing");
+		} else if (joystick.getRawButton(7)) {
+			climber.set(.425);
+			System.out.println("Climbing");
+		}
+		else {
+			climber.set(0);
+		}
+	
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
 		} /*else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || joystick.getRawAxis(1) > 0.5) {
@@ -277,7 +347,31 @@ public class Robot extends IterativeRobot {
 			System.out.println(speed);
 		}
 		
-		oldAxis = xbox.getRawAxis(3) > .8;				
+		oldAxis = xbox.getRawAxis(3) > .8;
+		if(buttonBox.getRawButton(3)){
+			shooter.setHopper(HopperState.RUNNING);
+		} else if(buttonBox.getRawButton(4)) {
+			shooter.setHopper(HopperState.BACKWARDS);			
+		} else {
+			shooter.setHopper(HopperState.STOPPED);			
+		}
+				
+		/*
+		if(xbox.getRawAxis(2) > 0.8){
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftUp();
+		} else if(xbox.getRawAxis(3) > 0.8){
+			orangeDrive.setShiftState(ShiftState.MANUAL);
+			orangeDrive.shiftDown();
+		} else {
+			orangeDrive.setShiftState(ShiftState.AUTO);
+		}
+		*/
+		
+		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
+			orangeDrive.toggleSimpleDrive();
+		}
+			
 	}
 
 	@Override
