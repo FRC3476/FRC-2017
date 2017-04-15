@@ -251,19 +251,13 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		/*
+		
 		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)){
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
 			if(orangeDrive.getGearState() != GearDrivingState.DONE){
 				gearMech.setState(GearState.PEG);
 			}
-		} else {
-			orangeDrive.arcadeDrive(moveVal, rotateVal);
-		}
-		*/
-		if(xbox.getRawButton(1)){
-			orangeDrive.setGearPath();
 		} else {
 			orangeDrive.arcadeDrive(moveVal, rotateVal);
 		}
@@ -294,7 +288,6 @@ public class Robot extends IterativeRobot {
 		if(xbox.getRawAxis(3) > .8){
 			orangeDrive.setShiftState(ShiftState.MANUAL);
 			orangeDrive.shiftDown();
-			gearMech.setState(GearState.DOWN);
 		} else {
 			orangeDrive.setShiftState(ShiftState.MANUAL);
 			orangeDrive.shiftUp();			
@@ -322,56 +315,21 @@ public class Robot extends IterativeRobot {
 		}*/ else{
 			shooter.setState(ShooterState.IDLE);	
 		}	
+
 		
-		if(buttonBox.getRawButton(5)){
-			shooter.setTurretAngle(Rotation.fromDegrees(-82));
-		} else if(buttonBox.getRawButton(6)){
-			shooter.setTurretAngle(Rotation.fromDegrees(-60));
-		} else if(buttonBox.getRawButton(7)){
+		if(buttonBox.getRawButton(1)){
 			shooter.setTurretAngle(Rotation.fromDegrees(60));
-		}else if(buttonBox.getRawButton(8)){
-			shooter.setTurretAngle(Rotation.fromDegrees(82));
-		} else if(buttonBox.getRawButton(9)){
-			shooter.setTurretAngle(Rotation.fromDegrees(-87));
-		} else if(buttonBox.getRawButton(10)){
-			shooter.setTurretAngle(Rotation.fromDegrees(87));
-		} 
-		
-		
-		if(buttonBox.getRisingEdge(1)){
-			speed += 10;
-			shooter.setSpeed(speed);
-		} else if(buttonBox.getRisingEdge(2)) {
-			speed -= 10;
-			shooter.setSpeed(speed);
-			System.out.println(speed);
+		} else if(buttonBox.getRawButton(2)){
+			shooter.setTurretAngle(Rotation.fromDegrees(0));
+		} else if(buttonBox.getRawButton(3)){
+			shooter.setTurretAngle(Rotation.fromDegrees(-60));
 		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
-		if(buttonBox.getRawButton(3)){
-			shooter.setHopper(HopperState.RUNNING);
-		} else if(buttonBox.getRawButton(4)) {
-			shooter.setHopper(HopperState.BACKWARDS);			
-		} else {
-			shooter.setHopper(HopperState.STOPPED);			
-		}
-				
-		/*
-		if(xbox.getRawAxis(2) > 0.8){
-			orangeDrive.setShiftState(ShiftState.MANUAL);
-			orangeDrive.shiftUp();
-		} else if(xbox.getRawAxis(3) > 0.8){
-			orangeDrive.setShiftState(ShiftState.MANUAL);
-			orangeDrive.shiftDown();
-		} else {
-			orangeDrive.setShiftState(ShiftState.AUTO);
-		}
-		*/
 		
 		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
 			orangeDrive.toggleSimpleDrive();
-		}
-			
+		}			
 	}
 
 	@Override

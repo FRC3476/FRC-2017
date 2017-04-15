@@ -1,13 +1,11 @@
-
 var print = new PrintWait("gearOnCenterPeg and shoot Right", 1);
 var gyroOffset = new SetGyroOffset(180);
 var gearTrack = new PutGearOn();
 var calibrate = new SetGear(GearState.DOWN);
-var gearSet = new SetGear(GearState.PEG);
 var print1 = new PrintWait("about to track gear", 600);
-var print2 = new PrintWait("about to track boiler", 600);
-var aim = new SetTurretAngle(-60);
-var shoot = new Shoot(3550);
+var print2 = new PrintWait("about to track boiler", 2300);
+var aim = new SetTurretAngle(-64.4);
+var shoot = new Shoot();
 
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, gearSet, print1, gearTrack, aim, print2, shoot);
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, print1, gearTrack, aim, print2, shoot);
 mainRunner.start();

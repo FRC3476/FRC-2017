@@ -1,11 +1,11 @@
-var drive1 = new Drive(0, 90, 50, false);
-var rotate1 = new Rotate(92);
-var drive2 = new Drive(70, 0, 30, false);
-var drive3 = new DriveTimed(30, 800);
-var drive4 = new DriveTimed(30, 400);
-var aim1 = new SetTurretAngle(60);
-var shoot1 = new Shoot(3800);
+
+var print = new PrintWait("rightHopper", 1);
+var drive1 = new Drive(0, 120, 60, false);
+var rotate1 = new Rotate(90);
+var print1 = new PrintWait("wait", 200);
+var drive2 = new Drive(-30, 0, 30, false);
+var drive3 = new DriveTimed(30, 400);
 
 
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, drive1, rotate1, drive2, drive3, drive4, aim1, shoot1);
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, drive1, rotate1, print1, drive2, drive3);
 mainRunner.start();

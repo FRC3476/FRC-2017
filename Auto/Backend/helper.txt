@@ -1,6 +1,6 @@
 //var ActionRunner = Java.type('org.usfirst.frc.team3476.auto.ActionRunner');
 var Drive = Java.type('org.usfirst.frc.team3476.auto.Drive');
-var DriveTimed = Java.type('org.usfirst.frc.team3476.auto.Drive');
+var DriveTimed = Java.type('org.usfirst.frc.team3476.auto.DriveTimed');
 var PutGearOn = Java.type('org.usfirst.frc.team3476.auto.PutGearOn');
 var Print = Java.type('org.usfirst.frc.team3476.auto.Print');
 var PrintWait = Java.type('org.usfirst.frc.team3476.auto.PrintWait');
