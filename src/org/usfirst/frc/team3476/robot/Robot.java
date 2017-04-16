@@ -68,10 +68,12 @@ public class Robot extends IterativeRobot {
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
+	Intake intake = Intake.getInstance();
 	double gearSpeed = 0.15;
 	Gear gearMech;
 	CANTalon climber;
 	CANTalon climberSlave;
+	CANTalon tempIntake = new CANTalon(Constants.IntakeId);
 	boolean homed = false;
 	boolean lowExposure = true;
 
@@ -128,10 +130,10 @@ public class Robot extends IterativeRobot {
 		orangeDrive.addTask(mainExecutor);
 		shooter.addTask(mainExecutor);
 		gearMech.addTask(mainExecutor);
-		/*
+		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
-		*/
+		
 		//CameraServer.getInstance().addAxisCamera("boilerCamera", "10.34.76.8:1183/?action=stream");
 		//CameraServer.getInstance().addAxisCamera("gearCamera", "10.34.76.8:1182/?action=stream");
 
@@ -231,6 +233,8 @@ public class Robot extends IterativeRobot {
 			}
 		}, 0, 50, TimeUnit.MILLISECONDS);
 		*/
+		intake.setState(IntakeState.DOWN);
+		
 		if(!shooter.isHomed()){
 			shooter.setHome();
 		}
@@ -251,6 +255,13 @@ public class Robot extends IterativeRobot {
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
 		
+		if (gearMech.getWheelCurent() > 8.0)
+		{
+			xbox.setRumble(RumbleType.kRightRumble, 1);
+		}
+		else
+			xbox.setRumble(RumbleType.kRightRumble, 0);
+		
 		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)){
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)){
@@ -264,13 +275,23 @@ public class Robot extends IterativeRobot {
 		if (joystick.getRawButton(3)){
 			gearMech.setSucking(.5);
 		}
-		else if (joystick.getRawButton(2)) {
+		else if (joystick.getRawButton(4)){
 			gearMech.setSucking(-.25);
-		} else if (joystick.getRawButton(4)){
-			gearMech.setSucking(-.5);
 		}
-		else{
+		else {
 			gearMech.setSucking(0);
+		}
+		
+		if (xbox.getRawButton(2))
+			shooter.setHopper(HopperState.RUNNING);
+		else
+			shooter.setHopper(HopperState.STOPPED);
+		
+		System.out.println(shooter.getHopperCurrent());
+		
+		if (joystick.getRawButton(2))
+		{
+			intake.setSucking(.5);
 		}
 		
 		if (buttonBox.getRisingEdge(6) )

@@ -311,4 +311,9 @@ public class Shooter extends Threaded {
 	public void setHopper(HopperState state){
 		hopperState = state;
 	}
+
+	public double getHopperCurrent()
+	{
+		return hopper.getCurrent();
+	}
 }

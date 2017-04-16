@@ -184,5 +184,10 @@ public class Gear extends Threaded {
 	public synchronized boolean isDone(){
 		return currentState == GearState.DONE;
 	}
+
+	public double getWheelCurent()
+	{
+		return gearFeederTalon.getOutputCurrent();
+	}
 }
 

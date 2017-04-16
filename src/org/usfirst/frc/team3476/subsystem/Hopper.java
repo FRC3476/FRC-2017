@@ -42,5 +42,10 @@ public class Hopper {
 			break;
 		}
 	}
+
+	public double getCurrent()
+	{
+		return turretFeeder.getOutputCurrent();
+	}
 	
 }

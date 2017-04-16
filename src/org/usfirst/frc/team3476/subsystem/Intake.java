@@ -13,11 +13,11 @@ public class Intake {
 
 	public enum IntakeState {UP,DOWN};
   
-	private DoubleSolenoid intakeSolenoids;
+	private Solenoid intakeSolenoids;
 	
 	private static final Intake intakeInstance = new Intake();
 	
-	CANTalon masterTalon, slaveTalon, feederTalon;
+	CANTalon masterTalon;
 	
 	private IntakeState currentState;
 
@@ -26,25 +26,19 @@ public class Intake {
 	}
 	
 	private Intake () {
-	  intakeSolenoids = new DoubleSolenoid(Constants.ForwardIntakeSolenoidId, Constants.ReverseIntakeSolenoidId);
+	  intakeSolenoids = new Solenoid(Constants.IntakeSolenoidId);
 	  
-	  
-	  feederTalon = new CANTalon(Constants.IntakeFeederId);
-	  feederTalon.changeControlMode(TalonControlMode.PercentVbus);
 	  
 	  masterTalon = new CANTalon(Constants.MasterIntakeId);
 	  masterTalon.changeControlMode(TalonControlMode.PercentVbus);
-	  slaveTalon = new CANTalon(Constants.SlaveIntakeId);
-	  slaveTalon.changeControlMode(TalonControlMode.Follower);
-	  slaveTalon.set(masterTalon.getDeviceID());
 	}
 	
 	public synchronized void setState(IntakeState setState){
 		if(setState == IntakeState.DOWN){
-			intakeSolenoids.set(Value.kForward);
+			intakeSolenoids.set(true);
 			currentState = setState;
 		} else {
-			intakeSolenoids.set(Value.kReverse);
+			intakeSolenoids.set(false);
 			currentState = setState;
 		}
 	}
@@ -55,14 +49,5 @@ public class Intake {
 	
 	public void setSucking(double isSucking){
 		masterTalon.set(isSucking);
-	}
-	
-	public void setFeeder(boolean isFeeding)
-	{
-		if (isFeeding){
-			feederTalon.set(-1);
-		} else {
-			feederTalon.set(0);
-		}
 	}
 }

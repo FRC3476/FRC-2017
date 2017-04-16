@@ -39,11 +39,13 @@ public final class Constants {
 	public static int RightBallSensorId = 23;
 	public static double InitialFlywheelSpeed = 3350;
 	
+	public static int IntakeId = -1;
+	
 	public static int IntakeFeederId = 7; 
 	public static int StarFeederId = 6;
 	public static int MasterIntakeId = 8;
 	public static int SlaveIntakeId = 9;
-	public static int ForwardIntakeSolenoidId = 5;
+	public static int IntakeSolenoidId = 5;
 	public static int ReverseIntakeSolenoidId = 6;
 	
 	public static int GearMechActuatorID = 8;
@@ -65,6 +67,7 @@ public final class Constants {
 	public static double TurningP = 0.015;
 	public static double TurningD = 0;
 	static NetworkTable table = NetworkTable.getTable("SmartDashboard");
+	
 	
 	public static void updateConstants(){
 	}
