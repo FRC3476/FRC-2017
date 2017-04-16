@@ -24,11 +24,11 @@ public class Shooter extends Threaded {
 	}
 	
 	public enum TurretState {
-		AUTO, IDLE, HOME, MANUAL
+		AUTO, IDLE, HOME
 	}
 	
 	public enum TurretAutoState {
-		AIMING, AIMED
+		AIMING, AIMED, DONE
 	}
 	
 	private enum HomingState {
@@ -55,8 +55,10 @@ public class Shooter extends Threaded {
 	
 	private double desiredSpeed;
 	private double startHome;
+	private double turretStartTime;
 	
-	private Interpolable lookupTable;
+	private Interpolable lookupTable1;
+	private Interpolable lookupTable07;
 	
 	public static Shooter getInstance(){
 		return shooterInstance;
@@ -83,39 +85,53 @@ public class Shooter extends Threaded {
 		hopper = Hopper.getInstance();
 		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
-		lookupTable = new Interpolable();
+		lookupTable1 = new Interpolable();
+		lookupTable07 = new Interpolable();
+
+		lookupTable07.addNumber(87.744, 3170.0);
+		lookupTable07.addNumber(89.833, 3250.0);
+		lookupTable07.addNumber(92.04, 3300.0);
+		lookupTable07.addNumber(96.74, 3350.0);
+		lookupTable07.addNumber(99.289, 3450.0);
 		/*
-		0.8
-		lookupTable.addNumber(99.289, 3450.0);
-		lookupTable.addNumber(101.973, 3470.0);
-		lookupTable.addNumber(107.8, 3570.0);
-		lookupTable.addNumber(110.971, 3620.0);
-		lookupTable.addNumber(114.333, 3715.0);
-		lookupTable.addNumber(117.906, 3750.0);
-		lookupTable.addNumber(121.740, 3870.0);
-		lookupTable.addNumber(125.767, 3980.0);
-		lookupTable.addNumber(130.103, 4010.0);
-		lookupTable.addNumber(134.750, 4050.0);
-		lookupTable.addNumber(139.741, 4080.0);
-		lookupTable.addNumber(145.115, 4210.0);
-		lookupTable.addNumber(150.920, 4320.0);
-		lookupTable.addNumber(157.208, 4450.0);
+		lookupTable08.addNumber(87.744, 3170.0);
+		lookupTable08.addNumber(89.833, 3250.0);
+		lookupTable08.addNumber(92.04, 3280.0);
+		lookupTable08.addNumber(96.74, 3330.0);
+		lookupTable08.addNumber(99.289, 3450.0);
+		lookupTable08.addNumber(101.973, 3470.0);
+		lookupTable08.addNumber(107.800, 3570.0);
+		lookupTable08.addNumber(110.971, 3620.0);
+		lookupTable08.addNumber(114.333, 3715.0);
+		lookupTable08.addNumber(117.906, 3750.0);
+		lookupTable08.addNumber(121.740, 3870.0);
+		lookupTable08.addNumber(125.767, 3980.0);
+		lookupTable08.addNumber(130.103, 4010.0);
+		lookupTable08.addNumber(134.750, 4050.0);
+		lookupTable08.addNumber(139.741, 4080.0);
+		lookupTable08.addNumber(145.115, 4210.0);
+		lookupTable08.addNumber(150.920, 4320.0);
+		lookupTable08.addNumber(157.208, 4450.0);
 		*/
 		
-		lookupTable.addNumber(99.289, 3380.0);
-		lookupTable.addNumber(101.973, 3400.0);
-		lookupTable.addNumber(107.800, 3500.0);
-		lookupTable.addNumber(110.971, 3550.0);
-		lookupTable.addNumber(114.333, 3675.0);
-		lookupTable.addNumber(117.906, 3680.0);
-		lookupTable.addNumber(121.740, 3800.0);
-		lookupTable.addNumber(125.767, 3910.0);
-		lookupTable.addNumber(130.103, 3930.0);
-		lookupTable.addNumber(134.750, 3980.0);
-		lookupTable.addNumber(139.741, 4020.0);
-		lookupTable.addNumber(145.115, 4140.0);
-		lookupTable.addNumber(150.920, 4210.0);
-		lookupTable.addNumber(157.208, 4320.0);
+		lookupTable1.addNumber(99.289, 3380.0);
+		lookupTable1.addNumber(101.973, 3450.0);
+		lookupTable1.addNumber(107.800, 3560.0);
+		lookupTable1.addNumber(110.971, 3610.0);
+		lookupTable1.addNumber(114.333, 3675.0);
+		lookupTable1.addNumber(117.906, 3730.0);
+		lookupTable1.addNumber(121.710, 3800.0);
+		lookupTable1.addNumber(125.767, 3900.0);
+		lookupTable1.addNumber(130.103, 3930.0);
+		lookupTable1.addNumber(134.750, 3980.0);
+		lookupTable1.addNumber(139.741, 4090.0);
+		lookupTable1.addNumber(145.115, 4140.0);
+		lookupTable1.addNumber(150.920, 4190.0);
+		lookupTable1.addNumber(157.208, 4320.0);
+		lookupTable1.addNumber(188.650, 4780.0);
+		
+		
+		hood.set(1.0);
 	}
 	
 	@Override
@@ -128,11 +144,11 @@ public class Shooter extends Threaded {
 			switch(turretState){
 				case AUTO:
 					switch(turretAutoState){
-						case AIMING:				
+						case AIMING:			
 							turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
 							if(turret.isDone()){
-								discardFrames = 0;
-								turretAutoState = TurretAutoState.AIMED;
+								turretAutoState = TurretAutoState.AIMED;	
+								turretStartTime = System.currentTimeMillis();
 							}
 							break;
 						case AIMED:
@@ -142,11 +158,22 @@ public class Shooter extends Threaded {
 								updateDesiredAngle();
 							}
 							*/
+							if(System.currentTimeMillis() - turretStartTime > 700){
+								updateDesiredAngle();
+								turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
+								if(!turret.isDone()) {
+									turretAutoState = TurretAutoState.AIMING;
+								} else {
+									updateDesiredSpeed();
+									turretAutoState = TurretAutoState.DONE;
+								}
+									
+							}
+							break;
+						case DONE:
 							break;
 					}				
-					break;					
-				case MANUAL:
-					break;
+					break;		
 				case HOME:
 					if(homingState == HomingState.RIGHT){
 						turret.setManual(0.2);
@@ -173,30 +200,27 @@ public class Shooter extends Threaded {
 					}
 					break;
 				case IDLE:
-					//turret.setAngle(Rotation.fromDegrees(-30));
 					break;
 			}
 		}
 		switch(currentState){
 			case READY:
 				if(turretState != TurretState.AUTO){
-					discardFrames = 15;
-					updateDesiredAngle();
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
+					updateDesiredAngle();
 				} else {
 					flywheel.setSetpoint(desiredSpeed);
 				}
 			break;
 			case SHOOT:
 				if(turretState != TurretState.AUTO){
-					discardFrames = 15;
-					updateDesiredAngle();
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
+					updateDesiredAngle();
 				} else {
-					flywheel.setSetpoint(desiredSpeed);
-					if(turretAutoState == TurretAutoState.AIMED){
+					if(turretAutoState == TurretAutoState.DONE){
+						flywheel.setSetpoint(desiredSpeed);
 						if (flywheel.isDone()) {
 							hopperState = HopperState.RUNNING;							
 						}
@@ -204,13 +228,11 @@ public class Shooter extends Threaded {
 				}
 				break;
 			case IDLE:
-				if(turretState != TurretState.HOME && turretState != TurretState.MANUAL){
+				if(turretState != TurretState.HOME){
 					turretAutoState = TurretAutoState.AIMING;
 					turretState = TurretState.IDLE;
-					//turret.setAngle(Rotation.fromDegrees(45).rotateBy(orangeDrive.getGyroAngle().inverse()));
 				}
 				flywheel.setVoltage(0);
-				hood.set(1);
 				hopperState = HopperState.STOPPED;
 				break;
 		}
@@ -234,15 +256,24 @@ public class Shooter extends Threaded {
 	public synchronized void updateDesiredAngle(){
 		if(currentState == ShooterState.SHOOT && turretAutoState == TurretAutoState.AIMED){
 		} else {
-			discardFrames++;
-			if(discardFrames > 15){
-				if(Dashcomm.get("isBoilerVisible", false)){
-					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));
-					desiredSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));
-				} else {
-					desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
-				}		
-			}
+			if(Dashcomm.get("isBoilerVisible", false)){
+				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));					
+			} else {
+				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
+				turretState = TurretState.IDLE;
+			}		
+		}
+	}
+	
+	public synchronized void updateDesiredSpeed(){
+		
+		double distance = Dashcomm.get("boilerYAngle", 0);
+		if(distance < 100){
+			desiredSpeed = lookupTable07.interpolate(distance);
+			hood.set(0.7);
+		} else {
+			desiredSpeed = lookupTable1.interpolate(distance);
+			hood.set(1);
 		}
 	}
 	
@@ -255,7 +286,7 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void setTurretAngle(Rotation setAngle){
-		turretState = TurretState.MANUAL;
+		turretState = TurretState.IDLE;
 		turret.setAngle(setAngle);
 	}
 	

@@ -192,10 +192,7 @@ public class OrangeDrive extends Threaded {
 		driveState = DriveState.AUTO;
 		setBrake(true);
 		shiftUp();
-
-		if(autoState != AutoState.TIMED){
-			autoState = AutoState.TIMED;					
-		}
+		autoState = AutoState.TIMED;	
 		driveTime = time;
 		driveStartTime = System.currentTimeMillis();
 		setWheelVelocity(new DriveVelocity(speed, 0));
@@ -298,12 +295,14 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private synchronized void updateAutoPath() {
+		System.out.println(autoState);
 		switch(autoState){
 		case TIMED:
 			if(System.currentTimeMillis() - driveStartTime > driveTime){
 				setWheelVelocity(new DriveVelocity(0, 0));
 				autoState = AutoState.DONE;
 			}
+			break;
 		case DRIVING:
 			autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
 			setWheelVelocity(autoDriveVelocity);
@@ -594,7 +593,7 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	public void zeroSensors(){
-		//gyroSensor.reset();
+		gyroSensor.reset();
 		leftTalon.setPosition(0);
 		rightTalon.setPosition(0);
 	}
