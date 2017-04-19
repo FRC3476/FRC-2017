@@ -58,6 +58,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTablesJNI;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
+
 public class Robot extends IterativeRobot {
 
 	Controller xbox = new Controller(0);
