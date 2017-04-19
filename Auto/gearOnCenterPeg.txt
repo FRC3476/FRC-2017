@@ -7,4 +7,3 @@ var gearSet = new SetGear(GearState.PEG);
 var print1 = new PrintWait("about to track gear", 600);
 
 var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, gearSet, print1, gearTrack);
-mainRunner.start();

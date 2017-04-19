@@ -168,13 +168,14 @@ public class Robot extends IterativeRobot {
 		orangeDrive.setRunningState(true);
 		gearMech.setRunningState(true);
 		shooter.setRunningState(true);
+		intake.setState(IntakeState.DOWN);
 		orangeDrive.resetGyro();
 		if(!shooter.isHomed()){		
 			shooter.setHome();
 		}
 		
 		try {
-			engine.eval(code);
+			engine.eval("mainRunner.start()");
 			
 		} catch (ScriptException e) {
 			System.out.println(e);
@@ -208,6 +209,7 @@ public class Robot extends IterativeRobot {
 		try
 		{
 			engine.eval(helperCode);
+			engine.eval(code);
 		}
 		catch (ScriptException e)
 		{
@@ -282,16 +284,13 @@ public class Robot extends IterativeRobot {
 			gearMech.setSucking(0);
 		}
 		
-		if (xbox.getRawButton(2))
-			shooter.setHopper(HopperState.RUNNING);
-		else
-			shooter.setHopper(HopperState.STOPPED);
-		
-		System.out.println(shooter.getHopperCurrent());
-		
-		if (joystick.getRawButton(2))
+		if (joystick.getRawButton(2) || buttonBox.getRawButton(4))
 		{
-			intake.setSucking(.5);
+			intake.setSucking(1);
+		}
+		else
+		{
+			intake.setSucking(0);
 		}
 		
 		if (buttonBox.getRisingEdge(6) )

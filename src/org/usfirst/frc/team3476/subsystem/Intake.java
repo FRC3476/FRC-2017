@@ -29,8 +29,9 @@ public class Intake {
 	  intakeSolenoids = new Solenoid(Constants.IntakeSolenoidId);
 	  
 	  
-	  masterTalon = new CANTalon(Constants.MasterIntakeId);
+	  masterTalon = new CANTalon(Constants.FuelIntakeId);
 	  masterTalon.changeControlMode(TalonControlMode.PercentVbus);
+	  
 	}
 	
 	public synchronized void setState(IntakeState setState){

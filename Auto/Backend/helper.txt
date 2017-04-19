@@ -1,4 +1,3 @@
-//var ActionRunner = Java.type('org.usfirst.frc.team3476.auto.ActionRunner');
 var Drive = Java.type('org.usfirst.frc.team3476.auto.Drive');
 var DriveTimed = Java.type('org.usfirst.frc.team3476.auto.DriveTimed');
 var PutGearOn = Java.type('org.usfirst.frc.team3476.auto.PutGearOn');
@@ -10,4 +9,5 @@ var SetGear = Java.type('org.usfirst.frc.team3476.auto.SetGear');
 var SetGyroOffset = Java.type('org.usfirst.frc.team3476.auto.SetGyroOffset');
 var SetTurretAngle = Java.type('org.usfirst.frc.team3476.auto.SetTurretAngle');
 var GearState = Java.type('org.usfirst.frc.team3476.subsystem.Gear.GearState');
-var Shoot = Java.type('org.usfirst.frc.team3476.auto.Shoot')
+var Shoot = Java.type('org.usfirst.frc.team3476.auto.Shoot');
+var SetFlywheelSpeed = Java.type('org.usfirst.frc.team3476.auto.SetFlywheelSpeed');

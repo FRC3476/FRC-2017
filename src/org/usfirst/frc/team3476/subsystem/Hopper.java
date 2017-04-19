@@ -21,6 +21,7 @@ public class Hopper {
 		turretFeeder = new CANTalon(6);
 		blenderMotor = new CANTalon(7);
 		motivatorWheel = new CANTalon(11);
+		
 	}
 	
 	public void setState(HopperState setState){

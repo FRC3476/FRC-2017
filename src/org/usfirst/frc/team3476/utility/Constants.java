@@ -43,13 +43,15 @@ public final class Constants {
 	
 	public static int IntakeFeederId = 7; 
 	public static int StarFeederId = 6;
-	public static int MasterIntakeId = 8;
+	public static int MasterIntakeId = 8; //not used
 	public static int SlaveIntakeId = 9;
-	public static int IntakeSolenoidId = 5;
+	public static int IntakeSolenoidId = 0;
 	public static int ReverseIntakeSolenoidId = 6;
 	
 	public static int GearMechActuatorID = 8;
 	public static int GearMechFeederID = 9;
+	
+	public static int FuelIntakeId = 18;
 
 	public static int GearSolenoidId = 2;
 	public static int PegSensorId = 2;

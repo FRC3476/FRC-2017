@@ -60,6 +60,21 @@ public class Shooter extends Threaded {
 	private Interpolable lookupTable1;
 	private Interpolable lookupTable07;
 	
+	public boolean isFlywheelDone()
+	{
+		return flywheel.isDone();
+	}
+	
+	public void enableFlywheel()
+	{
+		flywheel.enable();
+	}
+	
+	public void setFlywheelSpeed(double setpoint)
+	{
+		flywheel.setSetpoint(setpoint);
+	}
+	
 	public static Shooter getInstance(){
 		return shooterInstance;
 	}
@@ -139,6 +154,7 @@ public class Shooter extends Threaded {
 		NetworkTable.getTable("/shooter").putNumber("rpms", flywheel.getSpeed());
 		NetworkTable.getTable("/shooter").putNumber("setpoint", desiredSpeed);
 		NetworkTable.getTable("/shooter").putNumber("angle", turret.getAngle().getDegrees());
+		NetworkTable.getTable("/shooter").putNumber("current", hopper.getCurrent());
 		hopper.setState(hopperState);
 		if(Constants.TurretEnabled){
 			switch(turretState){
@@ -158,14 +174,14 @@ public class Shooter extends Threaded {
 								updateDesiredAngle();
 							}
 							*/
-							if(System.currentTimeMillis() - turretStartTime > 700){
+							if(System.currentTimeMillis() - turretStartTime > 900){
 								updateDesiredAngle();
 								turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
 								if(!turret.isDone()) {
 									turretAutoState = TurretAutoState.AIMING;
 								} else {
-									updateDesiredSpeed();
 									turretAutoState = TurretAutoState.DONE;
+									updateDesiredSpeed();
 								}
 									
 							}

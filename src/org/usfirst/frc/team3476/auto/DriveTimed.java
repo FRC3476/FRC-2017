@@ -13,7 +13,7 @@ public class DriveTimed implements Action {
 	
 	@Override
 	public void start() {
-		OrangeDrive.getInstance().setAutoTime(speed, time);// TODO Auto-generated method stub
+		OrangeDrive.getInstance().setAutoTime(speed, time);
 	}
 
 	@Override
