@@ -1,5 +1,5 @@
 
-var print = new PrintWait("gearOnCenterPeg and shoot Left", 1);
+var print = new PrintWait("Blue Center Gear_On_Center_And_Shoot_Left", 1);
 var gyroOffset = new SetGyroOffset(180);
 var gearTrack = new PutGearOn();
 var calibrate = new SetGear(GearState.DOWN);

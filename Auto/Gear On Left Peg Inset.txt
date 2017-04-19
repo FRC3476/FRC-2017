@@ -1,5 +1,5 @@
 
-var print = new PrintWait("gearOnLeftPeg", 1);
+var print = new PrintWait("Gear_On_Left_Peg_Inset", 1);
 var gyroOffset = new SetGyroOffset(180);
 var calibrate = new SetGear(GearState.DOWN);
 var drive1 = new Drive(0,70,80, true);

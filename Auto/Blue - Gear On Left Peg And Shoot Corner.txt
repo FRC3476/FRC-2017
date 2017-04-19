@@ -1,9 +1,9 @@
 
 
-var print = new PrintWait("gearOnLeftPeg", 1);
+var print = new PrintWait("Blue Gear_On_Left_Peg_And_Shoot", 1);
 var gyroOffset = new SetGyroOffset(180);
 var calibrate = new SetGear(GearState.DOWN);
-var drive1 = new Drive(0,75,80, true);
+var drive1 = new Drive(0,60,80, true);
 var rotate1 = new Rotate(-130);
 var print1 = new PrintWait("about to track gear", 1000);
 var gearTrack = new PutGearOn();

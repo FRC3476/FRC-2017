@@ -1,9 +1,0 @@
-
-var print1 = new PrintWait("wait for turre tto home", 4000);
-
-var print2 = new PrintWait("about to track boiler", 1800);
-var aim = new SetTurretAngle(-64.4);
-var shoot = new Shoot();
-
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, print1, aim, print2, shoot);
-mainRunner.start();

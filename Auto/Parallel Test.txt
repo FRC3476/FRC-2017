@@ -1,0 +1,7 @@
+var print1 = new PrintWait("print1", 10000);
+var print2 = new PrintWait("print2", 10000);
+var print3 = new PrintWait("print3", 10000);
+var print4 = new PrintWait("print4", 10000);
+var print5 = new PrintWait("print5", 10000);
+var print6 = new PrintWait("print6", 10000);
+var mainRunner = new Runner(Runner.ActionType.PARALLEL, print1, print2, print3, print4, print5, print6);

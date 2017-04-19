@@ -1,4 +1,0 @@
-var wait = new PrintWait("waiting", 3000);
-var shoot = new Shoot(3845);
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, wait, shoot);
-mainRunner.start();

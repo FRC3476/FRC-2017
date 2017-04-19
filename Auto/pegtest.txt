@@ -1,5 +1,0 @@
-var gear = new PutGearOn();
-
-
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL,gearTrack);
-mainRunner.start();
