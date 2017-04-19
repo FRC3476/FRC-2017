@@ -1,0 +1,13 @@
+
+var print = new PrintWait("leftCloseHopper", 1);
+var drive1 = new Drive(0, 90, 60, false);
+var rotate1 = new Rotate(-95);
+var print1 = new PrintWait("wait", 200);
+var drive2 = new Drive(0, 20, 50, false);
+var drive3 = new DriveTimed(40, 1200);
+
+var aim = new SetTurretAngle(-85);
+var print2 = new PrintWait("wait", 1000);
+var shoot = new Shoot();
+
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, drive1, aim, rotate1, print1, drive2, drive3, print2, shoot);

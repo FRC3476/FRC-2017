@@ -1,0 +1,13 @@
+ 
+var print = new PrintWait("gearOnLeftPeg", 1);
+var gyroOffset = new SetGyroOffset(180);
+var calibrate = new SetGear(GearState.DOWN);
+var drive1 = new Drive(0,60,80, true);
+var rotate1 = new Rotate(130);
+var print1 = new PrintWait("about to track gear", 1000);
+var gearTrack = new PutGearOn();
+
+var aim = new SetTurretAngle(20);
+var shoot = new Shoot();
+
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, print, gyroOffset, aim, calibrate, drive1, rotate1, print1, gearTrack, shoot);
