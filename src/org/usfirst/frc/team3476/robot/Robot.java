@@ -165,12 +165,11 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		//double start = System.currentTimeMillis();
+		orangeDrive.zeroSensors();
 		robotState.setRunningState(true);
 		orangeDrive.setRunningState(true);
 		gearMech.setRunningState(true);
 		shooter.setRunningState(true);
-		intake.setState(IntakeState.DOWN);
-		orangeDrive.resetGyro();
 		if(!shooter.isHomed()){		
 			shooter.setHome();
 		}
@@ -258,7 +257,7 @@ public class Robot extends IterativeRobot {
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
 		
-		if (gearMech.getWheelCurent() > 8.0)
+		if (gearMech.getWheelCurent() > 9.0)
 		{
 			xbox.setRumble(RumbleType.kRightRumble, 1);
 		}
@@ -287,7 +286,7 @@ public class Robot extends IterativeRobot {
 		
 		if (joystick.getRawButton(2) || buttonBox.getRawButton(4))
 		{
-			intake.setSucking(1);
+			intake.setSucking(-0.8);
 		}
 		else
 		{
@@ -326,30 +325,30 @@ public class Robot extends IterativeRobot {
 			climber.set(0);
 		}
 	
+		if(buttonBox.getRisingEdge(1)){
+			speed += 10;
+		
+		}
+		if(buttonBox.getRisingEdge(2)){
+			speed -= 10;
+		}
+		shooter.setSpeed(speed);
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
-		} else if(Math.abs(joystick.getRawAxis(0)) > 0.5 || joystick.getRawAxis(1) > 0.5) {
+		} else if(Math.abs(joystick.getRawAxis(0)) > 0.4 || joystick.getRawAxis(1) > 0.4) {
 			Translation stickLocation = new Translation(joystick.getRawAxis(0), Math.abs(joystick.getRawAxis(1)));
 			Rotation angle = new Translation(0, 0).getAngleTo(stickLocation);
 			shooter.setTurretAngle(angle);
 		} else{
 			shooter.setState(ShooterState.IDLE);	
 		}	
-
-		
-		if(buttonBox.getRawButton(1)){
-			shooter.setTurretAngle(Rotation.fromDegrees(60));
-		} else if(buttonBox.getRawButton(2)){
-			shooter.setTurretAngle(Rotation.fromDegrees(0));
-		} else if(buttonBox.getRawButton(3)){
-			shooter.setTurretAngle(Rotation.fromDegrees(-60));
-		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
 		
 		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
 			orangeDrive.toggleSimpleDrive();
 		}			
+		
 	}
 
 	@Override

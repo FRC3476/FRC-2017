@@ -54,7 +54,7 @@ public class Gear extends Threaded {
 		  actuatorTalon.configEncoderCodesPerRev(1024);
 		  actuatorTalon.setPosition(0);
 		  
-		  actuatorTalon.setPID(1.2, 0, 0);
+		  actuatorTalon.setPID(1, 0, 0);
 		  
 		  pegSensor = new DigitalInput(Constants.PegSensorId);
 		  currentState = GearState.DONE;

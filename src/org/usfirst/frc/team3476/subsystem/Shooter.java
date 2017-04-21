@@ -53,12 +53,14 @@ public class Shooter extends Threaded {
 	private DigitalInput homeSensor;
 	private Hopper hopper;
 	
+	private double speedOffset = 120;
 	private double desiredSpeed;
 	private double startHome;
 	private double turretStartTime;
 	
 	private Interpolable lookupTable1;
 	private Interpolable lookupTable07;
+	private Interpolable lookupTable09;
 	
 	public boolean isFlywheelDone()
 	{
@@ -101,13 +103,18 @@ public class Shooter extends Threaded {
 		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
 		lookupTable1 = new Interpolable();
+		lookupTable09 = new Interpolable();
 		lookupTable07 = new Interpolable();
 
-		lookupTable07.addNumber(87.744, 3170.0);
-		lookupTable07.addNumber(89.833, 3250.0);
-		lookupTable07.addNumber(92.04, 3300.0);
-		lookupTable07.addNumber(96.74, 3350.0);
-		lookupTable07.addNumber(99.289, 3450.0);
+		/*
+		
+		lookupTable07.addNumber(87.744, 3170.0 + speedOffset);
+		lookupTable07.addNumber(89.833, 3250.0 + speedOffset);
+		lookupTable07.addNumber(92.04, 3300.0 + speedOffset);
+		lookupTable07.addNumber(96.74, 3350.0 + speedOffset);
+		lookupTable07.addNumber(99.289, 3450.0 + speedOffset);
+		*/
+		
 		/*
 		lookupTable08.addNumber(87.744, 3170.0);
 		lookupTable08.addNumber(89.833, 3250.0);
@@ -129,24 +136,38 @@ public class Shooter extends Threaded {
 		lookupTable08.addNumber(157.208, 4450.0);
 		*/
 		
-		lookupTable1.addNumber(99.289, 3380.0);
-		lookupTable1.addNumber(101.973, 3450.0);
-		lookupTable1.addNumber(107.800, 3560.0);
-		lookupTable1.addNumber(110.971, 3610.0);
-		lookupTable1.addNumber(114.333, 3675.0);
-		lookupTable1.addNumber(117.906, 3730.0);
-		lookupTable1.addNumber(121.710, 3800.0);
-		lookupTable1.addNumber(125.767, 3900.0);
-		lookupTable1.addNumber(130.103, 3930.0);
-		lookupTable1.addNumber(134.750, 3980.0);
-		lookupTable1.addNumber(139.741, 4090.0);
-		lookupTable1.addNumber(145.115, 4140.0);
-		lookupTable1.addNumber(150.920, 4190.0);
-		lookupTable1.addNumber(157.208, 4320.0);
-		lookupTable1.addNumber(188.650, 4780.0);
+		/*
+		lookupTable1.addNumber(99.289, 3380.0 + speedOffset);
+		lookupTable1.addNumber(101.973, 3450.0 + speedOffset);
+		lookupTable1.addNumber(107.800, 3560.0 + speedOffset);
+		lookupTable1.addNumber(110.971, 3610.0 + speedOffset);
+		lookupTable1.addNumber(114.333, 3675.0 + speedOffset);
+		lookupTable1.addNumber(117.906, 3730.0 + speedOffset);
+		lookupTable1.addNumber(121.710, 3800.0 + speedOffset);
+		lookupTable1.addNumber(125.767, 3900.0 + speedOffset);
+		lookupTable1.addNumber(130.103, 3930.0 + speedOffset);
+		lookupTable1.addNumber(134.750, 3980.0 + speedOffset);
+		lookupTable1.addNumber(139.741, 4090.0 + speedOffset);
+		lookupTable1.addNumber(145.115, 4140.0 + speedOffset);
+		lookupTable1.addNumber(150.920, 4190.0 + speedOffset);
+		lookupTable1.addNumber(157.208, 4320.0 + speedOffset);
+		lookupTable1.addNumber(188.650, 4780.0 + speedOffset);
+		*/
+		
+		lookupTable09.addNumber(99.0, 3600.0);
+		lookupTable09.addNumber(118.0, 3780.0);
+		lookupTable09.addNumber(135.0, 4050.0);
+		lookupTable09.addNumber(145.0, 4200.0);
+
+		lookupTable07.addNumber(102.0, 3500.0);
+		lookupTable07.addNumber(92.0, 3350.0);
+
+
+
 		
 		
-		hood.set(1.0);
+		
+		hood.set(0.7);
 	}
 	
 	@Override
@@ -282,15 +303,16 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void updateDesiredSpeed(){
-		
+		/*
 		double distance = Dashcomm.get("boilerYAngle", 0);
 		if(distance < 100){
 			desiredSpeed = lookupTable07.interpolate(distance);
 			hood.set(0.7);
 		} else {
 			desiredSpeed = lookupTable1.interpolate(distance);
-			hood.set(1);
+			hood.set(0.9);
 		}
+		*/
 	}
 	
 	public double getSpeed(){
