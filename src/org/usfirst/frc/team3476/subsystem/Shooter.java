@@ -59,8 +59,9 @@ public class Shooter extends Threaded {
 	private double turretStartTime;
 	
 	private Interpolable lookupTable1;
-	private Interpolable lookupTable07;
 	private Interpolable lookupTable09;
+	private Interpolable lookupTable08;
+	private Interpolable lookupTable07;
 	
 	public boolean isFlywheelDone()
 	{
@@ -104,10 +105,10 @@ public class Shooter extends Threaded {
 		homed = false;
 		lookupTable1 = new Interpolable();
 		lookupTable09 = new Interpolable();
+		lookupTable08 = new Interpolable();
 		lookupTable07 = new Interpolable();
 
 		/*
-		
 		lookupTable07.addNumber(87.744, 3170.0 + speedOffset);
 		lookupTable07.addNumber(89.833, 3250.0 + speedOffset);
 		lookupTable07.addNumber(92.04, 3300.0 + speedOffset);
@@ -154,20 +155,18 @@ public class Shooter extends Threaded {
 		lookupTable1.addNumber(188.650, 4780.0 + speedOffset);
 		*/
 		
+		lookupTable1.addNumber(1000.0, 10000.0);
+		
 		lookupTable09.addNumber(99.0, 3600.0);
-		lookupTable09.addNumber(118.0, 3780.0);
-		lookupTable09.addNumber(135.0, 4050.0);
+		lookupTable09.addNumber(118.0, 3780.0); //should be 0.8 around here
+		lookupTable09.addNumber(135.0, 4050.0); //good around here
 		lookupTable09.addNumber(145.0, 4200.0);
-
-		lookupTable07.addNumber(102.0, 3500.0);
-		lookupTable07.addNumber(92.0, 3350.0);
-
-
-
 		
+		lookupTable08.addNumber(1000.0, 10000.0);
 		
-		
-		hood.set(0.7);
+		lookupTable07.addNumber(92.0, 3350.0);		
+		lookupTable07.addNumber(102.0, 3500.0); // these values are guddi
+		hood.set(0.8);
 	}
 	
 	@Override
@@ -189,12 +188,6 @@ public class Shooter extends Threaded {
 							}
 							break;
 						case AIMED:
-							/*
-							if(Math.abs(turret.getAngle().rotateBy(desiredAngle.inverse()).rotateBy(Rotation.fromDegrees(-Constants.TurretCameraOffset)).getDegrees()) > .5) {
-								turretAutoState = TurretAutoState.AIMING;
-								updateDesiredAngle();
-							}
-							*/
 							if(System.currentTimeMillis() - turretStartTime > 900){
 								updateDesiredAngle();
 								turret.setAngle(desiredAngle.rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
@@ -204,7 +197,6 @@ public class Shooter extends Threaded {
 									turretAutoState = TurretAutoState.DONE;
 									updateDesiredSpeed();
 								}
-									
 							}
 							break;
 						case DONE:
@@ -303,16 +295,16 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void updateDesiredSpeed(){
-		/*
+		
 		double distance = Dashcomm.get("boilerYAngle", 0);
 		if(distance < 100){
 			desiredSpeed = lookupTable07.interpolate(distance);
 			hood.set(0.7);
 		} else {
-			desiredSpeed = lookupTable1.interpolate(distance);
+			desiredSpeed = lookupTable09.interpolate(distance);
 			hood.set(0.9);
 		}
-		*/
+		
 	}
 	
 	public double getSpeed(){

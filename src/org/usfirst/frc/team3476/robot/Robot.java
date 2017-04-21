@@ -225,16 +225,7 @@ public class Robot extends IterativeRobot {
 		orangeDrive.setRunningState(true);
 		shooter.setRunningState(true);
 		gearMech.setRunningState(true);
-		/*
-		mainExecutor.scheduleAtFixedRate(new Runnable(){
-			@Override
-			public void run(){
-				for(int itrats = 0; itrats < 16; itrats++){
-					NetworkTable.getTable("").putNumber("channel" + itrats, pdp.getCurrent(itrats));
-				}				
-			}
-		}, 0, 50, TimeUnit.MILLISECONDS);
-		*/
+	
 		intake.setState(IntakeState.DOWN);
 		
 		if(!shooter.isHomed()){
@@ -284,12 +275,11 @@ public class Robot extends IterativeRobot {
 			gearMech.setSucking(0);
 		}
 		
-		if (joystick.getRawButton(2) || buttonBox.getRawButton(4))
-		{
+		if (joystick.getRawButton(2) || buttonBox.getRawButton(4)) {
 			intake.setSucking(-0.8);
-		}
-		else
-		{
+		} else if (buttonBox.getRawButton(3)){
+			intake.setSucking(0.8);
+		} else {
 			intake.setSucking(0);
 		}
 		
@@ -324,14 +314,7 @@ public class Robot extends IterativeRobot {
 		else {
 			climber.set(0);
 		}
-	
-		if(buttonBox.getRisingEdge(1)){
-			speed += 10;
 		
-		}
-		if(buttonBox.getRisingEdge(2)){
-			speed -= 10;
-		}
 		shooter.setSpeed(speed);
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
@@ -347,8 +330,22 @@ public class Robot extends IterativeRobot {
 		
 		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
 			orangeDrive.toggleSimpleDrive();
-		}			
+		}		
 		
+		
+		
+		/*
+		DEBUGGING
+		if(buttonBox.getRisingEdge(1)){
+			speed += 10;
+			shooter.setSpeed(speed);
+		}
+		if(buttonBox.getRisingEdge(2)){
+			speed -= 10;
+			shooter.setSpeed(speed);
+		}
+		
+		*/
 	}
 
 	@Override
@@ -357,9 +354,6 @@ public class Robot extends IterativeRobot {
 		shooter.resetState();
 		robotState.setRunningState(false);
 		orangeDrive.setRunningState(false);		
-		if (logger != null) {
-			logger.cancel(true);
-		}
 		shooter.setRunningState(false);
 		gearMech.setRunningState(false);
 	}
