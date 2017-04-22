@@ -1,7 +1,7 @@
 
 var print = new PrintWait("Blue Left_Close_Hopper", 1);
 var gyroOffset = new SetGyroOffset(180);
-var drive1 = new Drive(0, 86, 60, true);
+var drive1 = new Drive(0, 88, 60, true);
 var rotate1 = new Rotate(-95);
 var print1 = new PrintWait("wait", 200);
 var drive2 = new Drive(0, -20, 50, false);

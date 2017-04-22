@@ -4,7 +4,7 @@ var gyroOffset = new SetGyroOffset(180);
 var drive1 = new Drive(0, 114, 60, true);
 var rotate1 = new Rotate(-95);
 var print1 = new PrintWait("wait", 200);
-var drive2 = new Drive(0, -40, 50, false);
+var drive2 = new Drive(0, 40, 50, false);
 var drive3 = new DriveTimed(40, 1200);
 
 var aim = new SetTurretAngle(85);

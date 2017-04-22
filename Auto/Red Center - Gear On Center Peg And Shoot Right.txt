@@ -8,4 +8,4 @@ var print2 = new PrintWait("about to track boiler", 1000);
 var aim = new SetTurretAngle(-64.4);
 var shoot = new Shoot();
 
-var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, print1, aim, gearTrack, print2, shoot);
+var mainRunner = new Runner(Runner.ActionType.SEQUENTIAL, gyroOffset, calibrate, print1, gearTrack, aim, print2, shoot);
