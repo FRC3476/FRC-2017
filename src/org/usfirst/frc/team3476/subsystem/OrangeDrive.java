@@ -236,7 +236,7 @@ public class OrangeDrive extends Threaded {
 		if(Dashcomm.get("isGearVisible", false)){
 			double cameraAngle = Dashcomm.get("gearAngle", 0);
 			double desiredDistance = Dashcomm.get("gearDistance", 0);
-			gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.2;
+			gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.5;
 			Translation targetPosition = Translation.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle)).rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
 			Translation offset = new Translation(0.5, -9.5);
 			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
@@ -295,7 +295,6 @@ public class OrangeDrive extends Threaded {
 	}
 
 	private synchronized void updateAutoPath() {
-		System.out.println(autoState);
 		switch(autoState){
 		case TIMED:
 			if(System.currentTimeMillis() - driveStartTime > driveTime){
@@ -322,7 +321,6 @@ public class OrangeDrive extends Threaded {
 
 	private synchronized boolean updateRotation(){
 		Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
-		//System.out.println(error.getDegrees());
 		if (Math.abs(error.getDegrees()) > Constants.DrivingAngleTolerance) {
 			double turningSpeed = turningDriver.update(error.getDegrees());		
 			turningSpeed = scaleValues(turningSpeed, 0, 1, 20, 100);
@@ -347,7 +345,7 @@ public class OrangeDrive extends Threaded {
 				Rotation error = desiredAngle.inverse().rotateBy(getGyroAngle());
   				//System.out.println("error" + error.getDegrees());
 				double turningSpeed = turningDriver.update(error.getDegrees());
-				turningSpeed = scaleValues(turningSpeed, 0, 1, 0, 200);
+				turningSpeed = scaleValues(turningSpeed, 0, 1, 5, 200);
 				setWheelVelocity(new DriveVelocity(-Constants.GearSpeed, turningSpeed));
 				if(System.currentTimeMillis() - gearStartTime > gearDrivingTime * 1000){
 					gearReversingTime = System.currentTimeMillis();
@@ -414,7 +412,6 @@ public class OrangeDrive extends Threaded {
 		}
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
-		
 		
 		double leftMotorSpeed;
 		double rightMotorSpeed;
@@ -570,9 +567,9 @@ public class OrangeDrive extends Threaded {
 	public synchronized void shiftUp(){
 		driveMultiplier = 200;
 		driveShifters.set(!Constants.ShifterHighDefault);
-		rightTalon.setP(0.45);
+		rightTalon.setP(0.2); // 0.45 on practice
 		rightTalon.setF(0.1453);
-		leftTalon.setP(0.45);
+		leftTalon.setP(0.2);
 		leftTalon.setF(0.1453);
 	}
 	

@@ -157,14 +157,15 @@ public class Shooter extends Threaded {
 		
 		lookupTable1.addNumber(1000.0, 10000.0);
 		
-		lookupTable09.addNumber(99.0, 3600.0);
+		lookupTable09.addNumber(99.0, 3510.0);
 		lookupTable09.addNumber(118.0, 3780.0); //should be 0.8 around here
-		lookupTable09.addNumber(135.0, 4050.0); //good around here
+		lookupTable09.addNumber(126.0, 3950.0); //good around here
+		lookupTable09.addNumber(135.0, 4050.0); //good around here		
 		lookupTable09.addNumber(145.0, 4200.0);
 		
 		lookupTable08.addNumber(1000.0, 10000.0);
 		
-		lookupTable07.addNumber(92.0, 3350.0);		
+		lookupTable07.addNumber(92.0, 3340.0);		
 		lookupTable07.addNumber(102.0, 3500.0); // these values are guddi
 		hood.set(0.8);
 	}
@@ -194,8 +195,8 @@ public class Shooter extends Threaded {
 								if(!turret.isDone()) {
 									turretAutoState = TurretAutoState.AIMING;
 								} else {
-									turretAutoState = TurretAutoState.DONE;
 									updateDesiredSpeed();
+									turretAutoState = TurretAutoState.DONE;
 								}
 							}
 							break;
@@ -303,7 +304,7 @@ public class Shooter extends Threaded {
 		} else {
 			desiredSpeed = lookupTable09.interpolate(distance);
 			hood.set(0.9);
-		}
+		}		
 		
 	}
 	

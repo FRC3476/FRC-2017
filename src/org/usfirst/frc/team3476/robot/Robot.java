@@ -315,7 +315,6 @@ public class Robot extends IterativeRobot {
 			climber.set(0);
 		}
 		
-		shooter.setSpeed(speed);
 		if(joystick.getRawButton(1)){
 			shooter.setState(ShooterState.SHOOT);
 		} else if(Math.abs(joystick.getRawAxis(0)) > 0.4 || joystick.getRawAxis(1) > 0.4) {
@@ -334,8 +333,9 @@ public class Robot extends IterativeRobot {
 		
 		
 		
+		
+		//DEBUGGING
 		/*
-		DEBUGGING
 		if(buttonBox.getRisingEdge(1)){
 			speed += 10;
 			shooter.setSpeed(speed);
@@ -344,8 +344,8 @@ public class Robot extends IterativeRobot {
 			speed -= 10;
 			shooter.setSpeed(speed);
 		}
+		*/	
 		
-		*/
 	}
 
 	@Override

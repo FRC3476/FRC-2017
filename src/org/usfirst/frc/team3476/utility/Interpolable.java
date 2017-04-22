@@ -18,11 +18,11 @@ public class Interpolable {
 		Entry<Double, Double> highest = sortedList.ceilingEntry(key);
 		Entry<Double, Double> lowest = sortedList.floorEntry(key);
 		if(lowest == null && highest == null){
-			return 10.0;
+			return 3000.0;
 		} else if(lowest == null){
-			return 10.0;
+			return 3000.0;
 		} else if (highest == null){
-			return 10.0;
+			return 3000.0;
 		} else {
 			double percentage = (key - lowest.getKey()) / (highest.getKey() - lowest.getKey());
 			return percentage * (highest.getValue() - lowest.getValue()) + lowest.getValue();
