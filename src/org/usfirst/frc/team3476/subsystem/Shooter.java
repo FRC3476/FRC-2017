@@ -167,7 +167,7 @@ public class Shooter extends Threaded {
 		
 		lookupTable07.addNumber(92.0, 3340.0);		
 		lookupTable07.addNumber(102.0, 3500.0); // these values are guddi
-		hood.set(0.8);
+		hood.set(0.4);
 	}
 	
 	@Override
@@ -244,18 +244,22 @@ public class Shooter extends Threaded {
 				}
 			break;
 			case SHOOT:
+				/*
 				if(turretState != TurretState.AUTO){
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
 					updateDesiredAngle();
 				} else {
 					if(turretAutoState == TurretAutoState.DONE){
+				*/
 						flywheel.setSetpoint(desiredSpeed);
 						if (flywheel.isDone()) {
 							hopperState = HopperState.RUNNING;							
 						}
+				/*
 					}
 				}
+				*/
 				break;
 			case IDLE:
 				if(turretState != TurretState.HOME){
@@ -319,6 +323,10 @@ public class Shooter extends Threaded {
 	public synchronized void setTurretAngle(Rotation setAngle){
 		turretState = TurretState.IDLE;
 		turret.setAngle(setAngle);
+	}
+	
+	public synchronized void setTurretPower(double power){
+		turret.setManual(power);
 	}
 	
 	public boolean isDone(){

@@ -15,7 +15,7 @@ public final class Constants {
 	public static double MinimumControllerOutput = 0;
 	public static double MaximumControllerOutput = 1;
 
-	public static double MaxAcceleration = 250;
+	public static double MaxAcceleration = 1000;
 	public static double LookAheadDistance = 20;
 	public static double WheelScrub = 0.8;
 	public static double GearSpeed = 50;
