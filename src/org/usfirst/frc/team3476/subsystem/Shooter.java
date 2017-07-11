@@ -28,7 +28,7 @@ public class Shooter extends Threaded {
 	}
 	
 	public enum TurretAutoState {
-		AIMING, AIMED, DONE
+		AIMING, AIMED
 	}
 	
 	private enum HomingState {
@@ -200,8 +200,6 @@ public class Shooter extends Threaded {
 								}
 							}
 							break;
-						case DONE:
-							break;
 					}				
 					break;		
 				case HOME:
@@ -244,22 +242,19 @@ public class Shooter extends Threaded {
 				}
 			break;
 			case SHOOT:
-				/*
+				
 				if(turretState != TurretState.AUTO){
 					turretState = TurretState.AUTO;
 					turretAutoState = TurretAutoState.AIMING;
 					updateDesiredAngle();
 				} else {
 					if(turretAutoState == TurretAutoState.DONE){
-				*/
 						flywheel.setSetpoint(desiredSpeed);
 						if (flywheel.isDone()) {
 							hopperState = HopperState.RUNNING;							
-						}
-				/*
+						}				
 					}
-				}
-				*/
+				}				
 				break;
 			case IDLE:
 				if(turretState != TurretState.HOME){
