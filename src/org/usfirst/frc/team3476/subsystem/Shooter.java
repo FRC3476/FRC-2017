@@ -301,7 +301,7 @@ public class Shooter extends Threaded {
 	
 	public synchronized void updateDesiredSpeed(){
 		
-		double distance = Dashcomm.get("boilerYAngle", 0);
+		double distance = VisionTracking.getInstance().getBoilerDistance();
 		if(distance < 100){
 			desiredSpeed = lookupTable07.interpolate(distance);
 			hood.set(0.7);

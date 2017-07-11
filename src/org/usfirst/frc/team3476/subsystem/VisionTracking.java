@@ -48,27 +48,30 @@ public class VisionTracking extends Threaded {
 		if(Dashcomm.get("isBoilerVisible", 0) != 0){
 			//Dashcomm.get("boilerXAngle", 0);
 			desiredFlywheelSpeed = lookupTable.interpolate(Dashcomm.get("boilerYAngle", 0));			
-		}
-		
-		
-		
+		}	
 	}
 	
-	// function will later interpolate based on current position
-	/*
-	public Rotation getGearAngle(){
-		return gearAngle;
-	}
-	*/
+	public double getBoilerDistance(){
+		double x = 1;
+		double y = Dashcomm.get("boilerX", 0);
+		double z = Dashcomm.get("boilerY", 0);		
+		double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 1280 * Constants.yCameraFOV + "camera angle upwards")) //to radians first
+		return distance;		
+		/*
+		x is forwards from camera
+		y is to the left from camera
+		z is up from the camera
+		x = x * yawOffset.cos() - x * yawOffset.sin();
+		y = y * yawOffset.cos() + y * yawOffset.sin();
+		
+		x = x * pitchOffset.cos() - x * pitchOffset.sin();
+		z = z * pitchOffset.cos() + z * pitchOffset.sin();
+		
+		distance = Constants.BoilerHeight / z * Math.hypot(x, y);			
+		*/
+	}	
 	
 	public synchronized double getFlywheelSpeed(){
 		return desiredFlywheelSpeed;
 	}
-	
-	/* 5.067 4200
-	 * 
-	 * 
-	 * 
-	 */
-
 }

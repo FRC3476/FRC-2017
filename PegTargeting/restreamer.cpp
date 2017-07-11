@@ -12,8 +12,9 @@ using namespace cv;
 using namespace std;
 
 shared_ptr<NetworkTable> table;
-void processGear(Mat &frame);
-vector<double> runningAverage(5);
+const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
+const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
+const double TargetHeight = 81 - x;
 
 void makeGearServer()
 {
@@ -37,9 +38,6 @@ bool sortByY(const Point &lhs, const Point &rhs) {
 
 
 void processGear(Mat &frame){
-	double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
-	double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
-	
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
 	Mat thres;
@@ -101,10 +99,7 @@ void processGear(Mat &frame){
 	}
 }
 
-void processBoiler(Mat &frame){
-	double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
-	double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
-	
+void processBoiler(Mat &frame){	
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
 	Mat thres;
@@ -152,26 +147,14 @@ void processBoiler(Mat &frame){
 		contours[0].insert(contours[0].end(), contours[1].begin(), contours[1].end());	
 	
 		Rect box = boundingRect(contours[0]);
-		double midX = box.x + box.width/2;
+		double midX = box.x + box.width / 2;
 		//to get the height from the bottom
-		double midY = yResolution - box.y;
+		double midY = yResolution - (box.y + box.height / 2);
    
+		
    
-		double distance = (539 * 7.0) / (cY - tY);
-    
-    runningAverage.erase(runningAverage.begin());
-    runningAverage.push_back(distance);
-    distance = 0;
-    for(auto d : runningAverage){
-      distance += d;
-    }
-    distance /= 5;
-    
-   //f = d * p / h;
-    //double f = 98 * (cY - tY) / 7;
-   
-		table->PutNumber("boilerXAngle", ((midX - xResolution/2)/xResolution) * xCameraFOV);
-		table->PutNumber("boilerYAngle", distance);
+		table->PutNumber("boilerX", xResolution - midX);
+		table->PutNumber("boilerY", -midY);
 		table->PutBoolean("isBoilerVisible", true);
 	} else {
 		table->PutBoolean("isBoilerVisible", false);
