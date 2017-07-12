@@ -48,11 +48,11 @@ public class VisionTracking extends Threaded {
 		x is forwards from camera
 		y is to the left from camera
 		z is up from the camera
-		x = x * yawOffset.cos() - x * yawOffset.sin();
-		y = y * yawOffset.cos() + y * yawOffset.sin();
+		x = x * yawOffset.cos() - y * yawOffset.sin();
+		y = x * yawOffset.cos() + y * yawOffset.sin();
 		
-		x = x * pitchOffset.cos() - x * pitchOffset.sin();
-		z = z * pitchOffset.cos() + z * pitchOffset.sin();
+		x = x * pitchOffset.cos() - z * pitchOffset.sin();
+		z = x * pitchOffset.cos() + z * pitchOffset.sin();
 		
 		distance = Constants.BoilerHeight / z * Math.hypot(x, y);			
 		*/
