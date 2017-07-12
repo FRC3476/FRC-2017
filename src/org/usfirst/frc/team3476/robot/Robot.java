@@ -127,11 +127,11 @@ public class Robot extends IterativeRobot {
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-		VisionTracking.getInstance().execute(mainExecutor);
-		robotState.execute(mainExecutor);
-		orangeDrive.execute(mainExecutor);
-		shooter.execute(mainExecutor);
-		gearMech.execute(mainExecutor);
+		VisionTracking.getInstance().schedule(mainExecutor);
+		robotState.schedule(mainExecutor);
+		orangeDrive.schedule(mainExecutor);
+		shooter.schedule(mainExecutor);
+		gearMech.schedule(mainExecutor);
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
