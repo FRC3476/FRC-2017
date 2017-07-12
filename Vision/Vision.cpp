@@ -6,18 +6,7 @@
 #include <stdlib.h>
 #include <ntcore.h>
 #include <networktables/NetworkTable.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <iostream>
-#include <arpa/inet.h>	
-#include <unistd.h>
-#include <fstream>
-#include <cstring>
-#include <sstream>
-#include <opencv2/opencv.hpp>
-
-
+#include "Udp.h"
 
 using namespace cv;
 using namespace std;
@@ -242,24 +231,9 @@ void boilerVision()
 
 int main(int argc, char** argv )
 {
-
-	int to_clientfd, size;	
-	struct addrinfo hints;
-	
-	hints.ai_family = AF_INET; //AF_INET6 for IPV6 AF_UNSPEC for none
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = 0;
-	hints.ai_flags = AI_PASSIVE;		
-
-	std::vector<uchar> bytes;
-	std::stringstream messagestream;
-	messagestream << "you nerd";
-	std::string message = messagestream.str();
-	to_clientfd = createHttpListener(hints);
-	if(sendData(to_clientfd, message.c_str(), message.size()) == -1){
-		std::cout << "Failed to send message!!!" << std::endl;	
-	}
-  close(to_clientfd);
+	UdpClient sender("10.34.76.2", 5800);
+	std::string message("hello");
+	sender.send(message, sizeof(string));
 
 	NetworkTable::SetClientMode();
 	NetworkTable::SetTeam(3476);
