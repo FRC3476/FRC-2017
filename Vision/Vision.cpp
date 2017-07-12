@@ -26,71 +26,15 @@ shared_ptr<NetworkTable> table;
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
 
-int sendData(int sckfd, const void *data, int len){
-	unsigned char *pData = (unsigned char *) data;
-	int sent;
-	while(len > 0){
-		sent = send(sckfd, pData, len, 0);
-		if(sent == -1){
-			std::cout << "Failed to send" << std::endl;
-			return -1;
-		}
-		pData += sent;
-		len -= sent;
-	}
-	return 0;
-}
-
-int createHttpListener(struct addrinfo hints){
-	int sockfd;		
-	socklen_t addr_size;	
-	struct addrinfo *servinfo;	
-	struct sockaddr_in client_addr;		
-	
-	//std::cout << gai_strerror(getaddrinfo(NULL, "3476", &hints, &servinfo));
-	if(getaddrinfo("10.34.76.2", "5800", &hints, &servinfo) != 0){
-		std::cout << "Failed getaddrinfo" << std::endl;
-		return -1;
-	}
-	sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-	if(sockfd == -1){
-		std::cout << "Failed to get socketfd" << std::endl;
-		perror("dfla");
-		return -1;
-	}
-
-	int yes = 1;
-
-	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1){
-		std::cout << "Failed to reuse port" << std::endl;
-		return -1;
-	}	
-	
-	if(connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1){
-		std::cout << "Failed to connect to socket" << std::endl;
-    close(sockfd);
-		return -1;
-	}
-	
-	std::cout << "connected" << std::endl;	
-  
-	
-	addr_size = sizeof(client_addr);
-	freeaddrinfo(servinfo);	
-
-	return sockfd;
-
-}
-
 void makeGearServer()
 {
-	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/gear\" -o \"output_http.so -w ./www -p 1183\"");
+	system("/home/ubuntu/Documents/Vision/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/Vision/gear\" -o \"output_http.so -w ./www -p 1183\"");
 	
 }
 
 void makeBoilerServer()
 {
-	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/boiler\" -o \"output_http.so -w ./www -p 1184\"");
+	system("/home/ubuntu/Documents/Vision/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/Vision/boiler\" -o \"output_http.so -w ./www -p 1184\"");
 	
 }
 
@@ -308,13 +252,13 @@ int main(int argc, char** argv )
 	hints.ai_flags = AI_PASSIVE;		
 
 	std::vector<uchar> bytes;
-  std::stringstream messagestream;
-  messagestream << "you nerd";
-  std::string message = messagestream.str();
-  to_clientfd = createHttpListener(hints);
-  if(sendData(to_clientfd, message.c_str(), message.size()) == -1){
-  	std::cout << "Failed to send message!!!" << std::endl;	
-  }
+	std::stringstream messagestream;
+	messagestream << "you nerd";
+	std::string message = messagestream.str();
+	to_clientfd = createHttpListener(hints);
+	if(sendData(to_clientfd, message.c_str(), message.size()) == -1){
+		std::cout << "Failed to send message!!!" << std::endl;	
+	}
   close(to_clientfd);
 
 	NetworkTable::SetClientMode();

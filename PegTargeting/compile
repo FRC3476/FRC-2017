@@ -1,1 +1,0 @@
-g++ -std=c++14 restreamer.cpp -o Vision -L/home/ubuntu/Documents/PegTargeting/arm -I/home/ubuntu/Documents/PegTargeting/include -lntcore -lwpiutil -lpthread `pkg-config --cflags --libs opencv`
