@@ -85,7 +85,7 @@ public class Robot extends IterativeRobot {
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 	
-	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
+	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(4);
 	private double voltage = 0;
 
 	ScriptEngineManager manager;
@@ -127,11 +127,11 @@ public class Robot extends IterativeRobot {
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-		VisionTracking.getInstance().addTask(mainExecutor);
-		robotState.addTask(mainExecutor);
-		orangeDrive.addTask(mainExecutor);
-		shooter.addTask(mainExecutor);
-		gearMech.addTask(mainExecutor);
+		VisionTracking.getInstance().execute(mainExecutor);
+		robotState.execute(mainExecutor);
+		orangeDrive.execute(mainExecutor);
+		shooter.execute(mainExecutor);
+		gearMech.execute(mainExecutor);
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);

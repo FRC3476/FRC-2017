@@ -8,25 +8,37 @@ public abstract class Threaded implements Runnable {
 	private ScheduledFuture<?> taskFuture;
 	private boolean isRunning = false;
 
-	protected int RUNNINGSPEED;
+	private int RUNNINGSPEED;
 
 	public abstract void update();
+	
+	protected Threaded (int period) {
+		RUNNINGSPEED = period;
+	}
+	
+	protected Threaded () {
+		RUNNINGSPEED = 5;
+	}
 
 	@Override
-	public void run() {
+	final public void run() {
 		if (isRunning) {
 			update();
 		}
 	}
 
-	public void addTask(ScheduledExecutorService execIn) {
+	public void schedule(ScheduledExecutorService execIn) {
 		if (RUNNINGSPEED <= 0) { // int is zeroinitialized
-			System.out.println("RUNNINGSPEED not initialized or is negative");
+			System.out.println("RUNNINGSPEED is 0 or negative");
 		} else {
 			taskFuture = execIn.scheduleAtFixedRate(this, 0, RUNNINGSPEED, TimeUnit.MILLISECONDS);
 		}
 	}
 
+	public void execute(ExecutorService execIn) {
+		taskFuture = execIn.execute(this);
+	}
+	
 	public void endTask() {
 		if (taskFuture != null) {
 			if (!taskFuture.isCancelled()) {
