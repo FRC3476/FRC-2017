@@ -22,6 +22,7 @@ import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.Turret;
+import org.usfirst.frc.team3476.subsystem.VisionTracking;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
@@ -126,7 +127,7 @@ public class Robot extends IterativeRobot {
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-		
+		VisionTracking.getInstance().addTask(mainExecutor);
 		robotState.addTask(mainExecutor);
 		orangeDrive.addTask(mainExecutor);
 		shooter.addTask(mainExecutor);
@@ -225,6 +226,7 @@ public class Robot extends IterativeRobot {
 		orangeDrive.setRunningState(true);
 		shooter.setRunningState(true);
 		gearMech.setRunningState(true);
+		VisionTracking.getInstance().setRunningState(true);
 	
 		intake.setState(IntakeState.DOWN);
 		

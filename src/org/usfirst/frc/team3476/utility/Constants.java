@@ -63,7 +63,7 @@ public final class Constants {
 	public static double TurretTicksPerRotations = 4096 * (180 / 24);
 	public static boolean TurretEnabled = true;
 	
-	public static double BoilerHeight = 81 - a;
+	public static double BoilerHeight = 58;
 	public static double yCameraFOV = 38;
 	public static double xCameraFOV = 60;
 	// 

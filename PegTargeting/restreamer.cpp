@@ -6,6 +6,17 @@
 #include <stdlib.h>
 #include <ntcore.h>
 #include <networktables/NetworkTable.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <iostream>
+#include <arpa/inet.h>	
+#include <unistd.h>
+#include <fstream>
+#include <cstring>
+#include <sstream>
+#include <opencv2/opencv.hpp>
+
 
 
 using namespace cv;
@@ -14,17 +25,72 @@ using namespace std;
 shared_ptr<NetworkTable> table;
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
-const double TargetHeight = 81 - x;
+
+int sendData(int sckfd, const void *data, int len){
+	unsigned char *pData = (unsigned char *) data;
+	int sent;
+	while(len > 0){
+		sent = send(sckfd, pData, len, 0);
+		if(sent == -1){
+			std::cout << "Failed to send" << std::endl;
+			return -1;
+		}
+		pData += sent;
+		len -= sent;
+	}
+	return 0;
+}
+
+int createHttpListener(struct addrinfo hints){
+	int sockfd;		
+	socklen_t addr_size;	
+	struct addrinfo *servinfo;	
+	struct sockaddr_in client_addr;		
+	
+	//std::cout << gai_strerror(getaddrinfo(NULL, "3476", &hints, &servinfo));
+	if(getaddrinfo("10.34.76.2", "5800", &hints, &servinfo) != 0){
+		std::cout << "Failed getaddrinfo" << std::endl;
+		return -1;
+	}
+	sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+	if(sockfd == -1){
+		std::cout << "Failed to get socketfd" << std::endl;
+		perror("dfla");
+		return -1;
+	}
+
+	int yes = 1;
+
+	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1){
+		std::cout << "Failed to reuse port" << std::endl;
+		return -1;
+	}	
+	
+	if(connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1){
+		std::cout << "Failed to connect to socket" << std::endl;
+    close(sockfd);
+		return -1;
+	}
+	
+	std::cout << "connected" << std::endl;	
+  
+	
+	addr_size = sizeof(client_addr);
+	freeaddrinfo(servinfo);	
+
+	return sockfd;
+
+}
 
 void makeGearServer()
 {
-	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/gear\" -o \"output_http.so -w ./www -p 1181\"");
+	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/gear\" -o \"output_http.so -w ./www -p 1183\"");
 	
 }
 
 void makeBoilerServer()
 {
-	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/boiler\" -o \"output_http.so -w ./www -p 1182\"");
+	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/boiler\" -o \"output_http.so -w ./www -p 1184\"");
 	
 }
 
@@ -232,6 +298,24 @@ void boilerVision()
 
 int main(int argc, char** argv )
 {
+
+	int to_clientfd, size;	
+	struct addrinfo hints;
+	
+	hints.ai_family = AF_INET; //AF_INET6 for IPV6 AF_UNSPEC for none
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = 0;
+	hints.ai_flags = AI_PASSIVE;		
+
+	std::vector<uchar> bytes;
+  std::stringstream messagestream;
+  messagestream << "you nerd";
+  std::string message = messagestream.str();
+  to_clientfd = createHttpListener(hints);
+  if(sendData(to_clientfd, message.c_str(), message.size()) == -1){
+  	std::cout << "Failed to send message!!!" << std::endl;	
+  }
+  close(to_clientfd);
 
 	NetworkTable::SetClientMode();
 	NetworkTable::SetTeam(3476);
