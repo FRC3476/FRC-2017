@@ -161,8 +161,7 @@ void processBoiler(Mat &frame){
 }
 
 
-void gearVision()
-{
+void gearVision(){
 	Mat gearFrame;
 	VideoCapture gearCam;
 	gearCam.open(0);
@@ -181,8 +180,7 @@ void gearVision()
 		processGear(gearFrame);
 		
 		VideoWriter writer ("/home/ubuntu/Documents/PegTargeting/gear/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (gearCam.get(3), gearCam.get(4)), -1);
-		if (!writer.isOpened())
-		{
+		if (!writer.isOpened()){
 			cout << "failed to open stream writer" << endl;
 			return;
 		}
@@ -194,13 +192,12 @@ void gearVision()
 	}
 } 
 
-void boilerVision()
-{
+void boilerVision(){
 	Mat boilerFrame;
 	VideoCapture boilerCam;
 	boilerCam.open(1);
 
-  if(!boilerCam.isOpened()){
+	if(!boilerCam.isOpened()){
      cout << "boiler not opened " << endl;
      return;
 	}
@@ -214,8 +211,7 @@ void boilerVision()
 		processBoiler(boilerFrame);
 		
 		VideoWriter writer ("/home/ubuntu/Documents/PegTargeting/boiler/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (boilerCam.get(3), boilerCam.get(4)), -1);
-		if (!writer.isOpened())
-		{
+		if (!writer.isOpened()){
 			cout << "failed to open stream writer" << endl;
 			return;
 		}
@@ -229,8 +225,7 @@ void boilerVision()
 } 
 
 
-int main(int argc, char** argv )
-{
+int main(int argc, char** argv ) {
 	UdpClient sender("10.34.76.2", 5800);
 	std::string message("hello");
 	sender.send(message, sizeof(string));
