@@ -5,17 +5,18 @@ class UDPClient {
 public:
 	UDPClient(const char* ip, int port);
 	~UDPClient();
-	int SendData(const void *data, int len);
+	int Send(const void *data, int len);
 private:
-	std::unique_ptr<int, close> sockfd;
+	int sockfd;
 }
 
 class UDPListener {	
 public:
 	UDPListener(int port);
 	~UDPListener();
+	int Recv(void *data, int len);
 private:
-	std::unique_ptr<int, close> sockfd;
+	int sockfd;
 	
 }
 
