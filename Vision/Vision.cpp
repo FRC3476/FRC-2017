@@ -35,7 +35,6 @@ bool sortByY(const Point &lhs, const Point &rhs) {
 	return lhs.y > rhs.y;
 }
 
-
 void processGear(Mat &frame){
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
@@ -179,7 +178,7 @@ void gearVision(){
 		gearCam.read(gearFrame);		
 		processGear(gearFrame);
 		
-		VideoWriter writer ("/home/ubuntu/Documents/PegTargeting/gear/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (gearCam.get(3), gearCam.get(4)), -1);
+		VideoWriter writer ("/home/ubuntu/Documents/Vision/gear/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (gearCam.get(3), gearCam.get(4)), -1);
 		if (!writer.isOpened()){
 			cout << "failed to open stream writer" << endl;
 			return;
@@ -210,7 +209,7 @@ void boilerVision(){
 		boilerCam.read(boilerFrame);
 		processBoiler(boilerFrame);
 		
-		VideoWriter writer ("/home/ubuntu/Documents/PegTargeting/boiler/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (boilerCam.get(3), boilerCam.get(4)), -1);
+		VideoWriter writer ("/home/ubuntu/Documents/Vision/boiler/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (boilerCam.get(3), boilerCam.get(4)), -1);
 		if (!writer.isOpened()){
 			cout << "failed to open stream writer" << endl;
 			return;
@@ -219,16 +218,15 @@ void boilerVision(){
 		auto boilerEnd = chrono::high_resolution_clock::now();    
 		auto boilerDur = boilerEnd - boilerBegin;
 		auto boilerMs = std::chrono::duration_cast<std::chrono::milliseconds>(boilerDur).count();
-		table->PutNumber("boilerTimeAgo", boilerMs);
-		
+		table->PutNumber("boilerTimeAgo", boilerMs);		
 	}
 } 
 
 
 int main(int argc, char** argv ) {
-	UdpClient sender("10.34.76.2", 5800);
+	UDPClient sender("10.34.76.2", 5800);
 	std::string message("hello");
-	sender.send(message, sizeof(string));
+	sender.Send(message, sizeof(string));
 
 	NetworkTable::SetClientMode();
 	NetworkTable::SetTeam(3476);

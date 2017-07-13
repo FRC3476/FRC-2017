@@ -24,13 +24,9 @@ public class VisionTracking extends Threaded {
 	private ExecutorService workers;
 	private DatagramSocket listener;
 	
-	private Rotation gearAngle;
-	private Rotation turretAngle;
 	private Interpolable lookupTable;
-	private double desiredFlywheelSpeed;
 	
 	public VisionTracking() {
-		super(10);
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
@@ -44,8 +40,7 @@ public class VisionTracking extends Threaded {
 	@Override
 	public void update() {
 		byte[] buffer = new byte[2048];
-		System.out.println("pritning");
-		DriverStation.getInstance().reportError("printing", false);
+		System.out.println("listening");
 		DatagramPacket msg = new DatagramPacket(buffer, buffer.length);
 		try {
 			listener.receive(msg);
@@ -75,10 +70,6 @@ public class VisionTracking extends Threaded {
 		*/
 	}	
 	
-	public synchronized double getFlywheelSpeed(){
-		return desiredFlywheelSpeed;
-	}
-	
 	class MessageHandler extends Threaded {
 		
 		DatagramPacket packet;
@@ -89,9 +80,7 @@ public class VisionTracking extends Threaded {
 		
 		public void update(){
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
-
-			DriverStation.getInstance().reportError(rawMessage, false);
-			
+			System.out.println(rawMessage);
 		}
 	}
 }

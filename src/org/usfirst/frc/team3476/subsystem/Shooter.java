@@ -171,12 +171,6 @@ public class Shooter extends Threaded {
 	
 	@Override
 	public synchronized void update() {
-		/*
-		NetworkTable.getTable("/shooter").putNumber("rpms", flywheel.getSpeed());
-		NetworkTable.getTable("/shooter").putNumber("setpoint", desiredSpeed);
-		NetworkTable.getTable("/shooter").putNumber("angle", turret.getAngle().getDegrees());
-		NetworkTable.getTable("/shooter").putNumber("current", hopper.getCurrent());
-		*/
 		hopper.setState(hopperState);
 		if(Constants.TurretEnabled){
 			switch(turretState){

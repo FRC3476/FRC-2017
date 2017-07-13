@@ -1,46 +1,43 @@
 #include "Udp.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
-int UDPClient::Send(const void* data, int len){
-	int sent = 0;
-	while(len > 0){		
-		sent += send(sockfd, (unsigned char*) data + sent, len, 0);
-		if(sent == -1){
-			return -1;
-		}
-		len -= sent;
-	}
-	return sent;
-}
-
-int UDPCListener::Recv(void* data, int len){
-	int recv = 0;
-	while(len > 0){		
-		recv += recv(sockfd, (unsigned char*) data + recv, len, 0);
-		if(sent == -1){
-			return -1;
-		}
-		len -= recv;
-	}
-	return recv;
-}
-
-
-UDPClient::UDPClient(const char* ip, int port) : sockfd(PF_INET, SOCK_DGRAM, getprotobyname("udp")){
+UDPClient::UDPClient(const char* ip, int port) : sockfd(socket(PF_INET, SOCK_DGRAM, 0)){
 	sockaddr_in addr {0};
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	inet_hton(ip, &addr.sin_addr.s_addr);
+	inet_pton(AF_INET, ip, &addr.sin_addr);
 	if(connect(sockfd, (struct sockaddr*) &addr, sizeof(addr)) == -1){
 		close(sockfd);
 		//NOT CONNECTED
 	}
 }
 
-~UDPClient::UDPClient() {
+UDPClient::~UDPClient() {
 	close(sockfd);
 }
 
-UDPListener::UDPListener(int port) : sockfd(PF_INET, SOCK_DGRAM, getprotobyname("udp")){	
+bool UDPClient::Send(const void* data, int len){
+	int sent = 0;
+	while(len > 0){		
+		sent = send(sockfd, (unsigned char*) data, len, 0);
+		if(sent == -1){
+			return false;
+		}
+		data += sent;
+		len += sent;
+	}
+	return true;
+}
+
+UDPListener::UDPListener(int port) : sockfd(socket(PF_INET, SOCK_DGRAM, 0)){	
 	sockaddr_in addr {0};
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -51,6 +48,19 @@ UDPListener::UDPListener(int port) : sockfd(PF_INET, SOCK_DGRAM, getprotobyname(
 	}
 }
 
-~UDPListener::UDPListener() {
+UDPListener::~UDPListener() {
 	close(sockfd);
+}
+
+bool UDPListener::Recv(void* data, int len){
+	int received = 0;
+	while(len > 0){		
+		received = recv(sockfd, (unsigned char*) data + received, len, 0);
+		if(received == -1){s
+			return false;
+		}
+		data += received;
+		len -= received;
+	}
+	return true;s
 }
