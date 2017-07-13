@@ -89,7 +89,6 @@ public class Shooter extends Threaded {
 	}
 	
 	private Shooter(){
-		RUNNINGSPEED = 10;
 		hood = new Servo(Constants.ServoId);
 		hood.setBounds(1,0,0,0,2);
 		currentState = ShooterState.IDLE;
@@ -298,7 +297,7 @@ public class Shooter extends Threaded {
 	
 	public synchronized void updateDesiredSpeed(){
 		
-		double distance = VisionTracking.getInstance().getBoilerDistance();
+		double distance = 0;//VisionTracking.getInstance().getBoilerDistance();
 		if(distance < 100){
 			desiredSpeed = lookupTable07.interpolate(distance);
 			hood.set(0.7);

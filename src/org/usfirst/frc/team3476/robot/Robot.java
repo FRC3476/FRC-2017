@@ -85,8 +85,9 @@ public class Robot extends IterativeRobot {
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 	
-	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(4);
+	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
 	private double voltage = 0;
+	VisionTracking vision = new VisionTracking();
 
 	ScriptEngineManager manager;
 	ScriptEngine engine;
@@ -127,7 +128,7 @@ public class Robot extends IterativeRobot {
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-		VisionTracking.getInstance().schedule(mainExecutor);
+		vision.schedule(mainExecutor);
 		robotState.schedule(mainExecutor);
 		orangeDrive.schedule(mainExecutor);
 		shooter.schedule(mainExecutor);
@@ -223,10 +224,10 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		robotState.setRunningState(false);
-		orangeDrive.setRunningState(true);
-		shooter.setRunningState(true);
-		gearMech.setRunningState(true);
-		VisionTracking.getInstance().setRunningState(true);
+		orangeDrive.setRunningState(false);
+		shooter.setRunningState(false);
+		gearMech.setRunningState(false);
+		vision.setRunningState(true);
 	
 		intake.setState(IntakeState.DOWN);
 		

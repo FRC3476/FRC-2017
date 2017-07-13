@@ -3,8 +3,12 @@ package org.usfirst.frc.team3476.subsystem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
@@ -12,6 +16,8 @@ import org.usfirst.frc.team3476.utility.Interpolable;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.usfirst.frc.team3476.utility.Translation;
+
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class VisionTracking extends Threaded {
 
@@ -24,17 +30,28 @@ public class VisionTracking extends Threaded {
 	private double desiredFlywheelSpeed;
 	
 	public VisionTracking() {
-		listener = new DatagramSocket(5800);
-		workers = ExecutorService.newFixedThreadPool(2);
+		super(10);
+		try {
+			listener = new DatagramSocket(5800);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		workers = Executors.newFixedThreadPool(2);
 		lookupTable = new Interpolable();
 		lookupTable.addNumber(10.0, 10.0);		
 	}
 
 	@Override
-	public synchronized void update() {
-		byte[] buffer = new byte[2048]
+	public void update() {
+		byte[] buffer = new byte[2048];
+		System.out.println("pritning");
+		DriverStation.getInstance().reportError("printing", false);
 		DatagramPacket msg = new DatagramPacket(buffer, buffer.length);
-		listener.receive(msg);
+		try {
+			listener.receive(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		workers.execute(new MessageHandler(msg));		
 	}
 	
@@ -62,7 +79,7 @@ public class VisionTracking extends Threaded {
 		return desiredFlywheelSpeed;
 	}
 	
-	class MessageHandler implements Threaded {
+	class MessageHandler extends Threaded {
 		
 		DatagramPacket packet;
 		
@@ -70,12 +87,11 @@ public class VisionTracking extends Threaded {
 			this.packet = packet;
 		}
 		
-		public void run(){
+		public void update(){
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
-			String[] message = rawMessage.split(",");
-			for(String part : message) {
-				System.out.println(part);
-			}
+
+			DriverStation.getInstance().reportError(rawMessage, false);
+			
 		}
 	}
 }

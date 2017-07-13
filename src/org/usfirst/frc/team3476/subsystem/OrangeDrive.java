@@ -96,7 +96,6 @@ public class OrangeDrive extends Threaded {
 	}
 	
 	private OrangeDrive() {
-		RUNNINGSPEED = 10;
 		
 		leftTalon = new CANTalon(Constants.LeftMasterDriveId);
 		rightTalon = new CANTalon(Constants.RightMasterDriveId);

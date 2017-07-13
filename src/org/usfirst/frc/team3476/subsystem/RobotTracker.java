@@ -25,7 +25,6 @@ public class RobotTracker extends Threaded {
 	}
 
 	private RobotTracker() {
-		RUNNINGSPEED = 10;
 		driveBase.zeroSensors();
 		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;

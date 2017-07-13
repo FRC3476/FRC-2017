@@ -1,11 +1,14 @@
 package org.usfirst.frc.team3476.utility;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Threaded implements Runnable {
-	private ScheduledFuture<?> taskFuture;
+	private Future<?> taskFuture;
 	private boolean isRunning = false;
 
 	private int RUNNINGSPEED;
@@ -35,8 +38,8 @@ public abstract class Threaded implements Runnable {
 		}
 	}
 
-	public void execute(ExecutorService execIn) {
-		taskFuture = execIn.execute(this);
+	public void execute(Executor execIn) {
+		execIn.execute(this);
 	}
 	
 	public void endTask() {

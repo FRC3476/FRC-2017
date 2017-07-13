@@ -41,7 +41,6 @@ public class Gear extends Threaded {
 	}
 	
 	private Gear() {
-		  RUNNINGSPEED = 50;
 		  gearFeederTalon = new CANTalon(Constants.GearMechFeederID);
 		  gearFeederTalon.changeControlMode(TalonControlMode.PercentVbus);
 		  
