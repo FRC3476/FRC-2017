@@ -2,16 +2,13 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 #include <vector>
+#include <list>
 #include <chrono>
-#include <stdlib.h>
-#include <ntcore.h>
-#include <networktables/NetworkTable.h>
 #include "Udp.h"
 
 using namespace cv;
 using namespace std;
 
-shared_ptr<NetworkTable> table;
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
 
@@ -31,8 +28,16 @@ bool sortByArea(const vector<Point> &lhs, const vector<Point> &rhs) {
 	return (contourArea(lhs) < contourArea(rhs));
 }
 
+bool SortByX(const cv::Point& a, const cv::Point& b) {
+    return a.x < b.x;
+}
+
 bool sortByY(const Point &lhs, const Point &rhs) {
 	return lhs.y > rhs.y;
+}
+
+bool IsLessThanTwo(const std::vector<cv::Point>>& group) {
+	return group.size() < 2;
 }
 
 void processGear(Mat &frame){
@@ -89,11 +94,8 @@ void processGear(Mat &frame){
    //f = d * p / h;
    // double f = 52 * box.height / 5;
 	
-		table->PutNumber("gearAngle", ((midX - xResolution/2)/xResolution) * xCameraFOV);
-		table->PutNumber("gearDistance", distance);
-		table->PutBoolean("isGearVisible", true);		
 	} else {		
-		table->PutBoolean("isGearVisible", false);
+	
 	}
 }
 
@@ -101,62 +103,33 @@ void processBoiler(Mat &frame){
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
 	Mat thres;
-	vector<vector<Point> > contours, allContours;
+	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;	
 	
 	cvtColor(frame, thres, COLOR_BGR2HSV);
-	inRange(thres, Scalar(45, 95, 60), Scalar(85, 255, 255), thres);
-  //morphologyEx(thres, thres, MORPH_CLOSE, Mat(3, 3, CV_8UC1, Scalar(10)), Point(-1, -1), 1);
-	
-
-
-	//imshow("cvt", thres);	
-	findContours(thres, allContours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point(0, 0));	
-
-	contours.clear();
-	for(auto contour : allContours){
-		if(contourArea(contour) > 100 && contourArea(contour) < 30000){
-			contours.push_back(contour);	
-		} 
+	inRange(thres, Scalar(40, 90, 100), Scalar(80, 255, 2), thres);
+	findContours(thres, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point(0, 0));
+	std::vector<cv::Point> centers;
+	for(auto contour : contours) {
+		cv::Rect target = cv::boundingRect(contour);
+		int x = target.x + (target.width / 2);
+		int y = target.y + (target.heigth / 2);
+		centers.push_back(cv::Point(x, y));
 	}
+	std::sort(centers.begin(), centers.end(), SortByX);
+    std::list<std::vector<cv::Point>> sortedX;
+    for (auto it = std::begin(centers); it != std::end(centers); ) {
+        std::vector<cv::Point> currentX;
+        currentX.push_back(*it);
+        ++it;
+        while (std::abs(it->x - std::prev(it)->x) < 50 && it != centers.end()) {
+            currentX.push_back(*it);
+            ++it;            
+        }        
+        sortedX.push_back(currentX);
+    }
+	sortedX.remove_if(IsLessThanTwo);
 	
-	sort(contours.begin(), contours.end(), sortByArea);
-
-	if (contours.size() > 1) {
-		vector<vector<Point> > hulls(2);
-		
-		Moments mu = moments(contours[0], false);
-		int cX = mu.m10 / mu.m00;
-		int cY = mu.m01 / mu.m00;
-		// Maximum of three correct contours
-		Moments mus = moments(contours[1], false);
-		int tX = mus.m10 / mus.m00;
-		int tY = mus.m01 / mus.m00;
-	
-		double firstEps = 0.001 * arcLength(contours[0], true);
-		approxPolyDP(contours[0], hulls[0], firstEps, true);	
-		drawContours(frame, hulls, 0, Scalar(255, 255, 255), 1, 1);
-		
-		double secondEps = 0.000001 * arcLength(contours[1], true);
-		approxPolyDP(contours[1], hulls[1], secondEps, true);
-		drawContours(frame, hulls, 1, Scalar(255, 255, 255), 2);
-		
-   
-		contours[0].insert(contours[0].end(), contours[1].begin(), contours[1].end());	
-	
-		Rect box = boundingRect(contours[0]);
-		double midX = box.x + box.width / 2;
-		//to get the height from the bottom
-		double midY = yResolution - (box.y + box.height / 2);
-   
-		
-   
-		table->PutNumber("boilerX", xResolution - midX);
-		table->PutNumber("boilerY", -midY);
-		table->PutBoolean("isBoilerVisible", true);
-	} else {
-		table->PutBoolean("isBoilerVisible", false);
-	}
 }
 
 
@@ -227,10 +200,6 @@ int main(int argc, char** argv ) {
 	UDPClient sender("10.34.76.2", 5800);
 	std::string message("hello");
 	sender.Send(message, sizeof(string));
-
-	NetworkTable::SetClientMode();
-	NetworkTable::SetTeam(3476);
-	table = NetworkTable::GetTable("");
 
 	thread gearServer(makeGearServer);
 	thread boilerServer(makeBoilerServer);
