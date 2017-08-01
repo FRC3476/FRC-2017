@@ -1,7 +1,5 @@
 package org.usfirst.frc.team3476.auto;
 
-import java.util.List;
-
 public final class ActionRunner {
 
 	private ActionRunner() {

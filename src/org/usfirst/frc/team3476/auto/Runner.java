@@ -1,10 +1,7 @@
 package org.usfirst.frc.team3476.auto;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.usfirst.frc.team3476.auto.Action;
 
 import edu.wpi.first.wpilibj.DriverStation;
 

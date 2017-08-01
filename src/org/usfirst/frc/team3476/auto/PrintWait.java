@@ -1,7 +1,5 @@
 package org.usfirst.frc.team3476.auto;
 
-import java.sql.Date;
-
 public class PrintWait implements Action
 {
 	private String msg;

@@ -1,10 +1,7 @@
 package org.usfirst.frc.team3476.utility;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import org.usfirst.frc.team3476.utility.Path.Waypoint;
 
 
 public class Path {

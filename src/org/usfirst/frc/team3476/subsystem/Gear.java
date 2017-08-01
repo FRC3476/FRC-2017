@@ -1,19 +1,13 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
-import org.usfirst.frc.team3476.subsystem.OrangeDrive.DriveVelocity;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Gear extends Threaded {
 	
