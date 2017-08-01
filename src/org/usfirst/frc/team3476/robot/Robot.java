@@ -1,18 +1,15 @@
 package org.usfirst.frc.team3476.robot;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.usfirst.frc.team3476.subsystem.Flywheel;
 import org.usfirst.frc.team3476.subsystem.Gear;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
-import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
 import org.usfirst.frc.team3476.subsystem.Intake;
 import org.usfirst.frc.team3476.subsystem.Intake.IntakeState;
 import org.usfirst.frc.team3476.subsystem.OrangeDrive;
@@ -21,35 +18,22 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
-import org.usfirst.frc.team3476.subsystem.Turret;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Path;
-import org.usfirst.frc.team3476.utility.Path.Waypoint;
-import org.usfirst.frc.team3476.utility.RigidTransform;
-import org.usfirst.frc.team3476.utility.Rotation;
-import org.usfirst.frc.team3476.utility.Translation;
+import org.usfirst.frc.team3476.utility.ThreadScheduler;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
-import com.ctre.CANTalon.VelocityMeasurementPeriod;
 
-import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.hal.PDPJNI;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.networktables.NetworkTablesJNI;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -84,7 +68,8 @@ public class Robot extends IterativeRobot {
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 	
-	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
+	ExecutorService mainExecutor = Executors.newFixedThreadPool(4);
+	ThreadScheduler scheduler = new ThreadScheduler();
 	private double voltage = 0;
 
 	ScriptEngineManager manager;
@@ -115,11 +100,6 @@ public class Robot extends IterativeRobot {
 		shooter = Shooter.getInstance();
 		gearMech = Gear.getInstance();
 		
-		//CameraServer.getInstance().startAutomaticCapture();
-		/*
-		UsbCamera cam = new UsbCamera("cam", 0);
-		MjpegServer server = new MjpegServer("server", 1180);
-		server.setSource(cam);*/
 		
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
@@ -127,10 +107,10 @@ public class Robot extends IterativeRobot {
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
 		
-		robotState.addTask(mainExecutor);
-		orangeDrive.addTask(mainExecutor);
-		shooter.addTask(mainExecutor);
-		gearMech.addTask(mainExecutor);
+		scheduler.schedule(robotState, 5000000, mainExecutor);
+		scheduler.schedule(orangeDrive, 5000000, mainExecutor);
+		scheduler.schedule(shooter, 5000000, mainExecutor);
+		scheduler.schedule(gearMech, 5000000, mainExecutor);
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
@@ -166,10 +146,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		//double start = System.currentTimeMillis();
 		orangeDrive.zeroSensors();
-		robotState.setRunningState(true);
-		orangeDrive.setRunningState(true);
-		gearMech.setRunningState(true);
-		shooter.setRunningState(true);
+		
 		if(!shooter.isHomed()){		
 			shooter.setHome();
 		}
@@ -221,11 +198,7 @@ public class Robot extends IterativeRobot {
 	
 	@Override
 	public void teleopInit() {
-		robotState.setRunningState(false);
-		orangeDrive.setRunningState(true);
-		shooter.setRunningState(true);
-		gearMech.setRunningState(true);
-	
+		
 		intake.setState(IntakeState.DOWN);
 		
 		if(!shooter.isHomed()){
@@ -365,10 +338,6 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		orangeDrive.resetState();
 		shooter.resetState();
-		robotState.setRunningState(false);
-		orangeDrive.setRunningState(false);		
-		shooter.setRunningState(false);
-		gearMech.setRunningState(false);
 	}
 
 	/**

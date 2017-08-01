@@ -5,9 +5,7 @@ import org.usfirst.frc.team3476.utility.Constants;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Intake {
 

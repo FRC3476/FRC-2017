@@ -5,7 +5,6 @@ import org.usfirst.frc.team3476.utility.Rotation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 public class Turret {

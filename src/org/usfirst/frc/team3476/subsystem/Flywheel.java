@@ -7,9 +7,6 @@ import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 import com.ctre.CANTalon.VelocityMeasurementPeriod;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
-
 public class Flywheel {
 
 	private CANTalon masterTalon, slaveTalon;

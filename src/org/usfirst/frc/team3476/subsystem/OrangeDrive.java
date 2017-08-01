@@ -3,7 +3,6 @@ package org.usfirst.frc.team3476.subsystem;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.OrangeUtility;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Rotation;
@@ -13,19 +12,14 @@ import org.usfirst.frc.team3476.utility.Translation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.MotionProfileStatus;
 import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /* Inspiration from Team 254 */
 
@@ -95,9 +89,7 @@ public class OrangeDrive extends Threaded {
 		gearState = GearDrivingState.DONE;
 	}
 	
-	private OrangeDrive() {
-		RUNNINGSPEED = 10;
-		
+	private OrangeDrive() {		
 		leftTalon = new CANTalon(Constants.LeftMasterDriveId);
 		rightTalon = new CANTalon(Constants.RightMasterDriveId);
 
@@ -448,7 +440,7 @@ public class OrangeDrive extends Threaded {
 		// Units in in/s
 		// Shift if the current speed is over a certain point
 		// 90 % of low gear speed
-		if(shiftState == shiftState.AUTO){
+		if(shiftState == ShiftState.AUTO){
 			if(getGear()){
 	        	if(Math.abs(getSpeed()) > 56){
 	        		shiftUp();
@@ -471,7 +463,7 @@ public class OrangeDrive extends Threaded {
 			
 			// get acceleration
 			// assumes that wheel speed pid works
-			// works by limiting how much higher/lower we can set the speed		
+			// works by limiting how much higher/lower we can set the speed
 			double now = Timer.getFPGATimestamp();
 			double dt = (now - lastTime);
 			

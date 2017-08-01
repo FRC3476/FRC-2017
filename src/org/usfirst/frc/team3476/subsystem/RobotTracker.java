@@ -5,9 +5,6 @@ import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.usfirst.frc.team3476.utility.Translation;
 
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.SPI;
-
 public class RobotTracker extends Threaded {
 
 	private static RobotTracker trackingInstance = new RobotTracker();
@@ -25,7 +22,6 @@ public class RobotTracker extends Threaded {
 	}
 
 	private RobotTracker() {
-		RUNNINGSPEED = 10;
 		driveBase.zeroSensors();
 		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;

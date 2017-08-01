@@ -1,11 +1,9 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Interpolable;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.Translation;
 
 public class VisionTracking extends Threaded {
 
@@ -22,7 +20,6 @@ public class VisionTracking extends Threaded {
 	}
 	
 	private VisionTracking() {
-		RUNNINGSPEED = 10;
 		lookupTable = new Interpolable();
 		lookupTable.addNumber(10.0, 10.0);
 		
