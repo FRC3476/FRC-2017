@@ -22,7 +22,7 @@ public class Drive implements Action {
 
 	@Override
 	public void start() {
-		RobotTracker.getInstance().resetPose();
+		RobotTracker.getInstance().resetOdometry();
 		OrangeDrive.getInstance().setAutoPath(setPath, reversed);
 	}
 

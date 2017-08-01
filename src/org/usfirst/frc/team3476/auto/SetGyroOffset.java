@@ -15,7 +15,7 @@ public class SetGyroOffset implements Action{
 	@Override
 	public void start() {
 		OrangeDrive.getInstance().setOffset(offset);
-		RobotTracker.getInstance().resetPose();
+		RobotTracker.getInstance().resetOdometry();
 	}
 
 	@Override

@@ -6,7 +6,27 @@ import edu.wpi.first.wpilibj.Joystick;
 public class Controller extends Joystick {
 
 	private int oldButtons;
-	private int currentButtons;
+	private int currentButtons;	
+
+	public static class Xbox {
+		public static int A = 1;
+		public static int B = 2;
+		public static int X = 3;
+		public static int Y = 4;
+		public static int LeftBumper = 5;
+		public static int RightBumper = 6;
+		public static int Back = 7;
+		public static int Start = 8;
+		public static int LeftClick = 9;
+		public static int RightClick = 10;
+		
+		public static int LeftX = 0;
+		public static int LeftY = 1;
+		public static int LeftTrigger = 2;
+		public static int RightTrigger = 3;
+		public static int RightX = 4;
+		public static int RightY = 5;			
+	}
 
 	public Controller(int port) {
 		super(port);

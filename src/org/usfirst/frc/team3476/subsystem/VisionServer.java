@@ -19,22 +19,18 @@ import org.usfirst.frc.team3476.utility.Translation;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
-public class VisionTracking extends Threaded {
+public class VisionServer extends Threaded {
 
 	private ExecutorService workers;
 	private DatagramSocket listener;
 	
-	private Interpolable lookupTable;
-	
-	public VisionTracking() {
+	public VisionServer() {
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
 		workers = Executors.newFixedThreadPool(2);
-		lookupTable = new Interpolable();
-		lookupTable.addNumber(10.0, 10.0);		
 	}
 
 	@Override

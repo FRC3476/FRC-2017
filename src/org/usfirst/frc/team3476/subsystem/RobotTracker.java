@@ -15,7 +15,6 @@ public class RobotTracker extends Threaded {
 
 	private RigidTransform currentPose;
 	private Rotation deltaRotation;
-
 	
 	private double currentDistance, oldDistance, deltaDistance;
 	
@@ -30,11 +29,13 @@ public class RobotTracker extends Threaded {
 		oldDistance = 0;
 	}
 
-	
-	// TODO: Timestamp it for Orange County
-	// Ain't even our final form yet
 	@Override
-	public synchronized void update() {
+	public void update() {
+		updateOdometry();
+		
+	}
+	
+	public void updateOdometry(){
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		deltaDistance = currentDistance - oldDistance;
@@ -52,14 +53,20 @@ public class RobotTracker extends Threaded {
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
 			//System.out.println("change is large");
 		}
-
 		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
-		currentPose = currentPose.transform(new RigidTransform(deltaPosition, deltaRotation));
-		//System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
-		//System.out.println(currentPose.rotationMat.getDegrees());
-		oldDistance = currentDistance;
+		synchronized(this){
+			currentPose = currentPose.transform(new RigidTransform(deltaPosition, deltaRotation));
+			//System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
+			//System.out.println(currentPose.rotationMat.getDegrees());
+			oldDistance = currentDistance;				
+		}
+		
 	}
 
+	public void updateVision(){
+		
+	}
+	
 	public synchronized RigidTransform getCurrentPosition() {
 		return currentPose;
 	}
@@ -68,7 +75,7 @@ public class RobotTracker extends Threaded {
 		return currentPose.rotationMat;
 	}
 	
-	public synchronized void resetPose(){
+	public synchronized void resetOdometry(){
 		driveBase.zeroSensors();
 		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;
@@ -79,9 +86,7 @@ public class RobotTracker extends Threaded {
 	}
 }
 
-/*
-TODO: 
- 
+/* 
 How we calculate curvature
 
 From https://github.com/strasdat/Sophus/blob/master/sophus/se2.hpp

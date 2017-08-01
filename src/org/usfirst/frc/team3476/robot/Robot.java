@@ -22,7 +22,7 @@ import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.Turret;
-import org.usfirst.frc.team3476.subsystem.VisionTracking;
+import org.usfirst.frc.team3476.subsystem.VisionServer;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
@@ -62,36 +62,30 @@ import edu.wpi.first.wpilibj.networktables.NetworkTablesJNI;
 
 public class Robot extends IterativeRobot {
 
-	Controller xbox = new Controller(0);
-	Controller joystick = new Controller(1);
-	Controller buttonBox = new Controller(2);
+	Controller xbox;
+	Controller joystick;
+	Controller buttonBox;
 
-	double speed = Constants.InitialFlywheelSpeed;
 	RobotTracker robotState;
 	OrangeDrive orangeDrive;
 	Shooter shooter;
-	Intake intake = Intake.getInstance();
-	double gearSpeed = 0.15;
+	Intake intake;
 	Gear gearMech;
 	CANTalon climber;
 	CANTalon climberSlave;
 	CANTalon tempIntake = new CANTalon(Constants.IntakeId);
-	boolean homed = false;
-	boolean lowExposure = true;
-
 	
-	DigitalOutput turnOnJetson = new DigitalOutput(0);
-	DigitalOutput led =  new DigitalOutput(4);
+	boolean lowExposure = true;
+	
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 	
 	ScheduledExecutorService mainExecutor = Executors.newScheduledThreadPool(2);
-	private double voltage = 0;
-	VisionTracking vision = new VisionTracking();
+	VisionServer vision = new VisionServer();
 
+	
 	ScriptEngineManager manager;
-	ScriptEngine engine;
-	  	
+	ScriptEngine engine;	  	
 	String code;
 	String helperCode;
 
@@ -101,33 +95,35 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		NetworkTable.globalDeleteAll();					
 		
+		DigitalOutput turnOnJetson = new DigitalOutput(0);
 		turnOnJetson.set(false);
 		double initialTime = System.currentTimeMillis();
 		while((System.currentTimeMillis() - initialTime) < 1000){
 			// do nothing
 		}
 		turnOnJetson.set(true);
-		NetworkTable.globalDeleteAll();	
+		new DigitalOutput(4).set(true);
 		
-		led.set(true);
+		//Controllers
+		xbox = new Controller(0);
+		joystick = new Controller(1);
+		buttonBox = new Controller(2);
+		
 		//Subsystems
 		robotState = RobotTracker.getInstance();
 		orangeDrive = OrangeDrive.getInstance();
 		shooter = Shooter.getInstance();
+		intake = Intake.getInstance();
 		gearMech = Gear.getInstance();
-		
-		//CameraServer.getInstance().startAutomaticCapture();
-		/*
-		UsbCamera cam = new UsbCamera("cam", 0);
-		MjpegServer server = new MjpegServer("server", 1180);
-		server.setSource(cam);*/
 		
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
+		
 		vision.schedule(mainExecutor);
 		robotState.schedule(mainExecutor);
 		orangeDrive.schedule(mainExecutor);
@@ -137,14 +133,8 @@ public class Robot extends IterativeRobot {
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
 		
-		//CameraServer.getInstance().addAxisCamera("boilerCamera", "10.34.76.8:1183/?action=stream");
-		//CameraServer.getInstance().addAxisCamera("gearCamera", "10.34.76.8:1182/?action=stream");
-
-		
 		manager = new ScriptEngineManager();
-		engine = manager.getEngineByName("js");
-		
-		
+		engine = manager.getEngineByName("js");		
 		
 		// Put all variables for auto here
 		engine.put("orangeDrive", orangeDrive);
@@ -189,7 +179,6 @@ public class Robot extends IterativeRobot {
 		curve.addWaypoint(new Waypoint(20, 120, 50));
 		orangeDrive.setAutoPath(curve, false);
 		*/
-
 	}
 
 	/**
@@ -201,8 +190,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	@Override
-	public void disabledPeriodic(){
-		
+	public void disabledPeriodic(){		
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
 		if(engine == null){
@@ -216,8 +204,7 @@ public class Robot extends IterativeRobot {
 		catch (ScriptException e)
 		{
 			e.printStackTrace();
-		}
-		
+		}		
 	}
 	
 	
@@ -332,36 +319,11 @@ public class Robot extends IterativeRobot {
 			shooter.setTurretPower(0);
 		}
 		
-		if(buttonBox.getRisingEdge(9)){
-			speed += 50;
-			shooter.setSpeed(speed);
-		} 
-		if(buttonBox.getRisingEdge(10)){
-			speed -= 50;
-			shooter.setSpeed(speed);
-		} 
-		
 		oldAxis = xbox.getRawAxis(3) > .8;
 		
 		if((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))){
 			orangeDrive.toggleSimpleDrive();
 		}		
-		
-		
-		
-		
-		//DEBUGGING
-		/*
-		if(buttonBox.getRisingEdge(1)){
-			speed += 10;
-			shooter.setSpeed(speed);
-		}
-		if(buttonBox.getRisingEdge(2)){
-			speed -= 10;
-			shooter.setSpeed(speed);
-		}
-		*/	
-		
 	}
 
 	@Override
