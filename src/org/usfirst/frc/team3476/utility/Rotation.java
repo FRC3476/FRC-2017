@@ -4,7 +4,6 @@ public class Rotation {
 
 	private double cos;
 	private double sin;
-	private double angle;
 	
 	public Rotation() {
 		cos = 1;

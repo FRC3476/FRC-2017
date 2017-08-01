@@ -18,7 +18,6 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive.ShiftState;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
-import org.usfirst.frc.team3476.subsystem.Turret;
 import org.usfirst.frc.team3476.subsystem.VisionServer;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
@@ -56,6 +55,7 @@ public class Robot extends IterativeRobot {
 	Shooter shooter;
 	Intake intake;
 	Gear gearMech;
+	VisionServer vision;
 	CANTalon climber;
 	CANTalon climberSlave;
 	CANTalon tempIntake = new CANTalon(Constants.IntakeId);
@@ -67,7 +67,6 @@ public class Robot extends IterativeRobot {
 	
 	ExecutorService mainExecutor = Executors.newFixedThreadPool(4);
 	ThreadScheduler scheduler = new ThreadScheduler();
-	private double voltage = 0;
 
 	
 	ScriptEngineManager manager;
@@ -103,16 +102,18 @@ public class Robot extends IterativeRobot {
 		shooter = Shooter.getInstance();
 		intake = Intake.getInstance();
 		gearMech = Gear.getInstance();
+		vision = VisionServer.getInstance();
 		climber = new CANTalon(Constants.ClimberId);
 		climber.changeControlMode(TalonControlMode.PercentVbus);
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
 		
-		scheduler.schedule(robotState, 5000000, mainExecutor);
-		scheduler.schedule(orangeDrive, 5000000, mainExecutor);
-		scheduler.schedule(shooter, 5000000, mainExecutor);
-		scheduler.schedule(gearMech, 5000000, mainExecutor);
+		scheduler.schedule(robotState, 1000000, mainExecutor);
+		scheduler.schedule(orangeDrive, 10000000, mainExecutor);
+		scheduler.schedule(shooter, 10000000, mainExecutor);
+		scheduler.schedule(gearMech, 10000000, mainExecutor);
+		scheduler.schedule(vision, 0, mainExecutor);
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
@@ -285,14 +286,6 @@ public class Robot extends IterativeRobot {
 		} else{
 			shooter.setState(ShooterState.IDLE);	
 		}	
-		
-		if(buttonBox.getRawButton(1)){
-			shooter.setTurretPower(0.2);
-		} else if (buttonBox.getRawButton(2)){
-			shooter.setTurretPower(-0.2);
-		} else {
-			shooter.setTurretPower(0);
-		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
 		

@@ -3,13 +3,14 @@ package org.usfirst.frc.team3476.subsystem;
 import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Flywheel;
 import org.usfirst.frc.team3476.utility.Interpolable;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
+import org.usfirst.frc.team3476.utility.Turret;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Shooter extends Threaded {
 	public enum ShooterState {
@@ -35,18 +36,15 @@ public class Shooter extends Threaded {
 	private TurretAutoState turretAutoState;
 	private HomingState homingState;
 
-	private double discardFrames;
 	private Rotation desiredAngle;
 	private boolean homed;
 	
-	private OrangeDrive orangeDrive;
 	private Turret turret;
 	private Flywheel flywheel;
 	private Servo hood;
 	private DigitalInput homeSensor;
 	private Hopper hopper;
 	
-	private double speedOffset = 120;
 	private double desiredSpeed;
 	private double startHome;
 	private double turretStartTime;
@@ -91,7 +89,6 @@ public class Shooter extends Threaded {
 		turret = new Turret(Constants.RightTurretId);
 		flywheel = new Flywheel(Constants.MasterFlywheelId, Constants.SlaveFlywheelId);
 		homeSensor = new DigitalInput(1);
-		orangeDrive = OrangeDrive.getInstance();
 		hopper = Hopper.getInstance();
 		desiredSpeed = Constants.InitialFlywheelSpeed;
 		homed = false;
@@ -308,9 +305,6 @@ public class Shooter extends Threaded {
 		turret.setAngle(setAngle);
 	}
 	
-	public synchronized void setTurretPower(double power){
-		turret.setManual(power);
-	}
 	
 	public boolean isDone(){
 		/*

@@ -66,7 +66,7 @@ public class OrangeDrive extends Threaded {
 	private GearDrivingState gearState;
 
 	private Gear gear = Gear.getInstance();
-	private static final OrangeDrive driveInstance = new OrangeDrive();
+	private static final OrangeDrive instance = new OrangeDrive();
 
 	private CANTalon leftTalon, rightTalon, leftSlaveTalon, rightSlaveTalon;
 	//private RobotTracker robotState;
@@ -75,7 +75,7 @@ public class OrangeDrive extends Threaded {
 	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);	
 	
 	public static OrangeDrive getInstance() {
-		return driveInstance;
+		return instance;
 	}
 	
 	public void updatePIDF(double P, double I, double D, double F)

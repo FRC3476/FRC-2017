@@ -1,4 +1,4 @@
-package org.usfirst.frc.team3476.subsystem;
+package org.usfirst.frc.team3476.utility;
 
 
 import com.ctre.CANTalon;
@@ -11,7 +11,6 @@ public class Flywheel {
 
 	private CANTalon masterTalon, slaveTalon;
 
-	private double setpoint;
 	private double toleranceRange = 200;
 
 	public Flywheel(int masterTalonId, int slaveTalonId) {

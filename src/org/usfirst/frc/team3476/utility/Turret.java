@@ -1,7 +1,4 @@
-package org.usfirst.frc.team3476.subsystem;
-
-import org.usfirst.frc.team3476.utility.Constants;
-import org.usfirst.frc.team3476.utility.Rotation;
+package org.usfirst.frc.team3476.utility;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;

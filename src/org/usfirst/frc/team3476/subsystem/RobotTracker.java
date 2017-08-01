@@ -1,5 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.RigidTransform;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
@@ -8,10 +9,11 @@ import org.usfirst.frc.team3476.utility.Translation;
 public class RobotTracker extends Threaded {
 
 	private static RobotTracker trackingInstance = new RobotTracker();
-	private OrangeDrive driveBase = OrangeDrive.getInstance();
+	private OrangeDrive driveBase;
 
-	private RigidTransform currentPose;
-	private Rotation deltaRotation;
+	private RigidTransform currentOdometry;
+	private CircularQueue<RigidTransform> fieldToVehicle;
+	private CircularQueue<Rotation> vehicleToTurret;
 	
 	private double currentDistance, oldDistance, deltaDistance;
 	
@@ -22,23 +24,18 @@ public class RobotTracker extends Threaded {
 
 	private RobotTracker() {
 		driveBase.zeroSensors();
-		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;
 	}
 
 	@Override
 	public void update() {
-		updateOdometry();
-		
-	}
-	
-	public void updateOdometry(){
 		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		deltaDistance = currentDistance - oldDistance;
 		// Get change in rotation
 		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
-		deltaRotation = currentPose.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
+		Rotation deltaRotation = currentOdometry.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		double sTBT;
 		double cTBT;
 		if(Math.abs(deltaRotation.getRadians()) < 1E-9){
@@ -52,34 +49,31 @@ public class RobotTracker extends Threaded {
 		}
 		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
 		synchronized(this){
-			currentPose = currentPose.transform(new RigidTransform(deltaPosition, deltaRotation));
+			currentOdometry = currentOdometry.transform(new RigidTransform(deltaPosition, deltaRotation));
 			//System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
 			//System.out.println(currentPose.rotationMat.getDegrees());
 			oldDistance = currentDistance;				
 		}
-		
-	}
-
-	public void updateVision(){
-		
+		fieldToVehicle.add(currentOdometry);
+		//add vision to queue
 	}
 	
 	public synchronized RigidTransform getCurrentPosition() {
-		return currentPose;
+		return currentOdometry;
 	}
 	
 	public synchronized Rotation getCurrentAngle(){
-		return currentPose.rotationMat;
+		return currentOdometry.rotationMat;
 	}
 	
 	public synchronized void resetOdometry(){
 		driveBase.zeroSensors();
-		currentPose = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;
 	}
 	
 	public synchronized double getY(){
-		return currentPose.translationMat.getY();
+		return currentOdometry.translationMat.getY();
 	}
 }
 

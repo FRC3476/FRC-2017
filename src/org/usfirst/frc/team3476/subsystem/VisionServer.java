@@ -1,30 +1,27 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Interpolable;
-import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.Translation;
-
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class VisionServer extends Threaded {
 
+	private static final VisionServer instance = new VisionServer();
 	private ExecutorService workers;
 	private DatagramSocket listener;
 	
-	public VisionServer() {
+	public static VisionServer getInstance(){
+		return instance;
+	}
+	
+	private VisionServer() {
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
