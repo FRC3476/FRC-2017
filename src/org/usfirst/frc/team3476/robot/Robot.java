@@ -58,7 +58,6 @@ public class Robot extends IterativeRobot {
 	VisionServer vision;
 	CANTalon climber;
 	CANTalon climberSlave;
-	CANTalon tempIntake = new CANTalon(Constants.IntakeId);
 	
 	boolean lowExposure = true;
 	
@@ -109,7 +108,7 @@ public class Robot extends IterativeRobot {
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
 		
-		//scheduler.schedule(robotState, 1000000, mainExecutor);
+		scheduler.schedule(robotState, 1000000, mainExecutor);
 		scheduler.schedule(orangeDrive, 10000000, mainExecutor);
 		scheduler.schedule(shooter, 10000000, mainExecutor);
 		scheduler.schedule(gearMech, 10000000, mainExecutor);

@@ -48,13 +48,9 @@ public class Turret {
 	public double getSetpoint(){
 		return turretTalon.getSetpoint();
 	}
-	
-	public synchronized boolean isDone(){
-		return Math.abs(getAngle().getDegrees() - getSetAngle().getDegrees()) < tolerance;
-	}	 
 
 	public synchronized void setTolerance(double tolerance) {
-		this.tolerance = tolerance;
+		turretTalon.setAllowableClosedLoopErr((int)angleToTicks(Rotation.fromDegrees(tolerance)));
 	}	
 	
 	public void setManual(double power)	{
@@ -62,7 +58,7 @@ public class Turret {
 		turretTalon.setSetpoint(power);
 	}
 	
-	public void resetPosition(){
-		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(30)));
+	public void resetPosition(double degrees){
+		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(degrees)));
 	}
 }
