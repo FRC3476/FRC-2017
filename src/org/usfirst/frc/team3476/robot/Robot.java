@@ -50,8 +50,8 @@ public class Robot extends IterativeRobot {
 	Controller joystick;
 	Controller buttonBox;
 
-	RobotTracker robotState;
 	OrangeDrive orangeDrive;
+	RobotTracker robotState;
 	Shooter shooter;
 	Intake intake;
 	Gear gearMech;
@@ -81,7 +81,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		NetworkTable.globalDeleteAll();					
-		
+		System.out.println("running");
 		DigitalOutput turnOnJetson = new DigitalOutput(0);
 		turnOnJetson.set(false);
 		double initialTime = System.currentTimeMillis();
@@ -97,8 +97,8 @@ public class Robot extends IterativeRobot {
 		buttonBox = new Controller(2);
 		
 		//Subsystems
-		robotState = RobotTracker.getInstance();
 		orangeDrive = OrangeDrive.getInstance();
+		robotState = RobotTracker.getInstance();
 		shooter = Shooter.getInstance();
 		intake = Intake.getInstance();
 		gearMech = Gear.getInstance();
@@ -109,7 +109,7 @@ public class Robot extends IterativeRobot {
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
 		
-		scheduler.schedule(robotState, 1000000, mainExecutor);
+		//scheduler.schedule(robotState, 1000000, mainExecutor);
 		scheduler.schedule(orangeDrive, 10000000, mainExecutor);
 		scheduler.schedule(shooter, 10000000, mainExecutor);
 		scheduler.schedule(gearMech, 10000000, mainExecutor);
@@ -125,6 +125,7 @@ public class Robot extends IterativeRobot {
 		engine.put("orangeDrive", orangeDrive);
 		engine.put("DriverStation", DriverStation.getInstance());	
 		Dashcomm.put("isJetsonOn", false);
+		System.out.println(Thread.activeCount());
 	}
 
 	/**

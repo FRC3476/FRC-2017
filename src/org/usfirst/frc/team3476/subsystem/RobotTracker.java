@@ -8,21 +8,21 @@ import org.usfirst.frc.team3476.utility.Translation;
 
 public class RobotTracker extends Threaded {
 
-	private static RobotTracker trackingInstance = new RobotTracker();
+	private static final RobotTracker trackingInstance = new RobotTracker();
 	private OrangeDrive driveBase;
 
 	private RigidTransform currentOdometry;
 	private CircularQueue<RigidTransform> fieldToVehicle;
 	private CircularQueue<Rotation> vehicleToTurret;
 	
-	private double currentDistance, oldDistance, deltaDistance;
-	
+	private double currentDistance, oldDistance, deltaDistance;	
 	
 	public static RobotTracker getInstance() {
 		return trackingInstance;
 	}
 
 	private RobotTracker() {
+		driveBase = OrangeDrive.getInstance();
 		driveBase.zeroSensors();
 		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;

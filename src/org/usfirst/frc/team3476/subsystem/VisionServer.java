@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Threaded;
+import org.json.simple.*;
 
 public class VisionServer extends Threaded {
 
@@ -74,6 +75,8 @@ public class VisionServer extends Threaded {
 		public void update(){
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
 			System.out.println(rawMessage);
+			JSONObject message = (JSONObject) JSONValue.parse(rawMessage);
+			System.out.println(message.get("data"));
 		}
 	}
 }

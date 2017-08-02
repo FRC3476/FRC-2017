@@ -39,13 +39,19 @@ public class ThreadScheduler implements Runnable {
 					}
 				}
 			}
-			Thread.yield();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	public void schedule(Threaded task, double period, ExecutorService threadPool) {
 		synchronized(this) {
 			scheduledTasks.add(task);
+			scheduledFutures.add(threadPool.submit(task));
 			taskPeriods.add(period);
 			taskTimes.add((double) System.nanoTime());
 			threadPools.add(threadPool);
