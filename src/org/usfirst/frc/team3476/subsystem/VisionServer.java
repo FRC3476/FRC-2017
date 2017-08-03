@@ -11,7 +11,6 @@ import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.VisionData;
 import org.json.simple.*;
 
 public class VisionServer extends Threaded {
@@ -45,29 +44,9 @@ public class VisionServer extends Threaded {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		workers.execute(new MessageHandler(msg));		
+		workers.execute(new MessageHandler(msg));
 	}
-	
-	public double getBoilerDistance(){
-		double x = 1;
-		double y = Dashcomm.get("boilerX", 0);
-		double z = Dashcomm.get("boilerY", 0);		
-		double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 1280 * Constants.yCameraFOV + 62)); //to radians first
-		return distance;		
-		/*
-		x is forwards from camera
-		y is to the left from camera
-		z is up from the camera
-		x = x * yawOffset.cos() - y * yawOffset.sin();
-		y = x * yawOffset.cos() + y * yawOffset.sin();
 		
-		x = x * pitchOffset.cos() - z * pitchOffset.sin();
-		z = x * pitchOffset.cos() + z * pitchOffset.sin();
-		
-		distance = Constants.BoilerHeight / z * Math.hypot(x, y);			
-		*/
-	}	
-	
 	private class MessageHandler extends Threaded {
 		
 		DatagramPacket packet;
@@ -79,9 +58,39 @@ public class VisionServer extends Threaded {
 		public void update(){
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
 			JSONObject message = (JSONObject) JSONValue.parse(rawMessage);
-			if(message.get("target").equals("boiler")){
-				turretToBoiler.add(new VisionData((double) message.get("angle"), (double) message.get("distance"), System.nanoTime() - (long) message.get("timestamp")));
-			}
+
+			double x = 1;
+			double y = (double) message.get("x");
+			double z = (double) message.get("y");
+			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 1280 * Constants.yCameraFOV + 62)); //to radians first
+			/*
+			x is forwards from camera
+			y is to the left from camera
+			z is up from the camera
+			x = x * yawOffset.cos() - y * yawOffset.sin();
+			y = x * yawOffset.cos() + y * yawOffset.sin();
+			
+			x = x * pitchOffset.cos() - z * pitchOffset.sin();
+			z = x * pitchOffset.cos() + z * pitchOffset.sin();
+			
+			distance = Constants.BoilerHeight / z * Math.hypot(x, y);
+			*/
+			if(((String) message.get("target")).equals("boiler")){
+				turretToBoiler.add(new VisionData((double) message.get("angle"), distance, System.nanoTime() - (long) message.get("timestamp")));
+			}	
 		}
 	}
+	
+	static private class VisionData {
+		public double angle;
+		public double distance;
+		public long time;
+		
+		public VisionData(double angle, double distance, long time){
+			this.angle = angle;
+			this.distance = distance;
+			this.time = time;
+		}
+	}
+
 }
