@@ -61,4 +61,8 @@ public class Turret {
 	public void resetPosition(double degrees){
 		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(degrees)));
 	}
+	
+	public boolean isDone(){
+		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 1;
+	}
 }

@@ -5,22 +5,23 @@ import java.util.List;
 
 public class CircularQueue <T> {
 	
-	List<T> queue;
+	T[] queue;
 	long back;
 	int size;
 	
+	@SuppressWarnings("unchecked")
 	public CircularQueue (int size) {
-		queue = new ArrayList<T>(size);
+		queue = (T[])new Object[size];
 		back = 0;
-		this.size = size;
+		this.size = size - 1;
 	}
 	
-	public void add (T t) {
-		queue.set((int) back % size, t);
+	synchronized public void add (T t) {
+		queue[(int) back % size] = t;
 		back++;
 	}
 	
-	public T get (int position) {
-		return queue.get((int) (back - position - 1) % size);
+	synchronized public T get (int position) {
+		return queue[(int) (back - position - 1) % size];
 	}
 }

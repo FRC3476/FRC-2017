@@ -29,7 +29,7 @@ public class ThreadScheduler implements Runnable {
 	@Override
 	public void run(){
 		while(isRunning) {
-		long waitTime = Long.MAX_VALUE;
+		long waitTime = 10000000;
 			synchronized(this){
 				for(int task = 0; task < scheduledTasks.size(); task++) {
 					long duration = System.nanoTime() - taskTimes.get(task);

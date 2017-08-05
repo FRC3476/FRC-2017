@@ -161,7 +161,11 @@ public class Shooter extends Threaded {
 	
 	@Override
 	public synchronized void update() {
-		
+		updateDesiredAngle();
+		switch(currentState){
+		case SHOOT:
+			turret.setAngle(desiredAngle);
+		}
 	}
 	
 	public synchronized void setState(ShooterState wantedState){
@@ -180,15 +184,11 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void updateDesiredAngle(){
-		if(currentState == ShooterState.SHOOT && turretAutoState == TurretAutoState.AIMED){
-		} else {
-			if(Dashcomm.get("isBoilerVisible", false)){
-				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(Dashcomm.get("boilerXAngle", 0)));					
-			} else {
-				desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(0));
-				turretState = TurretState.IDLE;
-			}		
+		System.out.println(VisionServer.getInstance().GetBoilerAngle(0));
+		if(currentState != ShooterState.SHOOT){
+			desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(VisionServer.getInstance().GetBoilerAngle(0)));				
 		}
+				
 	}
 	
 	public synchronized void updateDesiredSpeed(){

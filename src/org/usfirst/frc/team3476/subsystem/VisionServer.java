@@ -26,6 +26,7 @@ public class VisionServer extends Threaded {
 	}
 	
 	private VisionServer() {
+		turretToBoiler = new CircularQueue<VisionData>(10);
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
@@ -37,7 +38,6 @@ public class VisionServer extends Threaded {
 	@Override
 	public void update() {
 		byte[] buffer = new byte[2048];
-		System.out.println("listening");
 		DatagramPacket msg = new DatagramPacket(buffer, buffer.length);
 		try {
 			listener.receive(msg);
@@ -47,6 +47,10 @@ public class VisionServer extends Threaded {
 		workers.execute(new MessageHandler(msg));
 	}
 		
+	public double GetBoilerAngle(double time){
+		return turretToBoiler.get(0).angle;
+	}
+	
 	private class MessageHandler extends Threaded {
 		
 		DatagramPacket packet;
@@ -58,11 +62,12 @@ public class VisionServer extends Threaded {
 		public void update(){
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
 			JSONObject message = (JSONObject) JSONValue.parse(rawMessage);
-
+			
 			double x = 1;
 			double y = (double) message.get("x");
 			double z = (double) message.get("y");
-			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 1280 * Constants.yCameraFOV + 62)); //to radians first
+			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 720 * Constants.yCameraFOV + 62)); //to radians first
+			double angle = y / 1280 * Constants.xCameraFOV;
 			/*
 			x is forwards from camera
 			y is to the left from camera
@@ -75,9 +80,14 @@ public class VisionServer extends Threaded {
 			
 			distance = Constants.BoilerHeight / z * Math.hypot(x, y);
 			*/
+			/*
+			18.8 90
+			23 130
 			if(((String) message.get("target")).equals("boiler")){
-				turretToBoiler.add(new VisionData((double) message.get("angle"), distance, System.nanoTime() - (long) message.get("timestamp")));
-			}	
+				turretToBoiler.add(new VisionData((double) message.get("x"), distance, System.nanoTime() - (long) message.get("timestamp")));
+			}
+			*/
+			turretToBoiler.add(new VisionData(angle, 0, 0));
 		}
 	}
 	
