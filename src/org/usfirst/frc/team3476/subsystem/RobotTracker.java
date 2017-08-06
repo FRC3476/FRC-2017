@@ -13,7 +13,7 @@ public class RobotTracker extends Threaded {
 
 	private RigidTransform currentOdometry;
 	private CircularQueue<RigidTransform> fieldToVehicle;
-	private CircularQueue<Rotation> vehicleToTurret;
+	private CircularQueue<TurretData> vehicleToTurret;
 	
 	private double currentDistance, oldDistance, deltaDistance;	
 	
@@ -22,6 +22,8 @@ public class RobotTracker extends Threaded {
 	}
 
 	private RobotTracker() {
+		fieldToVehicle = new CircularQueue<RigidTransform>(100);
+		vehicleToTurret = new CircularQueue<TurretData>(100);
 		driveBase = OrangeDrive.getInstance();
 		driveBase.zeroSensors();
 		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
@@ -55,7 +57,16 @@ public class RobotTracker extends Threaded {
 			oldDistance = currentDistance;				
 		}
 		fieldToVehicle.add(currentOdometry);
-		//add vision to queue
+		vehicleToTurret.add(new TurretData(Shooter.getInstance().getAngle(), System.nanoTime()));
+	}
+	
+	public synchronized Rotation getTurretAngle(long time){
+		for(int i = 0; i < 50; i++){
+			if(vehicleToTurret.get(i).time - time < 0){
+				return vehicleToTurret.get(i).rotation;
+			}
+		}
+		return Shooter.getInstance().getAngle();
 	}
 	
 	public synchronized RigidTransform getCurrentPosition() {
@@ -74,6 +85,15 @@ public class RobotTracker extends Threaded {
 	
 	public synchronized double getY(){
 		return currentOdometry.translationMat.getY();
+	}
+	
+	static private class TurretData{
+		public Rotation rotation;
+		public Long time;
+		public TurretData(Rotation rotation, Long time){
+			this.rotation = rotation;
+			this.time = time;
+		}
 	}
 }
 

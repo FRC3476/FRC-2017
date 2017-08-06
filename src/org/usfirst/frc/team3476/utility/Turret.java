@@ -8,10 +8,6 @@ public class Turret {
 
 	private double tolerance;
 	private CANTalon turretTalon;
-	//P: .12
-	//I: .002
-	//I-ZONE: 400
-	//Don't delete this
 	public Turret(int turretTalonId) {
 		
 		turretTalon = new CANTalon(turretTalonId);
@@ -19,10 +15,10 @@ public class Turret {
 		turretTalon.enableBrakeMode(true);
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		turretTalon.reverseSensor(true);
-		turretTalon.configPeakOutputVoltage(4.8, -4.8);
+		turretTalon.configPeakOutputVoltage(6, -6);
 		turretTalon.setPID(1.15, 0, 0.5);
 		turretTalon.setPosition(0);
-		tolerance = 0.5;
+		tolerance = 100;
 		//1024 * (140/24)
 	}
 
@@ -63,6 +59,6 @@ public class Turret {
 	}
 	
 	public boolean isDone(){
-		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 1;
+		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 2;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.json.simple.*;
 
@@ -47,8 +48,8 @@ public class VisionServer extends Threaded {
 		workers.execute(new MessageHandler(msg));
 	}
 		
-	public double GetBoilerAngle(double time){
-		return turretToBoiler.get(0).angle;
+	public VisionData GetBoilerData(double time){
+		return turretToBoiler.get(0);
 	}
 	
 	private class MessageHandler extends Threaded {
@@ -66,8 +67,12 @@ public class VisionServer extends Threaded {
 			double x = 1;
 			double y = (double) message.get("x");
 			double z = (double) message.get("y");
+			
 			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 720 * Constants.yCameraFOV + 62)); //to radians first
 			double angle = y / 1280 * Constants.xCameraFOV;
+			
+			double time = System.nanoTime() - (double) message.get("time");
+			System.out.println(angle);
 			/*
 			x is forwards from camera
 			y is to the left from camera
@@ -78,20 +83,20 @@ public class VisionServer extends Threaded {
 			x = x * pitchOffset.cos() - z * pitchOffset.sin();
 			z = x * pitchOffset.cos() + z * pitchOffset.sin();
 			
-			distance = Constants.BoilerHeight / z * Math.hypot(x, y);
-			*/
-			/*
+			double distance = Constants.BoilerHeight / z * Math.hypot(x, y);
+			double angle = new Rotation(x, y).getDegrees();
+			
 			18.8 90
 			23 130
 			if(((String) message.get("target")).equals("boiler")){
 				turretToBoiler.add(new VisionData((double) message.get("x"), distance, System.nanoTime() - (long) message.get("timestamp")));
 			}
 			*/
-			turretToBoiler.add(new VisionData(angle, 0, 0));
+			turretToBoiler.add(new VisionData(angle, 0, (long) time));
 		}
 	}
 	
-	static private class VisionData {
+	static public class VisionData {
 		public double angle;
 		public double distance;
 		public long time;

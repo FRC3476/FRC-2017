@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.Servo;
 
 public class Shooter extends Threaded {
 	public enum ShooterState {
-		READY, SHOOT, IDLE
+		SHOOT, IDLE
 	}
 	
 	public enum TurretState {
@@ -22,7 +22,7 @@ public class Shooter extends Threaded {
 	}
 	
 	public enum TurretAutoState {
-		AIMING, AIMED, DONE
+		AIMING, AIMED
 	}
 	
 	private enum HomingState {
@@ -32,7 +32,6 @@ public class Shooter extends Threaded {
 	private static final Shooter shooterInstance = new Shooter();	
 	private ShooterState currentState;
 	private TurretState turretState;
-	private HopperState hopperState;
 	private TurretAutoState turretAutoState;
 	private HomingState homingState;
 
@@ -84,7 +83,6 @@ public class Shooter extends Threaded {
 		hood.setBounds(1,0,0,0,2);
 		currentState = ShooterState.IDLE;
 		turretState = TurretState.IDLE;
-		hopperState = HopperState.STOPPED;
 		desiredAngle = new Rotation();
 		turret = new Turret(Constants.RightTurretId);
 		flywheel = new Flywheel(Constants.MasterFlywheelId, Constants.SlaveFlywheelId);
@@ -161,14 +159,51 @@ public class Shooter extends Threaded {
 	
 	@Override
 	public synchronized void update() {
-		updateDesiredAngle();
 		switch(currentState){
 		case SHOOT:
-			turret.setAngle(desiredAngle);
+			switch(turretState){
+			case AUTO:
+				switch(turretAutoState){
+				case AIMING:
+					turret.setAngle(desiredAngle);
+					if(turret.isDone()){
+						turretStartTime = System.currentTimeMillis();
+						turretAutoState = TurretAutoState.AIMED;
+					}
+					break;
+				case AIMED:
+					if(System.currentTimeMillis() - turretStartTime > 0){
+						updateDesiredAngle();
+						turretAutoState = TurretAutoState.AIMING;
+					}
+					break;
+				}
+				break;
+			case IDLE:
+				turret.setManual(0);
+				break;
+			case HOME:
+				break;
+			}
+		case IDLE:
+			
 		}
 	}
 	
 	public synchronized void setState(ShooterState wantedState){
+		switch (wantedState){
+		case SHOOT:
+			if(currentState != ShooterState.SHOOT){
+				updateDesiredAngle();
+				turretState = TurretState.AUTO;
+				turretAutoState = TurretAutoState.AIMING;
+			}
+			break;
+		case IDLE:
+			turretState = TurretState.AUTO;
+			turretAutoState = TurretAutoState.AIMING;
+			break;
+		}
 		currentState = wantedState;
 	}
 	
@@ -184,11 +219,9 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void updateDesiredAngle(){
-		System.out.println(VisionServer.getInstance().GetBoilerAngle(0));
-		if(currentState != ShooterState.SHOOT){
-			desiredAngle = turret.getAngle().rotateBy(Rotation.fromDegrees(VisionServer.getInstance().GetBoilerAngle(0)));				
-		}
-				
+		long time = VisionServer.getInstance().GetBoilerData(0).time;
+		double angle = VisionServer.getInstance().GetBoilerData(0).angle;
+		desiredAngle = RobotTracker.getInstance().getTurretAngle(time).rotateBy(Rotation.fromDegrees(angle));		
 	}
 	
 	public synchronized void updateDesiredSpeed(){
@@ -202,14 +235,6 @@ public class Shooter extends Threaded {
 			hood.set(0.9);
 		}		
 		
-	}
-	
-	public double getSpeed(){
-		return flywheel.getSpeed();
-	}
-	
-	public double getPower(){
-		return flywheel.getOutputVoltage();
 	}
 	
 	public synchronized void setTurretAngle(Rotation setAngle){
@@ -236,12 +261,7 @@ public class Shooter extends Threaded {
 		return homed;
 	}
 	
-	public void setHopper(HopperState state){
-		hopperState = state;
-	}
-
-	public double getHopperCurrent()
-	{
-		return hopper.getCurrent();
+	public Rotation getAngle(){
+		return turret.getAngle();
 	}
 }
