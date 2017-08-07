@@ -9,8 +9,6 @@ import java.util.concurrent.Executors;
 
 import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
-import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.json.simple.*;
 
@@ -72,7 +70,6 @@ public class VisionServer extends Threaded {
 			double angle = y / 1280 * Constants.xCameraFOV;
 			
 			double time = System.nanoTime() - (double) message.get("time");
-			System.out.println(angle);
 			/*
 			x is forwards from camera
 			y is to the left from camera
@@ -92,7 +89,7 @@ public class VisionServer extends Threaded {
 				turretToBoiler.add(new VisionData((double) message.get("x"), distance, System.nanoTime() - (long) message.get("timestamp")));
 			}
 			*/
-			turretToBoiler.add(new VisionData(angle, 0, (long) time));
+			turretToBoiler.add(new VisionData(angle, distance, (long) time));
 		}
 	}
 	

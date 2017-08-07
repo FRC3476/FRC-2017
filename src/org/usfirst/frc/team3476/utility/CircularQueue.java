@@ -1,13 +1,13 @@
 package org.usfirst.frc.team3476.utility;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CircularQueue <T> {
+	/*
+	 * This class is thread safe so there is no need to synchronize when using it
+	 */
 	
-	T[] queue;
-	long back;
-	int size;
+	private T[] queue;
+	private long back;
+	public final int size;
 	
 	@SuppressWarnings("unchecked")
 	public CircularQueue (int size) {

@@ -18,4 +18,6 @@ public class RigidTransform {
 	public RigidTransform transform(RigidTransform delta) {
 		return new RigidTransform(translationMat.translateBy(delta.translationMat.rotateBy(rotationMat)), rotationMat.rotateBy(delta.rotationMat));
 	}
+	
+	//TODO: Replace all matrix stuff with ejml
 }

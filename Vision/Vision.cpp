@@ -4,18 +4,17 @@
 #include <vector>
 #include <chrono>
 #include <stdlib.h>
-#include <ntcore.h>
-#include <networktables/NetworkTable.h>
 #include "Udp.h"
 #include "json.hpp"
 
 using namespace cv;
 using namespace std;
 
-shared_ptr<NetworkTable> table;
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
-
+const double focal_length = 1108.5;
+	UDPClient sender("10.34.76.2", 5800);
+/*
 void makeGearServer()
 {
 	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/gear\" -o \"output_http.so -w ./www -p 1181\"");
@@ -27,7 +26,7 @@ void makeBoilerServer()
 	system("/home/ubuntu/Documents/PegTargeting/mjpg_streamer -i \"input_file.so -f /home/ubuntu/Documents/PegTargeting/boiler\" -o \"output_http.so -w ./www -p 1182\"");
 	
 }
-
+*/
 bool sortByArea(const vector<Point> &lhs, const vector<Point> &rhs) {
 	return (contourArea(lhs) < contourArea(rhs));
 }
@@ -37,7 +36,7 @@ bool sortByY(const Point &lhs, const Point &rhs) {
 }
 
 
-void processGear(Mat &frame){
+nlohmann::json processGear(Mat &frame){
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
 	Mat thres;
@@ -99,13 +98,14 @@ void processGear(Mat &frame){
 	}
 }
 
-void processBoiler(Mat &frame){	
+nlohmann::json processBoiler(Mat &frame){	
 	double xResolution = frame.cols;
 	double yResolution = frame.rows;
 	Mat thres;
 	vector<vector<Point> > contours, allContours;
-	vector<Vec4i> hierarchy;	
-	
+	vector<Vec4i> hierarchy;		
+    nlohmann::json message;
+    
 	cvtColor(frame, thres, COLOR_BGR2HSV);
 	inRange(thres, Scalar(45, 95, 60), Scalar(85, 255, 255), thres);
   //morphologyEx(thres, thres, MORPH_CLOSE, Mat(3, 3, CV_8UC1, Scalar(10)), Point(-1, -1), 1);
@@ -141,42 +141,37 @@ void processBoiler(Mat &frame){
 		
 		double secondEps = 0.000001 * arcLength(contours[1], true);
 		approxPolyDP(contours[1], hulls[1], secondEps, true);
-		drawContours(frame, hulls, 1, Scalar(255, 255, 255), 2);
-		
+		drawContours(frame, hulls, 1, Scalar(255, 255, 255), 2);		
    
 		contours[0].insert(contours[0].end(), contours[1].begin(), contours[1].end());	
 	
 		Rect box = boundingRect(contours[0]);
 		double midX = box.x + box.width / 2;
 		//to get the height from the bottom
-		double midY = yResolution - (box.y + box.height / 2);
-   
-		
-   
-		table->PutNumber("boilerX", xResolution - midX);
-		table->PutNumber("boilerY", -midY);
-		table->PutBoolean("isBoilerVisible", true);
+		double midY = box.y + box.height / 2;
+        message["x"] = -(x - xCameraResolution) / focal_length;
+        message["y"] = (y - yCameraResolution) / focal_length;
 	} else {
-		table->PutBoolean("isBoilerVisible", false);
+        message["x"] = 0.0;
+        message["y"] = 0.0;        
 	}
+    return message;
 }
 
 
 void gearVision(){
 	Mat gearFrame;
 	VideoCapture gearCam;
-	gearCam.open(0);
+	gearCam.open(1);
 	if(!gearCam.isOpened()){
      cout << "gearcam not opened " << endl;
      return;
 	}
 
 	while(1){
-	  system("v4l2-ctl -d 0 -c exposure_auto=1 -c exposure_absolute=5 -c brightness=30");
+	  system("v4l2-ctl -d 1 -c exposure_auto=1 -c exposure_absolute=5 -c brightness=30");
 		
-		table->PutBoolean("isJetsonOn", true);
 		auto gearBegin = chrono::high_resolution_clock::now(); 
-		//frame = imread("http://10.84.76.20:8080/stream.mjpg", CV_LOAD_IMAGE_COLOR
 		gearCam.read(gearFrame);		
 		processGear(gearFrame);
 		
@@ -196,56 +191,37 @@ void gearVision(){
 void boilerVision(){
 	Mat boilerFrame;
 	VideoCapture boilerCam;
-	boilerCam.open(1);
+	boilerCam.open(0);
 
 	if(!boilerCam.isOpened()){
      cout << "boiler not opened " << endl;
      return;
 	}
 	
-	
 	while(1){
-  	system("v4l2-ctl -d 1 -c exposure_auto=1 -c exposure_absolute=5 -c brightness=30");
-	
+  	system("v4l2-ctl -d 0 -c exposure_auto=1 -c exposure_absolute=5 -c brightness=30");	
 		auto boilerBegin = chrono::high_resolution_clock::now();
 		boilerCam.read(boilerFrame);
-		processBoiler(boilerFrame);
-		
+		nlohmann::json message = processBoiler(boilerFrame);		
+		auto boilerEnd = chrono::high_resolution_clock::now();    
+		auto boilerDur = boilerEnd - boilerBegin;
+		auto boilerNs = std::chrono::duration_cast<std::chrono::nanoseconds>(boilerDur).count();
+        message["time"] = boilerNs;
+        string serialized = message.dump(4);
+        sender.Send(serialized.c_str(), serialized.size());
+        /*
 		VideoWriter writer ("/home/ubuntu/Documents/Vision/boiler/out.mjpg", CV_FOURCC('M','J','P','G'), 2, Size (boilerCam.get(3), boilerCam.get(4)), -1);
 		if (!writer.isOpened()){
 			cout << "failed to open stream writer" << endl;
 			return;
 		}
-		writer.write(boilerFrame);
-		auto boilerEnd = chrono::high_resolution_clock::now();    
-		auto boilerDur = boilerEnd - boilerBegin;
-		auto boilerMs = std::chrono::duration_cast<std::chrono::milliseconds>(boilerDur).count();
-		table->PutNumber("boilerTimeAgo", boilerMs);
-		
+		writer.write(boilerFrame);		
+        */
 	}
 } 
 
-
 int main(int argc, char** argv ) {
-
-	UDPClient sender("10.34.76.2", 5800);
-	nlohmann::json message;
-	message["type"] = "string";
-	message["length"] = 100;
-	message["data"] = "something here";
-	string serialized = message.dump(4);
-	sender.Send(serialized.c_str(), serialized.size());
-  /*
-	NetworkTable::SetClientMode();
-	NetworkTable::SetTeam(3476);
-	table = NetworkTable::GetTable("");
-
-	thread gearServer(makeGearServer);
-	thread boilerServer(makeBoilerServer);
-	thread gear(gearVision);
 	thread boiler(boilerVision);
-	gearServer.join();
-	boilerServer.join();
-  */
+    boiler.join();
 	return 0;
 }

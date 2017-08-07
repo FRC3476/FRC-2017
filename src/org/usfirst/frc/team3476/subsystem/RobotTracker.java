@@ -1,5 +1,7 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import java.util.Arrays;
+
 import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.RigidTransform;
 import org.usfirst.frc.team3476.utility.Rotation;
@@ -32,38 +34,34 @@ public class RobotTracker extends Threaded {
 
 	@Override
 	public void update() {
-		// Average distance
 		currentDistance = (driveBase.getLeftDistance() + driveBase.getRightDistance()) / 2;
 		deltaDistance = currentDistance - oldDistance;
-		// Get change in rotation
-		//System.out.println("gyro degrees" + driveBase.getGyroAngle().getDegrees());
 		Rotation deltaRotation = currentOdometry.rotationMat.inverse().rotateBy(driveBase.getGyroAngle());
 		double sTBT;
 		double cTBT;
 		if(Math.abs(deltaRotation.getRadians()) < 1E-9){
 			sTBT = 1.0 - 1.0 / 6.0 * deltaRotation.getRadians() * deltaRotation.getRadians();
 			cTBT = 0.5 * deltaRotation.getRadians() - 1.0 / 24.0 * Math.pow(deltaRotation.getRadians(), 3);
-			//System.out.println("change is small");
 		} else {
 			sTBT = deltaRotation.sin() / deltaRotation.getRadians();
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
-			//System.out.println("change is large");
 		}
 		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
 		synchronized(this){
 			currentOdometry = currentOdometry.transform(new RigidTransform(deltaPosition, deltaRotation));
-			//System.out.println(currentPose.translationMat.getX() + " " + currentPose.translationMat.getY());
-			//System.out.println(currentPose.rotationMat.getDegrees());
-			oldDistance = currentDistance;				
+			oldDistance = currentDistance;
 		}
 		fieldToVehicle.add(currentOdometry);
-		vehicleToTurret.add(new TurretData(Shooter.getInstance().getAngle(), System.nanoTime()));
+		vehicleToTurret.add(new TurretData(Shooter.getInstance().getAngle(), System.nanoTime()));		
 	}
 	
-	public synchronized Rotation getTurretAngle(long time){
-		for(int i = 0; i < 50; i++){
-			if(vehicleToTurret.get(i).time - time < 0){
-				return vehicleToTurret.get(i).rotation;
+	public Rotation getTurretAngle(long time){
+		for(int i = 0; i < vehicleToTurret.size; i++){
+			if(vehicleToTurret.get(i).time < time){
+				long difference = time - vehicleToTurret.get(i).time;
+				long total = vehicleToTurret.get(i - 1).time - vehicleToTurret.get(i).time;
+				Rotation angleDifference = vehicleToTurret.get(i).rotation.inverse().rotateBy(vehicleToTurret.get(i - 1).rotation);
+				return vehicleToTurret.get(i).rotation.rotateBy(Rotation.fromDegrees(angleDifference.getDegrees() * difference / total));
 			}
 		}
 		return Shooter.getInstance().getAngle();

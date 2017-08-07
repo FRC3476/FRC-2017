@@ -46,17 +46,10 @@ public class Rotation {
 		return Math.toDegrees(getRadians());
 	}
 
-	// cos , sin in unit circle
 	public double getRadians() {
 		return Math.atan2(sin, cos);
 	}
 
-	// Rotation matrix consists of
-	// cos O -sin O
-	// sin O cos O
-	// R = rotation matrix
-	// Rotated coordinates is R * R
-	// We only need cos O and sin O because the other two can be determined
 	public Rotation rotateBy(Rotation rotationMat) {
 		return new Rotation(cos * rotationMat.cos() - sin * rotationMat.sin(), sin * rotationMat.cos()
 				+ cos * rotationMat.sin(), true);

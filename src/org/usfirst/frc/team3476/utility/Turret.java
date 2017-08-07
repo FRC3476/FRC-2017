@@ -8,18 +8,17 @@ public class Turret {
 
 	private double tolerance;
 	private CANTalon turretTalon;
-	public Turret(int turretTalonId) {
-		
+	
+	public Turret(int turretTalonId) {		
 		turretTalon = new CANTalon(turretTalonId);
-
 		turretTalon.enableBrakeMode(true);
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		turretTalon.reverseSensor(true);
 		turretTalon.configPeakOutputVoltage(6, -6);
-		turretTalon.setPID(1.15, 0, 0.5);
+		turretTalon.setPID(1.15, 0, 10);
 		turretTalon.setPosition(0);
-		tolerance = 100;
-		//1024 * (140/24)
+		tolerance = angleToTicks(Rotation.fromDegrees(1));
+		turretTalon.setAllowableClosedLoopErr((int) tolerance);
 	}
 
 	public void setAngle(Rotation setAngle) {
