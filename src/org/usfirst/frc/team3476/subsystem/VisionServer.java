@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Threaded;
+import org.usfirst.frc.team3476.utility.TimeStampedData;
 import org.json.simple.*;
 
 public class VisionServer extends Threaded {
@@ -17,7 +18,7 @@ public class VisionServer extends Threaded {
 	private static final VisionServer instance = new VisionServer();
 	private ExecutorService workers;
 	private DatagramSocket listener;
-	private CircularQueue<VisionData> turretToBoiler;
+	private VisionData boilerData;
 	
 	
 	public static VisionServer getInstance(){
@@ -25,7 +26,7 @@ public class VisionServer extends Threaded {
 	}
 	
 	private VisionServer() {
-		turretToBoiler = new CircularQueue<VisionData>(10);
+		boilerData = new VisionData(0, 0, 0);
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
@@ -46,8 +47,8 @@ public class VisionServer extends Threaded {
 		workers.execute(new MessageHandler(msg));
 	}
 		
-	public VisionData GetBoilerData(double time){
-		return turretToBoiler.get(0);
+	public VisionData getBoilerData(){
+		return boilerData;
 	}
 	
 	private class MessageHandler extends Threaded {
@@ -89,10 +90,13 @@ public class VisionServer extends Threaded {
 				turretToBoiler.add(new VisionData((double) message.get("x"), distance, System.nanoTime() - (long) message.get("timestamp")));
 			}
 			*/
-			turretToBoiler.add(new VisionData(angle, distance, (long) time));
+			boilerData.angle = angle;
+			boilerData.distance = distance;
+			boilerData.time = (long) time;
 		}
 	}
 	
+	//TODO: Change to not implementing TimeStampedData and instead of angle/distance to  x,y coordinates
 	static public class VisionData {
 		public double angle;
 		public double distance;

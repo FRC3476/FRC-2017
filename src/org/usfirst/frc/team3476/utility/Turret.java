@@ -44,7 +44,7 @@ public class Turret {
 		return turretTalon.getSetpoint();
 	}
 
-	public synchronized void setTolerance(double tolerance) {
+	public void setTolerance(double tolerance) {
 		turretTalon.setAllowableClosedLoopErr((int)angleToTicks(Rotation.fromDegrees(tolerance)));
 	}	
 	

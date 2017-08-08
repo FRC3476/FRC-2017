@@ -69,7 +69,6 @@ public class OrangeDrive extends Threaded {
 	private static final OrangeDrive instance = new OrangeDrive();
 
 	private CANTalon leftTalon, rightTalon, leftSlaveTalon, rightSlaveTalon;
-	//private RobotTracker robotState;
 	private PurePursuitController autonomousDriver;
 	private DriveVelocity autoDriveVelocity;
 	private Solenoid driveShifters = new Solenoid(Constants.ShifterSolenoidId);	
@@ -295,9 +294,9 @@ public class OrangeDrive extends Threaded {
 			}
 			break;
 		case DRIVING:
-			autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getCurrentPosition());
+			autoDriveVelocity = autonomousDriver.calculate(RobotTracker.getInstance().getOdometry());
 			setWheelVelocity(autoDriveVelocity);
-			if(autonomousDriver.isDone(RobotTracker.getInstance().getCurrentPosition())){
+			if(autonomousDriver.isDone(RobotTracker.getInstance().getOdometry())){
 				autoState = AutoState.DONE;
 			}
 			break;

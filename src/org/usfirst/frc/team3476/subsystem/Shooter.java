@@ -144,19 +144,9 @@ public class Shooter extends Threaded {
 		case SHOOT:
 			switch(turretState){
 			case AUTO:
-				switch(turretAutoState){
-				case AIMING:
+				if(turret.isDone()){
 					turret.setAngle(getDesiredAngle());
-					if(turret.isDone()){
-						turretStartTime = System.currentTimeMillis();
-						turretAutoState = TurretAutoState.AIMED;
-					}
-					break;
-				case AIMED:
-					if(System.currentTimeMillis() - turretStartTime > 0){
-						turretAutoState = TurretAutoState.AIMING;
-					}
-					break;
+					turretStartTime = System.currentTimeMillis();
 				}
 				break;
 			case IDLE:
@@ -192,9 +182,10 @@ public class Shooter extends Threaded {
 	}
 	
 	public Rotation getDesiredAngle(){
-		long time = VisionServer.getInstance().GetBoilerData(0).time;
-		double angle = VisionServer.getInstance().GetBoilerData(0).angle;
-		return RobotTracker.getInstance().getTurretAngle(time).rotateBy(Rotation.fromDegrees(angle));		
+		long time = VisionServer.getInstance().getBoilerData().time;
+		double angle = VisionServer.getInstance().getBoilerData().angle;
+		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
+		return RobotTracker.getInstance().getTurretAngle(time).rotateBy(gyroComp).rotateBy(Rotation.fromDegrees(angle));
 	}
 	
 	public synchronized void updateDesiredSpeed(){		
