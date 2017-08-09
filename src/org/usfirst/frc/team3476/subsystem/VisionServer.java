@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.TimeStampedData;
+import org.usfirst.frc.team3476.utility.InterpolableValue;
 import org.json.simple.*;
 
 public class VisionServer extends Threaded {
@@ -93,19 +93,32 @@ public class VisionServer extends Threaded {
 			boilerData.angle = angle;
 			boilerData.distance = distance;
 			boilerData.time = (long) time;
+			//move to storing an x, y position value instead
 		}
 	}
 	
 	//TODO: Change to not implementing TimeStampedData and instead of angle/distance to  x,y coordinates
 	static public class VisionData {
-		public double angle;
-		public double distance;
-		public long time;
+		private double angle;
+		private double distance;
+		private long time;
 		
 		public VisionData(double angle, double distance, long time){
 			this.angle = angle;
 			this.distance = distance;
 			this.time = time;
+		}
+		
+		public double getAngle(){
+			return angle;
+		}
+		
+		public double getDistance(){
+			return distance;
+		}
+		
+		public long getTime(){
+			return time;
 		}
 	}
 

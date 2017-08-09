@@ -39,15 +39,10 @@ public class Translation {
 	public Translation inverse(){
 		return new Translation(-x, -y);
 	}
-	// Rotation matrix consists of
-	// cos O -sin O
-	// sin O cos O
-	// R = rotation matrix T = translation matrix
-	// Rotated coordinates is R * T
+	
 	public Translation rotateBy(Rotation rotationMat) {
 		x = x * rotationMat.cos() - y * rotationMat.sin();
 		y = x * rotationMat.sin() + y * rotationMat.cos();
-
 		return new Translation(x, y);
 	}
 

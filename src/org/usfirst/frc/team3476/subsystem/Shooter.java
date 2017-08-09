@@ -1,15 +1,19 @@
 package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
+import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Flywheel;
 import org.usfirst.frc.team3476.utility.Interpolable;
+import org.usfirst.frc.team3476.utility.InterpolableValue;
+import org.usfirst.frc.team3476.utility.InterpolatingDouble;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 import org.usfirst.frc.team3476.utility.Turret;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Servo;
 
 public class Shooter extends Threaded {
@@ -46,10 +50,10 @@ public class Shooter extends Threaded {
 	private double startHome;
 	private double turretStartTime;
 	
-	private Interpolable lookupTable1;
-	private Interpolable lookupTable09;
-	private Interpolable lookupTable08;
-	private Interpolable lookupTable07;
+	private CircularQueue<InterpolatingDouble> lookupTable1;
+	private CircularQueue<InterpolatingDouble> lookupTable09;
+	private CircularQueue<InterpolatingDouble> lookupTable08;
+	private CircularQueue<InterpolatingDouble> lookupTable07;
 	
 	public static Shooter getInstance(){
 		return shooterInstance;
@@ -71,10 +75,12 @@ public class Shooter extends Threaded {
 		homeSensor = new DigitalInput(1);
 		hopper = Hopper.getInstance();
 		homed = false;
-		lookupTable1 = new Interpolable();
-		lookupTable09 = new Interpolable();
-		lookupTable08 = new Interpolable();
-		lookupTable07 = new Interpolable();
+		
+		
+		lookupTable1 = new CircularQueue<InterpolatingDouble>(20);
+		lookupTable09 = new CircularQueue<InterpolatingDouble>(20);
+		lookupTable08 = new CircularQueue<InterpolatingDouble>(20);
+		lookupTable07 = new CircularQueue<InterpolatingDouble>(20);
 
 		/*
 		lookupTable07.addNumber(87.744, 3170.0 + speedOffset);
@@ -123,18 +129,18 @@ public class Shooter extends Threaded {
 		lookupTable1.addNumber(188.650, 4780.0 + speedOffset);
 		*/
 		
-		lookupTable1.addNumber(1000.0, 10000.0);
+		lookupTable1.add(new InterpolableValue<InterpolatingDouble>(1000.0, new InterpolatingDouble(1000.0)));
 		
-		lookupTable09.addNumber(99.0, 3510.0);
-		lookupTable09.addNumber(118.0, 3780.0); //should be 0.8 around here
-		lookupTable09.addNumber(126.0, 3950.0); //good around here
-		lookupTable09.addNumber(135.0, 4050.0); //good around here		
-		lookupTable09.addNumber(145.0, 4200.0);
+		lookupTable09.add(new InterpolableValue<InterpolatingDouble>(99.0, new InterpolatingDouble(3510.0)));
+		lookupTable09.add(new InterpolableValue<InterpolatingDouble>(118.0, new InterpolatingDouble(3780.0))); //should be 0.8 around here
+		lookupTable09.add(new InterpolableValue<InterpolatingDouble>(126.0, new InterpolatingDouble(3950.0))); //good around here
+		lookupTable09.add(new InterpolableValue<InterpolatingDouble>(135.0, new InterpolatingDouble(4050.0))); //good around here		
+		lookupTable09.add(new InterpolableValue<InterpolatingDouble>(145.0, new InterpolatingDouble(4200.0)));
 		
-		lookupTable08.addNumber(1000.0, 10000.0);
+		lookupTable08.add(new InterpolableValue<InterpolatingDouble>(1000.0, new InterpolatingDouble(10000.0)));
 		
-		lookupTable07.addNumber(92.0, 3340.0);		
-		lookupTable07.addNumber(102.0, 3500.0); // these values are guddi
+		lookupTable07.add(new InterpolableValue<InterpolatingDouble>(92.0, new InterpolatingDouble(3340.0)));		
+		lookupTable07.add(new InterpolableValue<InterpolatingDouble>(102.0, new InterpolatingDouble(3500.0))); // these values are guddi
 		hood.set(0.4);
 	}
 	
@@ -152,10 +158,34 @@ public class Shooter extends Threaded {
 			case IDLE:
 				break;
 			case HOME:
+				if(homingState == HomingState.RIGHT){
+					turret.setManual(0.2);
+				} else {
+					turret.setManual(-0.2);
+				}
+				if(!homeSensor.get()){
+					turret.setManual(0);
+					turret.resetPosition(30);
+					turretState = TurretState.IDLE;
+					homed = true;
+					break;
+				}
+				if(homingState == HomingState.LEFT){	
+					if(System.currentTimeMillis() - startHome > 1500){
+						turret.setManual(0);
+						turretState = TurretState.IDLE;
+						DriverStation.reportError("Failed to home turret", false);
+					}
+				} else {
+					if(System.currentTimeMillis() - startHome > 1500){
+						startHome = System.currentTimeMillis();
+						homingState = HomingState.LEFT;
+					}
+				}
 				break;
 			}
 		case IDLE:
-			
+			break;
 		}
 	}
 	
@@ -165,6 +195,7 @@ public class Shooter extends Threaded {
 			if(currentState != ShooterState.SHOOT){
 				turretState = TurretState.AUTO;
 				turretAutoState = TurretAutoState.AIMING;
+				turret.setAngle(getDesiredAngle());
 			}
 			break;
 		case IDLE:
@@ -175,28 +206,27 @@ public class Shooter extends Threaded {
 	}
 	
 	public synchronized void setHome(){
-		currentState = ShooterState.IDLE;
+		setState(ShooterState.IDLE);
 		startHome = System.currentTimeMillis();
 		homingState = HomingState.RIGHT;
 		turretState = TurretState.HOME;
 	}
 	
 	public Rotation getDesiredAngle(){
-		long time = VisionServer.getInstance().getBoilerData().time;
-		double angle = VisionServer.getInstance().getBoilerData().angle;
+		long time = VisionServer.getInstance().getBoilerData().getTime();
+		double angle = VisionServer.getInstance().getBoilerData().getAngle();
 		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
 		return RobotTracker.getInstance().getTurretAngle(time).rotateBy(gyroComp).rotateBy(Rotation.fromDegrees(angle));
 	}
 	
-	public synchronized void updateDesiredSpeed(){		
+	public void getDesiredSpeed(){		
 		double distance = 0;//VisionTracking.getInstance().getBoilerDistance();
 		if(distance < 100){
-			
+			 
 			hood.set(0.7);
-		} else {
-			
+		} else {			
 			hood.set(0.9);
-		}		
+		}
 	}
 	
 	public synchronized void setTurretAngle(Rotation setAngle){
@@ -205,16 +235,6 @@ public class Shooter extends Threaded {
 	}
 	
 	public boolean isDone(){
-		/*
-		switch(currentState){
-			case READY:
-				return turretAutoState == TurretAutoState.AIMED;		
-			case SHOOT:
-				return hopperState == HopperState.RUNNING;
-			case IDLE:
-				return turretState != TurretState.HOME;
-		}
-		*/
 		return true;
 	}
 	

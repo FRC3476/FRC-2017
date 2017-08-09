@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.utility;
 
-public class Rotation {
+public class Rotation implements Interpolable<Rotation> {
 
 	private double cos;
 	private double sin;
@@ -51,8 +51,7 @@ public class Rotation {
 	}
 
 	public Rotation rotateBy(Rotation rotationMat) {
-		return new Rotation(cos * rotationMat.cos() - sin * rotationMat.sin(), sin * rotationMat.cos()
-				+ cos * rotationMat.sin(), true);
+		return new Rotation(cos * rotationMat.cos() - sin * rotationMat.sin(), sin * rotationMat.cos() + cos * rotationMat.sin(), true);
 	}
 	
 	public Rotation inverse() {
@@ -65,5 +64,11 @@ public class Rotation {
 
 	public double sin() {
 		return sin;
+	}
+
+	@Override
+	public Rotation interpolate(Rotation other, double percentage) {
+		Rotation diff = inverse().rotateBy(other);
+		return rotateBy(Rotation.fromRadians(diff.getRadians() * percentage));
 	}
 }

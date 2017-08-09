@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.utility;
 
-public class RigidTransform {
+public class RigidTransform implements Interpolable<RigidTransform> {
 
 	public Rotation rotationMat;
 	public Translation translationMat;
@@ -18,6 +18,10 @@ public class RigidTransform {
 	public RigidTransform transform(RigidTransform delta) {
 		return new RigidTransform(translationMat.translateBy(delta.translationMat.rotateBy(rotationMat)), rotationMat.rotateBy(delta.rotationMat));
 	}
-	
-	//TODO: Replace all matrix stuff with ejml
+
+	@Override
+	public RigidTransform interpolate(RigidTransform other, double percentage) {
+		
+		return null;
+	}
 }

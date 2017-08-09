@@ -4,7 +4,7 @@ import org.usfirst.frc.team3476.utility.CircularQueue;
 import org.usfirst.frc.team3476.utility.RigidTransform;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.TimeStampedData;
+import org.usfirst.frc.team3476.utility.InterpolableValue;
 import org.usfirst.frc.team3476.utility.Translation;
 
 public class RobotTracker extends Threaded {
@@ -13,8 +13,8 @@ public class RobotTracker extends Threaded {
 	private OrangeDrive driveBase;
 
 	private RigidTransform currentOdometry;
-	private CircularQueue<OdometryData> vehicleHistory;
-	private CircularQueue<TurretData> turretHistory;
+	private CircularQueue<RigidTransform> vehicleHistory;
+	private CircularQueue<Rotation> turretHistory;
 	
 	private double currentDistance, oldDistance, deltaDistance;	
 	
@@ -23,8 +23,8 @@ public class RobotTracker extends Threaded {
 	}
 
 	private RobotTracker() {
-		vehicleHistory = new CircularQueue<OdometryData>(100);
-		turretHistory = new CircularQueue<TurretData>(100);
+		vehicleHistory = new CircularQueue<RigidTransform>(100);
+		turretHistory = new CircularQueue<Rotation>(100);
 		driveBase = OrangeDrive.getInstance();
 		driveBase.zeroSensors();
 		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
@@ -49,16 +49,16 @@ public class RobotTracker extends Threaded {
 			currentOdometry = currentOdometry.transform(new RigidTransform(deltaPosition, deltaRotation));
 			oldDistance = currentDistance;
 		}
-		vehicleHistory.add(new OdometryData(currentOdometry, System.nanoTime()));
-		turretHistory.add(new TurretData(Shooter.getInstance().getAngle(), System.nanoTime()));
+		vehicleHistory.add(new InterpolableValue<RigidTransform>(System.nanoTime(), currentOdometry));
+		turretHistory.add(new InterpolableValue<Rotation>(System.nanoTime(), Shooter.getInstance().getAngle()));
 	}
 	
 	public Rotation getTurretAngle(long time){
-		return turretHistory.getTime(time).getRotation();
+		return turretHistory.getKey(time);
 	}
 	
 	public Rotation getGyroAngle(long time){
-		return vehicleHistory.getTime(time).getOdometry().rotationMat;
+		return vehicleHistory.getKey(time).rotationMat;
 	}
 	
 	public synchronized RigidTransform getOdometry() {
@@ -69,58 +69,6 @@ public class RobotTracker extends Threaded {
 		driveBase.zeroSensors();
 		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
 		oldDistance = 0;
-	}
-
-	static private class TurretData implements TimeStampedData<TurretData>{
-		private Rotation rotation;
-		private Long time;
-		
-		public TurretData(Rotation rotation, Long time){
-			this.rotation = rotation;
-			this.time = time;
-		}
-		
-		public Rotation getRotation(){
-			return rotation;
-		}
-		
-		@Override
-		public long getTime() {
-			return time;
-		}
-		
-		@Override
-		public TurretData interpolate(TurretData end, double percentage) {
-			Rotation angleDiff = rotation.inverse().rotateBy(end.getRotation());
-			return new TurretData(rotation.rotateBy(Rotation.fromRadians(angleDiff.getRadians() * percentage)), (long) 0);
-		}
-	}
-	
-	static private class OdometryData implements TimeStampedData<OdometryData>{
-		
-		private RigidTransform odometry;
-		private long time;
-		
-		public OdometryData(RigidTransform odometry, long time) {
-			this.odometry = odometry;
-			this.time = time;
-		}
-
-		public RigidTransform getOdometry(){
-			return odometry;
-		}
-		
-		@Override
-		public long getTime() {
-			return time;
-		}
-
-		@Override
-		public OdometryData interpolate(OdometryData end, double percentage) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
 	}
 }
 
