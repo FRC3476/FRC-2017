@@ -11,17 +11,18 @@ public class RigidTransform implements Interpolable<RigidTransform> {
 	}
 
 	public RigidTransform(Translation translation, Rotation rotation) {
-		this.rotationMat = rotation;
-		this.translationMat = translation;
-	}
-
-	public RigidTransform transform(RigidTransform delta) {
-		return new RigidTransform(translationMat.translateBy(delta.translationMat.rotateBy(rotationMat)), rotationMat.rotateBy(delta.rotationMat));
+		rotationMat = rotation;
+		translationMat = translation;
 	}
 
 	@Override
 	public RigidTransform interpolate(RigidTransform other, double percentage) {
-		
+
 		return null;
+	}
+
+	public RigidTransform transform(RigidTransform delta) {
+		return new RigidTransform(translationMat.translateBy(delta.translationMat.rotateBy(rotationMat)),
+				rotationMat.rotateBy(delta.rotationMat));
 	}
 }

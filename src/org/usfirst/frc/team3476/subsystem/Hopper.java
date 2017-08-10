@@ -4,28 +4,34 @@ import com.ctre.CANTalon;
 
 public class Hopper {
 
-	public enum HopperState {RUNNING, STOPPED, BACKWARDS};
-	
+	public enum HopperState {
+		RUNNING, STOPPED, BACKWARDS
+	};
+
 	private static final Hopper hopperInstance = new Hopper();
-	
+
+	public static Hopper getInstance() {
+		return Hopper.hopperInstance;
+	}
+
 	private CANTalon turretFeeder;
 	private CANTalon blenderMotor;
+
 	private CANTalon motivatorWheel;
-	
-	
-	public static Hopper getInstance(){
-		return hopperInstance;
-	}
-	
-	private Hopper(){
+
+	private Hopper() {
 		turretFeeder = new CANTalon(6);
 		blenderMotor = new CANTalon(7);
 		motivatorWheel = new CANTalon(11);
-		
+
 	}
-	
-	public void setState(HopperState setState){
-		switch(setState){
+
+	public double getCurrent() {
+		return turretFeeder.getOutputCurrent();
+	}
+
+	public void setState(HopperState setState) {
+		switch (setState) {
 		case RUNNING:
 			turretFeeder.set(-1);
 			blenderMotor.set(-0.4);
@@ -34,7 +40,7 @@ public class Hopper {
 		case STOPPED:
 			turretFeeder.set(0);
 			blenderMotor.set(0);
-			motivatorWheel.set(0);	
+			motivatorWheel.set(0);
 			break;
 		case BACKWARDS:
 			turretFeeder.set(1);
@@ -44,9 +50,4 @@ public class Hopper {
 		}
 	}
 
-	public double getCurrent()
-	{
-		return turretFeeder.getOutputCurrent();
-	}
-	
 }

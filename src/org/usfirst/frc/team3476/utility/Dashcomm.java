@@ -26,6 +26,34 @@ public class Dashcomm {
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
 	 *            the default value if no keyed value is available
+	 * @return the keyed boolean value, if available
+	 */
+	public static boolean get(String keypath, boolean defaultvalue) {
+		return NetworkTable.getTable("").getBoolean(keypath, defaultvalue);
+	}
+
+	/**
+	 * Simplifies the Dashboard communication by simply using the exact keypath
+	 * of the value instead of the table and key.
+	 *
+	 * @param keypath
+	 *            the path to the value including the key - DO NOT PREPEND A '/'
+	 * @param defaultvalue
+	 *            the default value if no keyed value is available
+	 * @return the keyed boolean[] value, if available
+	 */
+	public static boolean[] get(String keypath, boolean[] defaultvalue) {
+		return NetworkTable.getTable("").getBooleanArray(keypath, defaultvalue);
+	}
+
+	/**
+	 * Simplifies the Dashboard communication by simply using the exact keypath
+	 * of the value instead of the table and key.
+	 *
+	 * @param keypath
+	 *            the path to the value including the key - DO NOT PREPEND A '/'
+	 * @param defaultvalue
+	 *            the default value if no keyed value is available
 	 * @return the keyed double value, if available
 	 */
 	public static double get(String keypath, double defaultvalue) {
@@ -54,24 +82,10 @@ public class Dashcomm {
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
 	 * @param defaultvalue
 	 *            the default value if no keyed value is available
-	 * @return the keyed boolean value, if available
+	 * @return the keyed Object[] value, if available
 	 */
-	public static boolean get(String keypath, boolean defaultvalue) {
-		return NetworkTable.getTable("").getBoolean(keypath, defaultvalue);
-	}
-
-	/**
-	 * Simplifies the Dashboard communication by simply using the exact keypath
-	 * of the value instead of the table and key.
-	 *
-	 * @param keypath
-	 *            the path to the value including the key - DO NOT PREPEND A '/'
-	 * @param defaultvalue
-	 *            the default value if no keyed value is available
-	 * @return the keyed boolean[] value, if available
-	 */
-	public static boolean[] get(String keypath, boolean[] defaultvalue) {
-		return NetworkTable.getTable("").getBooleanArray(keypath, defaultvalue);
+	public static Object get(String keypath, Object defaultvalue) {
+		return NetworkTable.getTable("").getValue(keypath, defaultvalue);
 	}
 
 	/**
@@ -102,23 +116,22 @@ public class Dashcomm {
 		return NetworkTable.getTable("").getStringArray(keypath, defaultvalue);
 	}
 
+	// *******************************
+	// ************PUTTERS************
+	// *******************************
+
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
 	 * of the value instead of the table and key.
 	 *
 	 * @param keypath
 	 *            the path to the value including the key - DO NOT PREPEND A '/'
-	 * @param defaultvalue
-	 *            the default value if no keyed value is available
-	 * @return the keyed Object[] value, if available
+	 * @param value
+	 *            the boolean value to put
 	 */
-	public static Object get(String keypath, Object defaultvalue) {
-		return NetworkTable.getTable("").getValue(keypath, defaultvalue);
+	public static void put(String keypath, boolean value) {
+		NetworkTable.getTable("").putBoolean(keypath, value);
 	}
-
-	// *******************************
-	// ************PUTTERS************
-	// *******************************
 
 	/**
 	 * Simplifies the Dashboard communication by simply using the exact keypath
@@ -170,18 +183,5 @@ public class Dashcomm {
 	 */
 	public static void put(String keypath, String[] value) {
 		NetworkTable.getTable("").putStringArray(keypath, value);
-	}
-
-	/**
-	 * Simplifies the Dashboard communication by simply using the exact keypath
-	 * of the value instead of the table and key.
-	 *
-	 * @param keypath
-	 *            the path to the value including the key - DO NOT PREPEND A '/'
-	 * @param value
-	 *            the boolean value to put
-	 */
-	public static void put(String keypath, boolean value) {
-		NetworkTable.getTable("").putBoolean(keypath, value);
 	}
 }

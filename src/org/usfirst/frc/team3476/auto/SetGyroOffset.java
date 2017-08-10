@@ -4,12 +4,17 @@ import org.usfirst.frc.team3476.subsystem.OrangeDrive;
 import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.utility.Rotation;
 
-public class SetGyroOffset implements Action{
-	
+public class SetGyroOffset implements Action {
+
 	private Rotation offset;
-	
-	public SetGyroOffset(double wantedOffset){
+
+	public SetGyroOffset(double wantedOffset) {
 		offset = Rotation.fromDegrees(wantedOffset);
+	}
+
+	@Override
+	public boolean isDone() {
+		return true;
 	}
 
 	@Override
@@ -18,10 +23,4 @@ public class SetGyroOffset implements Action{
 		RobotTracker.getInstance().resetOdometry();
 	}
 
-	@Override
-	public boolean isDone() {
-		return true;
-	}
-	
-	
 }

@@ -8,8 +8,8 @@ public class Turret {
 
 	private double tolerance;
 	private CANTalon turretTalon;
-	
-	public Turret(int turretTalonId) {		
+
+	public Turret(int turretTalonId) {
 		turretTalon = new CANTalon(turretTalonId);
 		turretTalon.enableBrakeMode(true);
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
@@ -21,43 +21,43 @@ public class Turret {
 		turretTalon.setAllowableClosedLoopErr((int) tolerance);
 	}
 
+	public double angleToTicks(Rotation setAngle) {
+		return (setAngle.getRadians() / (2 * Math.PI)) * Constants.TurretTicksPerRotations;
+	}
+
+	public Rotation getAngle() {
+		return Rotation.fromRadians((turretTalon.getPosition() / Constants.TurretTicksPerRotations) * 2 * Math.PI);
+	}
+
+	public Rotation getSetAngle() {
+		return Rotation.fromRadians((turretTalon.getSetpoint() / Constants.TurretTicksPerRotations) * 2 * Math.PI);
+	}
+
+	public double getSetpoint() {
+		return turretTalon.getSetpoint();
+	}
+
+	public boolean isDone() {
+		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 2;
+	}
+
+	public void resetPosition(double degrees) {
+		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(degrees)));
+	}
+
 	public void setAngle(Rotation setAngle) {
 		turretTalon.changeControlMode(TalonControlMode.Position);
-		if(setAngle.getDegrees() < 120 && setAngle.getDegrees() > -120){
+		if (setAngle.getDegrees() < 120 && setAngle.getDegrees() > -120) {
 			turretTalon.setSetpoint(angleToTicks(setAngle));
 		}
 	}
 
-	public double angleToTicks(Rotation setAngle){
-		return (setAngle.getRadians() / (2 * Math.PI)) * Constants.TurretTicksPerRotations;
-	}
-	
-	public Rotation getAngle() {
-		return Rotation.fromRadians((turretTalon.getPosition() / Constants.TurretTicksPerRotations) * 2 * Math.PI );
-	}
-
-	public Rotation getSetAngle() {
-		return Rotation.fromRadians((turretTalon.getSetpoint() / Constants.TurretTicksPerRotations) * 2 * Math.PI );
-	}
-	
-	public double getSetpoint(){
-		return turretTalon.getSetpoint();
-	}
-
-	public void setTolerance(double tolerance) {
-		turretTalon.setAllowableClosedLoopErr((int)angleToTicks(Rotation.fromDegrees(tolerance)));
-	}	
-	
-	public void setManual(double power)	{
+	public void setManual(double power) {
 		turretTalon.changeControlMode(TalonControlMode.PercentVbus);
 		turretTalon.setSetpoint(power);
 	}
-	
-	public void resetPosition(double degrees){
-		turretTalon.setPosition(angleToTicks(Rotation.fromDegrees(degrees)));
-	}
-	
-	public boolean isDone(){
-		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 2;
+
+	public void setTolerance(double tolerance) {
+		turretTalon.setAllowableClosedLoopErr((int) angleToTicks(Rotation.fromDegrees(tolerance)));
 	}
 }
