@@ -124,26 +124,15 @@ public class Shooter extends Threaded {
 		lookupTable1.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(1000.0)));
 
 		lookupTable09.add(new InterpolableValue<>(99.0, new InterpolatingDouble(3510.0)));
-		lookupTable09.add(new InterpolableValue<>(118.0, new InterpolatingDouble(3780.0))); // should
-																												// be
-																												// 0.8
-																												// around
-																												// here
-		lookupTable09.add(new InterpolableValue<>(126.0, new InterpolatingDouble(3950.0))); // good
-																												// around
-																												// here
-		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(4050.0))); // good
-																												// around
-																												// here
+		lookupTable09.add(new InterpolableValue<>(118.0, new InterpolatingDouble(3780.0)));
+		lookupTable09.add(new InterpolableValue<>(126.0, new InterpolatingDouble(3950.0)));
+		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(4050.0))); 
 		lookupTable09.add(new InterpolableValue<>(145.0, new InterpolatingDouble(4200.0)));
 
 		lookupTable08.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(10000.0)));
 
 		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3340.0)));
-		lookupTable07.add(new InterpolableValue<>(102.0, new InterpolatingDouble(3500.0))); // these
-																												// values
-																												// are
-																												// guddi
+		lookupTable07.add(new InterpolableValue<>(102.0, new InterpolatingDouble(3500.0))); 
 		hood.set(0.4);
 	}
 

@@ -13,7 +13,7 @@ using namespace std;
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
 const double focal_length = 1108.5;
-	UDPClient sender("10.34.76.2", 5800);
+UDPClient sender("10.34.76.2", 5800);
 /*
 void makeGearServer()
 {
@@ -90,11 +90,9 @@ nlohmann::json processGear(Mat &frame){
    //f = d * p / h;
    // double f = 52 * box.height / 5;
 	
-		table->PutNumber("gearAngle", ((midX - xResolution/2)/xResolution) * xCameraFOV);
-		table->PutNumber("gearDistance", distance);
-		table->PutBoolean("isGearVisible", true);		
+    
 	} else {		
-		table->PutBoolean("isGearVisible", false);
+    
 	}
 }
 
@@ -108,11 +106,6 @@ nlohmann::json processBoiler(Mat &frame){
     
 	cvtColor(frame, thres, COLOR_BGR2HSV);
 	inRange(thres, Scalar(45, 95, 60), Scalar(85, 255, 255), thres);
-  //morphologyEx(thres, thres, MORPH_CLOSE, Mat(3, 3, CV_8UC1, Scalar(10)), Point(-1, -1), 1);
-	
-
-
-	//imshow("cvt", thres);	
 	findContours(thres, allContours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE, Point(0, 0));	
 
 	contours.clear();
@@ -130,7 +123,7 @@ nlohmann::json processBoiler(Mat &frame){
 		Moments mu = moments(contours[0], false);
 		int cX = mu.m10 / mu.m00;
 		int cY = mu.m01 / mu.m00;
-		// Maximum of three correct contours
+        
 		Moments mus = moments(contours[1], false);
 		int tX = mus.m10 / mus.m00;
 		int tY = mus.m01 / mus.m00;
@@ -149,8 +142,8 @@ nlohmann::json processBoiler(Mat &frame){
 		double midX = box.x + box.width / 2;
 		//to get the height from the bottom
 		double midY = box.y + box.height / 2;
-        message["x"] = -(x - xCameraResolution) / focal_length;
-        message["y"] = (y - yCameraResolution) / focal_length;
+        message["x"] = -(x - xCameraResolution / 2) / focal_length;
+        message["y"] = (y - yCameraResolution / 2) / focal_length;
 	} else {
         message["x"] = 0.0;
         message["y"] = 0.0;        

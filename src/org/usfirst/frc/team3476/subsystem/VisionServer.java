@@ -52,9 +52,11 @@ public class VisionServer extends Threaded {
 			 * VisionData((double) message.get("x"), distance, System.nanoTime()
 			 * - (long) message.get("timestamp"))); }
 			 */
-			boilerData.angle = angle;
-			boilerData.distance = distance;
-			boilerData.time = (long) time;
+			synchronized (this) {
+				boilerData.angle = angle;
+				boilerData.distance = distance;
+				boilerData.time = (long) time;				
+			}
 			// move to storing an x, y position value instead
 		}
 	}
@@ -107,7 +109,7 @@ public class VisionServer extends Threaded {
 		workers = Executors.newFixedThreadPool(2);
 	}
 
-	public VisionData getBoilerData() {
+	synchronized public VisionData getBoilerData() {
 		return boilerData;
 	}
 
