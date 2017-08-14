@@ -2,6 +2,7 @@ package org.usfirst.frc.team3476.utility;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.StatusFrameRate;
 import com.ctre.CANTalon.TalonControlMode;
 
 public class Turret {
@@ -13,11 +14,12 @@ public class Turret {
 		turretTalon = new CANTalon(turretTalonId);
 		turretTalon.enableBrakeMode(true);
 		turretTalon.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		turretTalon.setStatusFrameRateMs(StatusFrameRate.QuadEncoder, 1);
 		turretTalon.reverseSensor(true);
 		turretTalon.configPeakOutputVoltage(6, -6);
 		turretTalon.setPID(1.15, 0, 10);
 		turretTalon.setPosition(0);
-		tolerance = angleToTicks(Rotation.fromDegrees(1));
+		tolerance = angleToTicks(Rotation.fromDegrees(1.5));
 		turretTalon.setAllowableClosedLoopErr((int) tolerance);
 	}
 
@@ -38,7 +40,7 @@ public class Turret {
 	}
 
 	public boolean isDone() {
-		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 2;
+		return Math.abs(getSetAngle().getDegrees() - getAngle().getDegrees()) < 1.5;
 	}
 
 	public void resetPosition(double degrees) {

@@ -58,6 +58,7 @@ public class Robot extends IterativeRobot {
 	VisionServer vision;
 	CANTalon climber;
 	CANTalon climberSlave;
+	DigitalOutput led;
 
 	boolean lowExposure = true;
 
@@ -129,6 +130,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledPeriodic() {
+		/*
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
 		if (engine == null) {
@@ -140,6 +142,7 @@ public class Robot extends IterativeRobot {
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		}
+		*/
 	}
 
 	/**
@@ -156,7 +159,8 @@ public class Robot extends IterativeRobot {
 			// do nothing
 		}
 		turnOnJetson.set(true);
-		new DigitalOutput(4).set(true);
+		led = new DigitalOutput(4);
+		led.set(true);
 
 		// Controllers
 		xbox = new Controller(0);
@@ -176,11 +180,11 @@ public class Robot extends IterativeRobot {
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
 
-		scheduler.schedule(robotState, 1000000, mainExecutor);
+		scheduler.schedule(robotState, 500000, mainExecutor);
 		scheduler.schedule(orangeDrive, 10000000, mainExecutor);
 		scheduler.schedule(shooter, 10000000, mainExecutor);
 		scheduler.schedule(gearMech, 10000000, mainExecutor);
-		scheduler.schedule(vision, 1000000, mainExecutor);
+		scheduler.schedule(vision, 100000, mainExecutor);
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
@@ -199,9 +203,8 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		intake.setState(IntakeState.DOWN);
 
-		if (!shooter.isHomed()) {
-			shooter.setHome();
-		}
+		shooter.setHome();
+
 	}
 
 	// 50 hz (20 ms)

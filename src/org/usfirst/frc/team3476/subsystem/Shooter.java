@@ -143,9 +143,9 @@ public class Shooter extends Threaded {
 	public Rotation getDesiredAngle() {
 		long time = VisionServer.getInstance().getBoilerData().getTime();
 		double angle = VisionServer.getInstance().getBoilerData().getAngle();
-		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse()
-				.rotateBy(OrangeDrive.getInstance().getGyroAngle());
-		return RobotTracker.getInstance().getTurretAngle(time).rotateBy(gyroComp).rotateBy(Rotation.fromDegrees(angle));
+		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
+		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);
+		return turretComp.rotateBy(Rotation.fromDegrees(angle));
 	}
 
 	public void getDesiredSpeed() {
@@ -172,7 +172,6 @@ public class Shooter extends Threaded {
 	}
 
 	public synchronized void setHome() {
-		setState(ShooterState.IDLE);
 		startHome = System.currentTimeMillis();
 		homingState = HomingState.RIGHT;
 		turretState = TurretState.HOME;
@@ -188,7 +187,9 @@ public class Shooter extends Threaded {
 			}
 			break;
 		case IDLE:
-			turretState = TurretState.IDLE;
+			if(turretState != TurretState.HOME){
+				turretState = TurretState.IDLE;				
+			}
 			break;
 		}
 		currentState = wantedState;
@@ -201,44 +202,42 @@ public class Shooter extends Threaded {
 
 	@Override
 	public synchronized void update() {
-		switch (currentState) {
-		case SHOOT:
-			switch (turretState) {
-			case AUTO:
-				if (turret.isDone()) {
-					turret.setAngle(getDesiredAngle());
-					turretStartTime = System.currentTimeMillis();
-				}
-				break;
-			case IDLE:
-				break;
-			case HOME:
-				if (homingState == HomingState.RIGHT) {
-					turret.setManual(0.2);
-				} else {
-					turret.setManual(-0.2);
-				}
-				if (!homeSensor.get()) {
-					turret.setManual(0);
-					turret.resetPosition(30);
-					turretState = TurretState.IDLE;
-					homed = true;
-					break;
-				}
-				if (homingState == HomingState.LEFT) {
-					if (System.currentTimeMillis() - startHome > 1500) {
-						turret.setManual(0);
-						turretState = TurretState.IDLE;
-						DriverStation.reportError("Failed to home turret", false);
-					}
-				} else {
-					if (System.currentTimeMillis() - startHome > 1500) {
-						startHome = System.currentTimeMillis();
-						homingState = HomingState.LEFT;
-					}
-				}
+
+		switch (turretState) {
+		case AUTO:
+			break;
+		case IDLE:
+			break;
+		case HOME:
+			if (homingState == HomingState.RIGHT) {
+				turret.setManual(0.2);
+			} else {
+				turret.setManual(-0.2);
+			}
+			if (!homeSensor.get()) {
+				turret.setManual(0);
+				turret.resetPosition(30);
+				turretState = TurretState.IDLE;
+				homed = true;
 				break;
 			}
+			if (homingState == HomingState.LEFT) {
+				if (System.currentTimeMillis() - startHome > 1500) {
+					turret.setManual(0);
+					turretState = TurretState.IDLE;
+					DriverStation.reportError("Failed to home turret", false);
+				}
+			} else {
+				if (System.currentTimeMillis() - startHome > 1500) {
+					startHome = System.currentTimeMillis();
+					homingState = HomingState.LEFT;
+				}
+			}
+			break;
+		}
+		switch (currentState) {
+		case SHOOT:
+			break;
 		case IDLE:
 			break;
 		}

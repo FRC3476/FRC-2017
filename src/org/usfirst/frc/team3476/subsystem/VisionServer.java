@@ -6,10 +6,12 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 public class VisionServer extends Threaded {
@@ -26,7 +28,7 @@ public class VisionServer extends Threaded {
 		public void update() {
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
 			JSONObject message = (JSONObject) JSONValue.parse(rawMessage);
-
+			double x = 1;
 			double y = (double) message.get("x");
 			double z = (double) message.get("y");
 
@@ -35,7 +37,7 @@ public class VisionServer extends Threaded {
 																														// first
 			double angle = y / 1280 * Constants.xCameraFOV;
 
-			double time = System.nanoTime() - (double) message.get("time");
+			double time = System.nanoTime() - (double) message.get("time") - TimeUnit.MILLISECONDS.toNanos(3);
 			/*
 			 * x is forwards from camera y is to the left from camera z is up
 			 * from the camera x = x * yawOffset.cos() - y * yawOffset.sin(); y
@@ -43,15 +45,11 @@ public class VisionServer extends Threaded {
 			 * 
 			 * x = x * pitchOffset.cos() - z * pitchOffset.sin(); z = x *
 			 * pitchOffset.cos() + z * pitchOffset.sin();
-			 * 
-			 * double distance = Constants.BoilerHeight / z * Math.hypot(x, y);
-			 * double angle = new Rotation(x, y).getDegrees();
-			 * 
-			 * 18.8 90 23 130 if(((String)
-			 * message.get("target")).equals("boiler")){ turretToBoiler.add(new
-			 * VisionData((double) message.get("x"), distance, System.nanoTime()
-			 * - (long) message.get("timestamp"))); }
 			 */
+			double distanceN = Constants.BoilerHeight / z * Math.hypot(x, y);
+			double angleN = new Rotation(x, y).getDegrees();
+			 
+		
 			synchronized (this) {
 				boilerData.angle = angle;
 				boilerData.distance = distance;

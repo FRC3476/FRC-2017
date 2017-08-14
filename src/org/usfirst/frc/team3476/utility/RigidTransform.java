@@ -17,7 +17,6 @@ public class RigidTransform implements Interpolable<RigidTransform> {
 
 	@Override
 	public RigidTransform interpolate(RigidTransform other, double percentage) {
-
 		return null;
 	}
 
