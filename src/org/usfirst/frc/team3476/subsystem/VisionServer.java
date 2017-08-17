@@ -31,13 +31,13 @@ public class VisionServer extends Threaded {
 			double x = 1;
 			double y = (double) message.get("x");
 			double z = (double) message.get("y");
-
-			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z / 720 * Constants.yCameraFOV + 62)); // to
-																														// radians
+			System.out.println(z * Constants.yCameraFOV);
+			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z * Constants.yCameraFOV + 24.8)); // to
+																											// radians
 																														// first
-			double angle = y / 1280 * Constants.xCameraFOV;
+			double angle = y * Constants.xCameraFOV;
 
-			double time = System.nanoTime() - (double) message.get("time") - TimeUnit.MILLISECONDS.toNanos(3);
+			long time = System.nanoTime() - (long) message.get("time");
 			/*
 			 * x is forwards from camera y is to the left from camera z is up
 			 * from the camera x = x * yawOffset.cos() - y * yawOffset.sin(); y
@@ -46,14 +46,14 @@ public class VisionServer extends Threaded {
 			 * x = x * pitchOffset.cos() - z * pitchOffset.sin(); z = x *
 			 * pitchOffset.cos() + z * pitchOffset.sin();
 			 */
-			double distanceN = Constants.BoilerHeight / z * Math.hypot(x, y);
+			double distanceN = (Constants.BoilerHeight / z) * Math.hypot(x, y);
 			double angleN = new Rotation(x, y).getDegrees();
-			 
-		
+			
+			System.out.println(angle + " " + distance);
 			synchronized (this) {
-				boilerData.angle = angle;
-				boilerData.distance = distance;
-				boilerData.time = (long) time;				
+				boilerData.angle = angleN;
+				boilerData.distance = distanceN;
+				boilerData.time = time;				
 			}
 			// move to storing an x, y position value instead
 		}

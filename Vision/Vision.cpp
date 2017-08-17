@@ -12,7 +12,7 @@ using namespace std;
 
 const double yCameraFOV = 38; //USB:38 ZED:45 Kinect:43
 const double xCameraFOV = 60; //USB:60 ZED:58 Kinect:57 USB:52 @720
-const double focal_length = 1108.5;
+const double focal_length = 554.25;
 UDPClient sender("10.34.76.2", 5800);
 /*
 void makeGearServer()
@@ -139,11 +139,13 @@ nlohmann::json processBoiler(Mat &frame){
 		contours[0].insert(contours[0].end(), contours[1].begin(), contours[1].end());	
 	
 		Rect box = boundingRect(contours[0]);
-		double midX = box.x + box.width / 2;
+		double midX = (box.x + box.width / 2);
 		//to get the height from the bottom
-		double midY = box.y + box.height / 2;
-        message["x"] = -(x - xCameraResolution / 2) / focal_length;
-        message["y"] = (y - yCameraResolution / 2) / focal_length;
+		double midY = (box.y + box.height / 2);
+    midX /= xResolution;
+    midY /= yResolution;
+        message["x"] = midX - 0.5;
+        message["y"] = 0.5 - midY;
 	} else {
         message["x"] = 0.0;
         message["y"] = 0.0;        
@@ -177,7 +179,6 @@ void gearVision(){
 		auto gearEnd = chrono::high_resolution_clock::now();    
 		auto gearDur = gearEnd - gearBegin;
 		auto gearMs = std::chrono::duration_cast<std::chrono::milliseconds>(gearDur).count();
-		table->PutNumber("gearTimeAgo", gearMs);		
 	}
 } 
 

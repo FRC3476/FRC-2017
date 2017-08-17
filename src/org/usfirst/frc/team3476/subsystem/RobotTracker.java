@@ -26,8 +26,8 @@ public class RobotTracker extends Threaded {
 
 	private RobotTracker() {
 		vehicleHistory = new CircularQueue<>(100);
-		turretHistory = new CircularQueue<>(100);
-		gyroHistory = new CircularQueue<>(100);
+		turretHistory = new CircularQueue<>(200);
+		gyroHistory = new CircularQueue<>(200);
 		driveBase = OrangeDrive.getInstance();
 		driveBase.zeroSensors();
 		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
