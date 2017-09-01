@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.robot.Constants;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 
@@ -31,7 +31,6 @@ public class VisionServer extends Threaded {
 			double x = 1;
 			double y = (double) message.get("x");
 			double z = (double) message.get("y");
-			System.out.println(z * Constants.yCameraFOV);
 			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z * Constants.yCameraFOV + 24.8)); // to
 																											// radians
 																														// first
@@ -48,8 +47,6 @@ public class VisionServer extends Threaded {
 			 */
 			double distanceN = (Constants.BoilerHeight / z) * Math.hypot(x, y);
 			double angleN = new Rotation(x, y).getDegrees();
-			
-			System.out.println(angle + " " + distance);
 			synchronized (this) {
 				boilerData.angle = angleN;
 				boilerData.distance = distanceN;

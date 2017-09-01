@@ -35,7 +35,7 @@ public class Hopper {
 		case RUNNING:
 			turretFeeder.set(-1);
 			blenderMotor.set(-0.4);
-			motivatorWheel.set(-0.6);
+			motivatorWheel.set(0.6);
 			break;
 		case STOPPED:
 			turretFeeder.set(0);
@@ -45,7 +45,7 @@ public class Hopper {
 		case BACKWARDS:
 			turretFeeder.set(1);
 			blenderMotor.set(0.55);
-			motivatorWheel.set(0.8);
+			motivatorWheel.set(-0.8);
 			break;
 		}
 	}

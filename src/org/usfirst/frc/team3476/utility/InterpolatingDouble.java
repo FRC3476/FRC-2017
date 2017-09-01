@@ -15,7 +15,7 @@ public class InterpolatingDouble implements Interpolable<InterpolatingDouble> {
 	@Override
 	public InterpolatingDouble interpolate(InterpolatingDouble other, double percentage) {
 		double diff = other.getValue() - value;
-		return new InterpolatingDouble(value + diff * percentage);
+		return new InterpolatingDouble(value + (diff * percentage));
 	}
 
 }

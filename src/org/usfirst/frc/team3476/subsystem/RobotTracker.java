@@ -34,7 +34,7 @@ public class RobotTracker extends Threaded {
 	}
 
 	public Rotation getGyroAngle(long time) {
-		return gyroHistory.getKey(time);
+		return gyroHistory.getInterpolateKey(time);
 	}
 
 	public synchronized RigidTransform getOdometry() {
@@ -42,7 +42,7 @@ public class RobotTracker extends Threaded {
 	}
 
 	public Rotation getTurretAngle(long time) {
-		return turretHistory.getKey(time);
+		return turretHistory.getInterpolateKey(time);
 	}
 
 	public synchronized void resetOdometry() {

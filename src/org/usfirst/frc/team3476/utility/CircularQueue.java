@@ -15,7 +15,7 @@ public class CircularQueue<D extends Interpolable<D>> {
 	public CircularQueue(int size) {
 		queue = new InterpolableValue[size];
 		back = 0;
-		this.size = size - 1;
+		this.size = size;
 	}
 
 	synchronized public void add(InterpolableValue<D> t) {
@@ -24,10 +24,11 @@ public class CircularQueue<D extends Interpolable<D>> {
 	}
 
 	synchronized public InterpolableValue<D> get(int position) {
+		position %= size;
 		return queue[(int) (back - position - 1) % size];
 	}
 
-	synchronized public D getKey(long time) {		
+	synchronized public D getInterpolateKey(long time) {		
 		int low = 0;
 		int high = queue.length - 1; 
 		while (low <= high) {
@@ -42,6 +43,7 @@ public class CircularQueue<D extends Interpolable<D>> {
 			}
 		}
 		double difference = time - get(low).getKey();
+		System.out.println("a");
 		double total = get(high).getKey() - get(low).getKey();
 		return get(low).getValue().interpolate(get(high).getValue(), difference / total);
 	}

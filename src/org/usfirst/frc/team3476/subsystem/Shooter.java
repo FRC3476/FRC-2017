@@ -1,7 +1,8 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.robot.Constants;
+import org.usfirst.frc.team3476.subsystem.Hopper.HopperState;
 import org.usfirst.frc.team3476.utility.CircularQueue;
-import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Flywheel;
 import org.usfirst.frc.team3476.utility.InterpolableValue;
 import org.usfirst.frc.team3476.utility.InterpolatingDouble;
@@ -47,9 +48,9 @@ public class Shooter extends Threaded {
 	private Flywheel flywheel;
 	private Servo hood;
 	private DigitalInput homeSensor;
-
 	private Hopper hopper;
 	private double startHome;
+	private double speed = 0;
 
 	private double turretStartTime;
 	private CircularQueue<InterpolatingDouble> lookupTable1;
@@ -70,7 +71,7 @@ public class Shooter extends Threaded {
 		homed = false;
 
 		lookupTable1 = new CircularQueue<>(20);
-		lookupTable09 = new CircularQueue<>(20);
+		lookupTable09 = new CircularQueue<>(5);
 		lookupTable08 = new CircularQueue<>(20);
 		lookupTable07 = new CircularQueue<>(20);
 
@@ -123,10 +124,10 @@ public class Shooter extends Threaded {
 
 		lookupTable1.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(1000.0)));
 
-		lookupTable09.add(new InterpolableValue<>(99.0, new InterpolatingDouble(3510.0)));
+		lookupTable09.add(new InterpolableValue<>(99.0, new InterpolatingDouble(3510.0))); 
 		lookupTable09.add(new InterpolableValue<>(118.0, new InterpolatingDouble(3780.0)));
 		lookupTable09.add(new InterpolableValue<>(126.0, new InterpolatingDouble(3950.0)));
-		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(4050.0))); 
+		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(4050.0)));
 		lookupTable09.add(new InterpolableValue<>(145.0, new InterpolatingDouble(4200.0)));
 
 		lookupTable08.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(10000.0)));
@@ -140,12 +141,16 @@ public class Shooter extends Threaded {
 		return turret.getAngle();
 	}
 
-	public Rotation getDesiredAngle() {
+	private Rotation getDesiredAngle() {
 		long time = VisionServer.getInstance().getBoilerData().getTime();
 		double angle = VisionServer.getInstance().getBoilerData().getAngle();
+		long distance = (long)VisionServer.getInstance().getBoilerData().getDistance();
+		/*
 		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
-		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);
-		return gyroComp.rotateBy(turretComp).rotateBy(Rotation.fromDegrees(angle));
+		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);		
+		*/
+		speed = lookupTable09.getInterpolateKey(distance).getValue();
+		return Rotation.fromDegrees(angle);
 	}
 
 	public void getDesiredSpeed() {
@@ -243,8 +248,14 @@ public class Shooter extends Threaded {
 		}
 		switch (currentState) {
 		case SHOOT:
+			flywheel.setSetpoint(speed);
+			if(flywheel.isDone()){
+				hopper.setState(HopperState.RUNNING);				
+			}
 			break;
 		case IDLE:
+			hopper.setState(HopperState.STOPPED);
+			flywheel.setPercent(0);
 			break;
 		}
 	}

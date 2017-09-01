@@ -19,7 +19,6 @@ import org.usfirst.frc.team3476.subsystem.RobotTracker;
 import org.usfirst.frc.team3476.subsystem.Shooter;
 import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.VisionServer;
-import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.ThreadScheduler;
@@ -185,10 +184,10 @@ public class Robot extends IterativeRobot {
 		scheduler.schedule(shooter, 10000000, mainExecutor);
 		scheduler.schedule(gearMech, 10000000, mainExecutor);
 		scheduler.schedule(vision, 100000, mainExecutor);
-
+		/*
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
-
+		*/
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 
@@ -215,13 +214,14 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-
+		orangeDrive.arcadeDrive(moveVal, rotateVal);
+		
 		if (gearMech.getWheelCurent() > 9.0) {
 			xbox.setRumble(RumbleType.kRightRumble, 1);
 		} else {
 			xbox.setRumble(RumbleType.kRightRumble, 0);
 		}
-
+		
 		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)) {
 			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)) {
@@ -275,13 +275,13 @@ public class Robot extends IterativeRobot {
 		} else {
 			climber.set(0);
 		}
-
+		
 		if (joystick.getRawButton(1)) {
 			shooter.setState(ShooterState.SHOOT);
 		} else {
 			shooter.setState(ShooterState.IDLE);
 		}
-
+		
 		oldAxis = xbox.getRawAxis(3) > .8;
 
 		if ((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))) {

@@ -1,7 +1,7 @@
 package org.usfirst.frc.team3476.subsystem;
 
+import org.usfirst.frc.team3476.robot.Constants;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
-import org.usfirst.frc.team3476.utility.Constants;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;

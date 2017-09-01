@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.subsystem;
 
-import org.usfirst.frc.team3476.utility.Constants;
+import org.usfirst.frc.team3476.robot.Constants;
 import org.usfirst.frc.team3476.utility.Threaded;
 
 import com.ctre.CANTalon;

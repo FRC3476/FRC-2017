@@ -1,5 +1,7 @@
 package org.usfirst.frc.team3476.utility;
 
+import org.usfirst.frc.team3476.robot.Constants;
+
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.StatusFrameRate;
