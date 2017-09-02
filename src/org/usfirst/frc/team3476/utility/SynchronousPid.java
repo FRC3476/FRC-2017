@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 
 public class SynchronousPid {
-
+	private 
 	private double m_P; // factor for "proportional" control
 	private double m_I; // factor for "integral" control
 	private double m_D; // factor for "derivative" control
@@ -28,8 +28,6 @@ public class SynchronousPid {
 	private double m_setpoint = 0.0;
 	private double m_error = 0.0;
 	private double m_result = 0.0;
-	protected PIDSource m_pidInput;
-	protected PIDOutput m_pidOutput;
 
 	// TODO: Polish, set functions, get functions
 	// Input/Output Range

@@ -149,7 +149,7 @@ public class Shooter extends Threaded {
 		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
 		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);		
 		*/
-		speed = lookupTable09.getInterpolateKey(distance).getValue();
+		speed = lookupTable09.getInterpolatedKey(distance).getValue();
 		return Rotation.fromDegrees(angle);
 	}
 

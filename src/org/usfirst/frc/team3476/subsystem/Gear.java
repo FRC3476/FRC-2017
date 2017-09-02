@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class Gear extends Threaded {
 
 	public enum GearState {
-		MANUAL, UP, PEG, HOME, DOWN, DONE
+		MANUAL, UP, PEG, HOME, DOWN, DONE;
 	};
 
 	public static final double UP = -.033, DOWN = -.355, PEG = -.082, HOME = 0, PEG_EJECT = -.25; // Default
@@ -32,8 +32,6 @@ public class Gear extends Threaded {
 	private GearState currentState;
 
 	double calibrationStartTime;
-
-	private DigitalInput pegSensor;
 
 	/*
 	 * private CANTalon ddmotor; private PIDController ddController; private
@@ -57,7 +55,6 @@ public class Gear extends Threaded {
 
 		actuatorTalon.setPID(1, 0, 0);
 
-		pegSensor = new DigitalInput(Constants.PegSensorId);
 		currentState = GearState.DONE;
 	}
 
@@ -93,10 +90,6 @@ public class Gear extends Threaded {
 
 	public synchronized boolean isDone() {
 		return currentState == GearState.DONE;
-	}
-
-	public boolean isPushed() {
-		return !pegSensor.get();
 	}
 
 	public synchronized void manualPegInsert() {
@@ -155,7 +148,6 @@ public class Gear extends Threaded {
 			setActuator(0.3);
 			if (getCurrent() > 3) {
 				actuatorTalon.setPosition(Gear.HOME);
-				System.out.println("HOMED");
 				currentState = GearState.DONE;
 				setActuator(0);
 			} else if (System.currentTimeMillis() - calibrationStartTime > 1000) {

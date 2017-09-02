@@ -34,10 +34,15 @@ public class Controller extends Joystick {
 	}
 
 	public boolean getFallingEdge(int button) {
-		if (button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())) {
+		if (button <= DriverStation.getInstance().getStickButtonCount(getPort())) {
+			/*
+			 * Driver Station sends back an int(32 bits) for buttons
+			 * Shifting 1 left (button - 1) times and ANDing it with
+			 * int sent from the Driver Station will either give you
+			 * 0 or a number not zero if it is true
+			 */
 			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
 			boolean currentVal = ((0x1 << (button - 1)) & currentButtons) != 0;
-
 			if (oldVal == true && currentVal == false) {
 				return true;
 			} else {
@@ -48,7 +53,7 @@ public class Controller extends Joystick {
 	}
 
 	public boolean getRisingEdge(int button) {
-		if (button > 0 || button <= DriverStation.getInstance().getStickButtonCount(getPort())) {
+		if (button <= DriverStation.getInstance().getStickButtonCount(getPort())) {
 			boolean oldVal = ((0x1 << (button - 1)) & oldButtons) != 0;
 			boolean currentVal = ((0x1 << (button - 1)) & currentButtons) != 0;
 

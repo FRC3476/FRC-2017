@@ -23,28 +23,27 @@ public class CircularQueue<D extends Interpolable<D>> {
 		back++;
 	}
 
-	synchronized public InterpolableValue<D> get(int position) {
+	synchronized public InterpolableValue<D> getFromQueue(int position) {
 		position %= size;
 		return queue[(int) (back - position - 1) % size];
 	}
 
-	synchronized public D getInterpolateKey(long time) {		
+	synchronized public D getInterpolatedKey(long key) {		
 		int low = 0;
 		int high = queue.length - 1; 
 		while (low <= high) {
 			int mid = (low + high) / 2;
-			double midVal = get(mid).getKey();
-			if (midVal < time) {
+			double midVal = getFromQueue(mid).getKey();
+			if (midVal < key) {
 				low = mid + 1;
-			} else if (midVal > time) {
+			} else if (midVal > key) {
 				high = mid - 1;
 			} else {
-				return get(mid).getValue();
+				return getFromQueue(mid).getValue();
 			}
 		}
-		double difference = time - get(low).getKey();
-		System.out.println("a");
-		double total = get(high).getKey() - get(low).getKey();
-		return get(low).getValue().interpolate(get(high).getValue(), difference / total);
+		double difference = key - getFromQueue(low).getKey();
+		double total = getFromQueue(high).getKey() - getFromQueue(low).getKey();
+		return getFromQueue(low).getValue().interpolate(getFromQueue(high).getValue(), difference / total);
 	}
 }

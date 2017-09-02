@@ -33,6 +33,9 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public static class DriveVelocity {
+		/*
+		 * Inches per second for speed
+		 */
 		public double wheelSpeed;
 		public double deltaSpeed;
 
@@ -346,16 +349,12 @@ public class OrangeDrive extends Threaded {
 		// scales ranges IE. 0.15 - 1 to 0 - 1
 		// the absolute value of the rawValue under minimum are treated as 0
 		// negative values also work
+		// values higher than maxInput returns maxOutput
 		if (Math.abs(rawValue) >= minInput) {
-
-			// (((rawValue - minInput) / (maxInput - minInput)) * (maxOutput -
-			// minOutput)) + minOutput
-			double scaledValue = ((((Math.abs(rawValue) - minInput) / (maxInput - minInput)) * (maxOutput - minOutput))
-					+ minOutput);
-			if (rawValue < 0) {
-				scaledValue *= -1;
-			}
-			return scaledValue;
+			double norm = (rawValue - minInput) / (maxInput - minInput);
+			return norm * (maxOutput - minOutput) + minOutput;			
+		} else if (Math.abs(rawValue) <= maxInput) {
+			return maxOutput;
 		} else {
 			return 0;
 		}
@@ -367,7 +366,7 @@ public class OrangeDrive extends Threaded {
 		// double robotDiameter, Path robotPath)
 		if (driveState != DriveState.AUTO) {
 			driveState = DriveState.AUTO;
-			setBrake(true);
+			setBrakeState(true);
 			shiftUp();
 		}
 
@@ -381,7 +380,7 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setAutoTime(double speed, double time) {
 		driveState = DriveState.AUTO;
-		setBrake(true);
+		setBrakeState(true);
 		shiftUp();
 		autoState = AutoState.TIMED;
 		driveTime = time;
@@ -389,21 +388,20 @@ public class OrangeDrive extends Threaded {
 		setWheelVelocity(new DriveVelocity(speed, 0));
 	}
 
-	public void setBrake(boolean isBraked) {
+	public void setBrakeState(boolean isBraked) {
 		leftTalon.enableBrakeMode(isBraked);
 		rightTalon.enableBrakeMode(isBraked);
 		leftSlaveTalon.enableBrakeMode(isBraked);
 		rightSlaveTalon.enableBrakeMode(isBraked);
-
 	}
 
 	public synchronized void setGearPath() {
 		if (driveState != DriveState.GEAR) {
 			driveState = DriveState.GEAR;
 			gearState = GearDrivingState.TURNING;
-			setBrake(true);
+			setBrakeState(true);
 			shiftUp();
-			updateDesiredAngle();
+			updateAngleToPeg();
 			gear.setState(GearState.PEG);
 			updateGearPath();
 		}
@@ -417,7 +415,7 @@ public class OrangeDrive extends Threaded {
 		if (driveState != DriveState.GEAR) {
 			driveState = DriveState.GEAR;
 			gearState = GearDrivingState.REVERSING;
-			setBrake(true);
+			setBrakeState(true);
 			shiftUp();
 			gearReversingTime = System.currentTimeMillis();
 			updateGearPath();
@@ -434,7 +432,7 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setRotation(Rotation desiredRotation) {
 		driveState = DriveState.AUTO;
-		setBrake(true);
+		setBrakeState(true);
 		shiftUp();
 
 		if (autoState != AutoState.ROTATING) {
@@ -544,7 +542,7 @@ public class OrangeDrive extends Threaded {
 		turningDriver.setD(Constants.TurningD);
 	}
 
-	public synchronized boolean updateDesiredAngle() {
+	public synchronized boolean updateAngleToPeg() {
 		if (Dashcomm.get("isGearVisible", false)) {
 			double cameraAngle = Dashcomm.get("gearAngle", 0);
 			double desiredDistance = Dashcomm.get("gearDistance", 0);
