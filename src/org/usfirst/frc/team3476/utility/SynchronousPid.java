@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 
 public class SynchronousPid {
-	private 
+	 
 	private double m_P; // factor for "proportional" control
 	private double m_I; // factor for "integral" control
 	private double m_D; // factor for "derivative" control

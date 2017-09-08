@@ -184,10 +184,10 @@ public class Robot extends IterativeRobot {
 		scheduler.schedule(shooter, 10000000, mainExecutor);
 		scheduler.schedule(gearMech, 10000000, mainExecutor);
 		scheduler.schedule(vision, 100000, mainExecutor);
-		/*
+		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(320, 240);
-		*/
+		
 		manager = new ScriptEngineManager();
 		engine = manager.getEngineByName("js");
 

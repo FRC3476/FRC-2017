@@ -353,7 +353,7 @@ public class OrangeDrive extends Threaded {
 		if (Math.abs(rawValue) >= minInput) {
 			double norm = (rawValue - minInput) / (maxInput - minInput);
 			return norm * (maxOutput - minOutput) + minOutput;			
-		} else if (Math.abs(rawValue) <= maxInput) {
+		} else if (Math.abs(rawValue) >= maxInput) {
 			return maxOutput;
 		} else {
 			return 0;
@@ -568,7 +568,6 @@ public class OrangeDrive extends Threaded {
 			if (updateRotation()) {
 				gearStartTime = System.currentTimeMillis();
 				gearState = GearDrivingState.DRIVING;
-				System.out.println("DRIVING");
 			}
 			break;
 		case DRIVING:

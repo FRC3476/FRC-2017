@@ -35,7 +35,6 @@ public class VisionServer extends Threaded {
 																											// radians
 																														// first
 			double angle = y * Constants.xCameraFOV;
-
 			long time = System.nanoTime() - (long) message.get("time");
 			/*
 			 * x is forwards from camera y is to the left from camera z is up
@@ -48,8 +47,8 @@ public class VisionServer extends Threaded {
 			double distanceN = (Constants.BoilerHeight / z) * Math.hypot(x, y);
 			double angleN = new Rotation(x, y).getDegrees();
 			synchronized (this) {
-				boilerData.angle = angleN;
-				boilerData.distance = distanceN;
+				boilerData.angle = angle;
+				boilerData.distance = distance;
 				boilerData.time = time;				
 			}
 			// move to storing an x, y position value instead

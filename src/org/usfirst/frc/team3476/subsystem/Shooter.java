@@ -134,14 +134,14 @@ public class Shooter extends Threaded {
 
 		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3340.0)));
 		lookupTable07.add(new InterpolableValue<>(102.0, new InterpolatingDouble(3500.0))); 
-		hood.set(0.4);
+		hood.set(0.9);
 	}
 
 	public Rotation getAngle() {
 		return turret.getAngle();
 	}
 
-	private Rotation getDesiredAngle() {
+	private Rotation getAngleError() {
 		long time = VisionServer.getInstance().getBoilerData().getTime();
 		double angle = VisionServer.getInstance().getBoilerData().getAngle();
 		long distance = (long)VisionServer.getInstance().getBoilerData().getDistance();
@@ -150,6 +150,7 @@ public class Shooter extends Threaded {
 		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);		
 		*/
 		speed = lookupTable09.getInterpolatedKey(distance).getValue();
+		System.out.println(speed);
 		return Rotation.fromDegrees(angle);
 	}
 
@@ -188,7 +189,7 @@ public class Shooter extends Threaded {
 			if (currentState != ShooterState.SHOOT) {
 				turretState = TurretState.AUTO;
 				turretAutoState = TurretAutoState.AIMING;
-				turret.setAngle(getDesiredAngle());
+				turret.setAngle(turret.getAngle().rotateBy(getAngleError()).rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
 			}
 			break;
 		case IDLE:
