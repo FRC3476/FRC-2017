@@ -50,6 +50,7 @@ public class Shooter extends Threaded {
 	private DigitalInput homeSensor;
 	private Hopper hopper;
 	private double startHome;
+	private double aimStartTime;
 	private double speed = 0;
 
 	private double turretStartTime;
@@ -71,9 +72,9 @@ public class Shooter extends Threaded {
 		homed = false;
 
 		lookupTable1 = new CircularQueue<>(20);
-		lookupTable09 = new CircularQueue<>(5);
+		lookupTable09 = new CircularQueue<>(10);
 		lookupTable08 = new CircularQueue<>(20);
-		lookupTable07 = new CircularQueue<>(20);
+		lookupTable07 = new CircularQueue<>(2);
 
 		/*
 		 * lookupTable07.addNumber(87.744, 3170.0 + speedOffset);
@@ -123,18 +124,23 @@ public class Shooter extends Threaded {
 		 */
 
 		lookupTable1.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(1000.0)));
-
-		lookupTable09.add(new InterpolableValue<>(99.0, new InterpolatingDouble(3510.0))); 
-		lookupTable09.add(new InterpolableValue<>(118.0, new InterpolatingDouble(3780.0)));
-		lookupTable09.add(new InterpolableValue<>(126.0, new InterpolatingDouble(3950.0)));
-		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(4050.0)));
-		lookupTable09.add(new InterpolableValue<>(145.0, new InterpolatingDouble(4200.0)));
+		
+		lookupTable09.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3225.0)));
+		lookupTable09.add(new InterpolableValue<>(100.0, new InterpolatingDouble(3250.0)));
+		lookupTable09.add(new InterpolableValue<>(109.0, new InterpolatingDouble(3375.0)));
+		lookupTable09.add(new InterpolableValue<>(123.0, new InterpolatingDouble(3450.0)));
+		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(3550.0)));
+		lookupTable09.add(new InterpolableValue<>(148.0, new InterpolatingDouble(3650.0)));
+		lookupTable09.add(new InterpolableValue<>(158.0, new InterpolatingDouble(3800.0)));
+		lookupTable09.add(new InterpolableValue<>(164.0, new InterpolatingDouble(3850.0)));
+		lookupTable09.add(new InterpolableValue<>(168.0, new InterpolatingDouble(4050.0)));
+		lookupTable09.add(new InterpolableValue<>(185.0, new InterpolatingDouble(4150.0)));
 
 		lookupTable08.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(10000.0)));
 
-		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3340.0)));
-		lookupTable07.add(new InterpolableValue<>(102.0, new InterpolatingDouble(3500.0))); 
-		hood.set(0.9);
+		lookupTable07.add(new InterpolableValue<>(75.0, new InterpolatingDouble(3175.0))); 
+		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3300.0)));
+		hood.set(0.7);
 	}
 
 	public Rotation getAngle() {
@@ -144,23 +150,23 @@ public class Shooter extends Threaded {
 	private Rotation getAngleError() {
 		long time = VisionServer.getInstance().getBoilerData().getTime();
 		double angle = VisionServer.getInstance().getBoilerData().getAngle();
-		long distance = (long)VisionServer.getInstance().getBoilerData().getDistance();
 		/*
 		Rotation gyroComp = RobotTracker.getInstance().getGyroAngle(time).inverse().rotateBy(OrangeDrive.getInstance().getGyroAngle());
 		Rotation turretComp = RobotTracker.getInstance().getTurretAngle(time);		
 		*/
-		speed = lookupTable09.getInterpolatedKey(distance).getValue();
-		System.out.println(speed);
+		//speed = lookupTable09.getInterpolatedKey(distance).getValue();
 		return Rotation.fromDegrees(angle);
 	}
 
 	public void getDesiredSpeed() {
-		double distance = 0;// VisionTracking.getInstance().getBoilerDistance();
+		long distance = (long)VisionServer.getInstance().getBoilerData().getDistance();
+		System.out.println(distance);
 		if (distance < 100) {
-
 			hood.set(0.7);
+			speed = lookupTable07.getInterpolatedKey(distance).getValue();
 		} else {
 			hood.set(0.9);
+			speed = lookupTable09.getInterpolatedKey(distance).getValue();
 		}
 	}
 
@@ -190,6 +196,7 @@ public class Shooter extends Threaded {
 				turretState = TurretState.AUTO;
 				turretAutoState = TurretAutoState.AIMING;
 				turret.setAngle(turret.getAngle().rotateBy(getAngleError()).rotateBy(Rotation.fromDegrees(Constants.TurretCameraOffset)));
+				aimStartTime = System.currentTimeMillis();
 			}
 			break;
 		case IDLE:
@@ -205,6 +212,11 @@ public class Shooter extends Threaded {
 		turretState = TurretState.IDLE;
 		turret.setAngle(setAngle);
 	}
+	
+	public synchronized void setSpeed(double speed){
+		this.speed += speed;
+		System.out.println(this.speed);
+	}
 
 	@Override
 	public synchronized void update() {
@@ -213,6 +225,10 @@ public class Shooter extends Threaded {
 		case AUTO:
 			switch(turretAutoState){
 			case AIMING:
+				if(System.currentTimeMillis() - aimStartTime > 1500){
+					getDesiredSpeed();
+					turretAutoState = TurretAutoState.AIMED;
+				}
 				break;
 			case AIMED:
 				break;
@@ -249,9 +265,11 @@ public class Shooter extends Threaded {
 		}
 		switch (currentState) {
 		case SHOOT:
-			flywheel.setSetpoint(speed);
-			if(flywheel.isDone()){
-				hopper.setState(HopperState.RUNNING);				
+			if(turretAutoState == TurretAutoState.AIMED){
+				flywheel.setSetpoint(speed);
+				if(flywheel.isDone()){
+					hopper.setState(HopperState.RUNNING);				
+				}
 			}
 			break;
 		case IDLE:

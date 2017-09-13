@@ -21,7 +21,9 @@ import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.VisionServer;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
+import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.ThreadScheduler;
+import org.usfirst.frc.team3476.utility.Translation;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
@@ -129,7 +131,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledPeriodic() {
-		/*
+		
 		code = Dashcomm.get("Code", "");
 		helperCode = Dashcomm.get("HelperCode", "");
 		if (engine == null) {
@@ -141,7 +143,7 @@ public class Robot extends IterativeRobot {
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 	}
 
 	/**
@@ -180,9 +182,9 @@ public class Robot extends IterativeRobot {
 		climberSlave.set(climber.getDeviceID());
 
 		scheduler.schedule(robotState, 500000, mainExecutor);
-		scheduler.schedule(orangeDrive, 10000000, mainExecutor);
-		scheduler.schedule(shooter, 10000000, mainExecutor);
-		scheduler.schedule(gearMech, 10000000, mainExecutor);
+		scheduler.schedule(orangeDrive, 5000000, mainExecutor);
+		scheduler.schedule(shooter, 5000000, mainExecutor);
+		scheduler.schedule(gearMech, 5000000, mainExecutor);
 		scheduler.schedule(vision, 100000, mainExecutor);
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
@@ -214,8 +216,6 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
-		orangeDrive.arcadeDrive(moveVal, rotateVal);
-		
 		if (gearMech.getWheelCurent() > 9.0) {
 			xbox.setRumble(RumbleType.kRightRumble, 1);
 		} else {
@@ -223,7 +223,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)) {
-			orangeDrive.setManualGearPath();
+			orangeDrive.setGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)) {
 			if (orangeDrive.getGearState() != GearDrivingState.DONE) {
 				gearMech.setState(GearState.PEG);
@@ -278,8 +278,12 @@ public class Robot extends IterativeRobot {
 		
 		if (joystick.getRawButton(1)) {
 			shooter.setState(ShooterState.SHOOT);
-		} else {
+		} else if(Math.abs(joystick.getRawAxis(0)) > 0.05 || Math.abs(joystick.getRawAxis(1)) > 0.05){
+			Translation angle = new Translation(joystick.getRawAxis(0), joystick.getRawAxis(1));
+			shooter.setTurretAngle(angle.getAngleFromOffset(new Translation(0, 0)));
 			shooter.setState(ShooterState.IDLE);
+		} else {
+			shooter.setState(ShooterState.IDLE);			
 		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;

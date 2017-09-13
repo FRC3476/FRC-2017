@@ -28,30 +28,44 @@ public class VisionServer extends Threaded {
 		public void update() {
 			String rawMessage = new String(packet.getData(), 0, packet.getLength());
 			JSONObject message = (JSONObject) JSONValue.parse(rawMessage);
-			double x = 1;
-			double y = (double) message.get("x");
-			double z = (double) message.get("y");
-			double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z * Constants.yCameraFOV + 24.8)); // to
-																											// radians
-																														// first
-			double angle = y * Constants.xCameraFOV;
-			long time = System.nanoTime() - (long) message.get("time");
-			/*
-			 * x is forwards from camera y is to the left from camera z is up
-			 * from the camera x = x * yawOffset.cos() - y * yawOffset.sin(); y
-			 * = x * yawOffset.cos() + y * yawOffset.sin();
-			 * 
-			 * x = x * pitchOffset.cos() - z * pitchOffset.sin(); z = x *
-			 * pitchOffset.cos() + z * pitchOffset.sin();
-			 */
-			double distanceN = (Constants.BoilerHeight / z) * Math.hypot(x, y);
-			double angleN = new Rotation(x, y).getDegrees();
-			synchronized (this) {
-				boilerData.angle = angle;
-				boilerData.distance = distance;
-				boilerData.time = time;				
+			if(message.get("type").equals("boiler")){
+				double x = 1;
+				double y = (double) message.get("x");
+				double z = (double) message.get("y");
+				double distance = Constants.BoilerHeight / Math.tan(Math.toRadians(z * Constants.yCameraFOV + 24.8)); // to
+																												// radians
+																															// first
+				double angle = y * Constants.xCameraFOV;
+				long time = System.nanoTime() - (long) message.get("time");
+				/*
+				 * x is forwards from camera y is to the left from camera z is up
+				 * from the camera x = x * yawOffset.cos() - y * yawOffset.sin(); y
+				 * = x * yawOffset.cos() + y * yawOffset.sin();
+				 * 
+				 * x = x * pitchOffset.cos() - z * pitchOffset.sin(); z = x *
+				 * pitchOffset.cos() + z * pitchOffset.sin();
+				 */
+				double distanceN = (Constants.BoilerHeight / z) * Math.hypot(x, y);
+				double angleN = new Rotation(x, y).getDegrees();
+				synchronized (this) {
+					boilerData.angle = angle;
+					boilerData.distance = distance;
+					boilerData.time = time;				
+				}
+				// move to storing an x, y position value instead
+			} else if(message.get("type").equals("gear")){
+				double distance = (double) message.get("distance");
+
+				double angle = (double) message.get("angle") * Constants.xCameraFOV;
+				long time = System.nanoTime() - (long) message.get("time");
+				
+				synchronized (this) {
+					gearData.distance = distance;
+					gearData.angle = angle;
+					gearData.time = time;					
+				}
 			}
-			// move to storing an x, y position value instead
+		
 		}
 	}
 
@@ -91,10 +105,11 @@ public class VisionServer extends Threaded {
 
 	private DatagramSocket listener;
 
-	private VisionData boilerData;
+	private VisionData boilerData, gearData;
 
 	private VisionServer() {
 		boilerData = new VisionData(0, 0, 0);
+		gearData = new VisionData(0, 0, 0);
 		try {
 			listener = new DatagramSocket(5800);
 		} catch (SocketException e) {
@@ -105,6 +120,10 @@ public class VisionServer extends Threaded {
 
 	synchronized public VisionData getBoilerData() {
 		return boilerData;
+	}
+	
+	synchronized public VisionData getGearData() {
+		return gearData;
 	}
 
 	@Override

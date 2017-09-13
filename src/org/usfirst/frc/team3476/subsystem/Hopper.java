@@ -20,8 +20,8 @@ public class Hopper {
 	private CANTalon motivatorWheel;
 
 	private Hopper() {
-		turretFeeder = new CANTalon(6);
-		blenderMotor = new CANTalon(7);
+		turretFeeder = new CANTalon(7);
+		blenderMotor = new CANTalon(6);
 		motivatorWheel = new CANTalon(11);
 
 	}
@@ -34,7 +34,7 @@ public class Hopper {
 		switch (setState) {
 		case RUNNING:
 			turretFeeder.set(-1);
-			blenderMotor.set(-0.4);
+			blenderMotor.set(-0.5);
 			motivatorWheel.set(0.6);
 			break;
 		case STOPPED:

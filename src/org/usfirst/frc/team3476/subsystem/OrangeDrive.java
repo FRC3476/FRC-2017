@@ -352,9 +352,8 @@ public class OrangeDrive extends Threaded {
 		// values higher than maxInput returns maxOutput
 		if (Math.abs(rawValue) >= minInput) {
 			double norm = (rawValue - minInput) / (maxInput - minInput);
-			return norm * (maxOutput - minOutput) + minOutput;			
-		} else if (Math.abs(rawValue) >= maxInput) {
-			return maxOutput;
+			norm = norm * (maxOutput - minOutput) + ((norm * minOutput) / Math.abs(norm));
+			return norm;
 		} else {
 			return 0;
 		}
@@ -543,23 +542,15 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public synchronized boolean updateAngleToPeg() {
-		if (Dashcomm.get("isGearVisible", false)) {
-			double cameraAngle = Dashcomm.get("gearAngle", 0);
-			double desiredDistance = Dashcomm.get("gearDistance", 0);
-			gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.5;
-			Translation targetPosition = Translation
-					.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle))
-					.rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
-			Translation offset = new Translation(0.5, -9.5);
-			desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
-			return true;
-		} else {
-			desiredAngle = getGyroAngle();
-			gearDrivingTime = 0;
-			gearState = GearDrivingState.DONE;
-			return false;
-		}
-
+		double cameraAngle = VisionServer.getInstance().getGearData().getAngle();
+		double desiredDistance = VisionServer.getInstance().getGearData().getDistance();
+		gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.5;
+		Translation targetPosition = Translation
+				.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle))
+				.rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
+		Translation offset = new Translation(0.5, -9.5);
+		desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
+		return true;
 	}
 
 	private synchronized void updateGearPath() {

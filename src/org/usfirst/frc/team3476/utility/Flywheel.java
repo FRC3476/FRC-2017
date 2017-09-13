@@ -36,7 +36,7 @@ public class Flywheel {
 		masterTalon.SetVelocityMeasurementPeriod(VelocityMeasurementPeriod.Period_100Ms);
 		masterTalon.SetVelocityMeasurementWindow(64);
 		masterTalon.setNominalClosedLoopVoltage(12);
-		masterTalon.setPID(0.0012, 0, 0, 0.0240, 0, 0, 0);
+		masterTalon.setPID(0.0014, 0, 0, 0.0240, 0, 0, 0);
 
 		masterTalon.configPeakOutputVoltage(12, 0);
 	}
