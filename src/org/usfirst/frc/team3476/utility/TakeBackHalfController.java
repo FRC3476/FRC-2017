@@ -24,6 +24,33 @@ public class TakeBackHalfController implements Runnable {
 		running = true;
 	}
 
+	public void disable() {
+		enabled = false;
+	}
+
+	public void enable() {
+		enabled = true;
+	}
+
+	public double getOldOutput() {
+		return oldOutVal;
+	}
+
+	public double getOutput() {
+		return outVal;
+	}
+
+	@Override
+	public void run() {
+		while (running) {
+			update();
+		}
+	}
+
+	public void setGain(double _gain) {
+		gain = _gain;
+	}
+
 	public void setSetpoint(double _setpoint) {
 		if (_setpoint > setpoint) {
 			outVal = 1;
@@ -35,20 +62,8 @@ public class TakeBackHalfController implements Runnable {
 
 	}
 
-	public void enable() {
-		enabled = true;
-	}
-
-	public void disable() {
-		enabled = false;
-	}
-
 	public void stop() {
 		running = false;
-	}
-
-	public void setGain(double _gain) {
-		gain = _gain;
 	}
 
 	public void update() {
@@ -69,21 +84,6 @@ public class TakeBackHalfController implements Runnable {
 			output.pidWrite(outVal);
 		}
 		System.out.println(outVal);
-	}
-
-	public double getOutput() {
-		return outVal;
-	}
-
-	public double getOldOutput() {
-		return oldOutVal;
-	}
-
-	@Override
-	public void run() {
-		while (running) {
-			update();
-		}
 	}
 
 }

@@ -9,24 +9,23 @@ public class Drive implements Action {
 	Path setPath;
 	boolean reversed;
 
-	/*public Drive(Path path) {
-		setPath = path;
-	}*/
-	public Drive(double x, double y, double speed, boolean reversed)
-	{
-		setPath = new Path(new Waypoint(x,y,speed));
+	/*
+	 * public Drive(Path path) { setPath = path; }
+	 */
+	public Drive(double x, double y, double speed, boolean reversed) {
+		setPath = new Path(new Waypoint(x, y, speed));
 		this.reversed = reversed;
+	}
+
+	@Override
+	public boolean isDone() {
+		return OrangeDrive.getInstance().isDone();
 	}
 
 	@Override
 	public void start() {
 		RobotTracker.getInstance().resetOdometry();
 		OrangeDrive.getInstance().setAutoPath(setPath, reversed);
-	}
-
-	@Override
-	public boolean isDone() {
-		return OrangeDrive.getInstance().isDone();
 	}
 
 }
