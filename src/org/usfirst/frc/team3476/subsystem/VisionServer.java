@@ -14,6 +14,8 @@ import org.usfirst.frc.team3476.robot.Constants;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
 
+import edu.wpi.first.wpilibj.DriverStation;
+
 public class VisionServer extends Threaded {
 
 	private class MessageHandler extends Threaded {
@@ -64,6 +66,8 @@ public class VisionServer extends Threaded {
 					gearData.angle = angle;
 					gearData.time = time;					
 				}
+			} else if(message.get("type").equals("jetson")){
+				DriverStation.getInstance().reportWarning("jetson on", false);
 			}
 		
 		}
