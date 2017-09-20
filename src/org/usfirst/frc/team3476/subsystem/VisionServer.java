@@ -6,7 +6,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -50,7 +49,7 @@ public class VisionServer extends Threaded {
 				synchronized (this) {
 					boilerData.angle = angle;
 					boilerData.distance = distance;
-					boilerData.time = time;				
+					boilerData.time = time;
 				}
 				// move to storing an x, y position value instead
 			} else if(message.get("type").equals("gear")){

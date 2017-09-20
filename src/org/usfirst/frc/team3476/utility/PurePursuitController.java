@@ -16,7 +16,6 @@ public class PurePursuitController {
 	public PurePursuitController(Path robotPath, boolean isReversed) {
 		this.robotPath = robotPath;
 		this.isReversed = isReversed;
-
 	}
 
 	public OrangeDrive.DriveVelocity calculate(RigidTransform robotPose) {
@@ -48,9 +47,6 @@ public class PurePursuitController {
 		// TODO: Lower wheel speed as you get closer to endpoint
 		// get distance to next point and subtract distance
 		// if it is positive past the endpoint slow down
-		// why does this work?????
-		// robotdiameter * (speed / radius) / 2
-		// ^ wheel speed delta
 
 		// TODO:
 		// scale to max speed
@@ -59,19 +55,8 @@ public class PurePursuitController {
 	// Move lookaheaddistance to path
 	public double getRadius(RigidTransform robotPose, double lookAheadDistance) {
 		// Get point if robot was centered on 0 degrees
-		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPose.translationMat, lookAheadDistance); // .rotateBy(robotPosition.rotationMat.inverse());
-																												// Don't
-																												// rotate
-																												// because
-																												// it
-																												// is
-																												// done
-																												// in
-																												// getting
-																												// the
-																												// lookAheadPoint
-		// System.out.println("position " + lookAheadPoint.getX() + " " +
-		// lookAheadPoint.getY());
+		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPose.translationMat, lookAheadDistance);
+		
 		// check if it is straight ahead or not
 		// TODO: fix method of checking whether to drive straight or not
 		// TODO: Constants

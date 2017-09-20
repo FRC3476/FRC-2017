@@ -2,7 +2,6 @@ package org.usfirst.frc.team3476.subsystem;
 
 import org.usfirst.frc.team3476.robot.Constants;
 import org.usfirst.frc.team3476.subsystem.Gear.GearState;
-import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Path;
 import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Rotation;
@@ -490,17 +489,18 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public synchronized void toggleSimpleDrive() {
-		if (drivePercentVbus) {
-			drivePercentVbus = false;
-		} else {
-			drivePercentVbus = true;
-		}
+		drivePercentVbus = true;
 	}
 
 	@Override
 	public synchronized void update() {
 		switch (driveState) {
 		case MANUAL:
+			if(DriverStation.getInstance().isEnabled()){
+				double right = rightTalon.getSpeed() / 1024 * 10 * 60;
+				double left = leftTalon.getSpeed() / 1024 * 10 * 60;
+				System.out.println(left - right);				
+			}
 			break;
 		case AUTO:
 			updateAutoPath();

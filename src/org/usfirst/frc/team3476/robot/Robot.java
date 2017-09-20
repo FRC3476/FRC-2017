@@ -21,7 +21,6 @@ import org.usfirst.frc.team3476.subsystem.Shooter.ShooterState;
 import org.usfirst.frc.team3476.subsystem.VisionServer;
 import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
-import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.ThreadScheduler;
 import org.usfirst.frc.team3476.utility.Translation;
 
@@ -46,11 +45,11 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  */
 
 public class Robot extends IterativeRobot {
-
+	/*
 	Controller xbox;
 	Controller joystick;
 	Controller buttonBox;
-
+	*/
 	OrangeDrive orangeDrive;
 	RobotTracker robotState;
 	Shooter shooter;
@@ -164,10 +163,11 @@ public class Robot extends IterativeRobot {
 		led.set(true);
 
 		// Controllers
+		/*
 		xbox = new Controller(0);
 		joystick = new Controller(1);
 		buttonBox = new Controller(2);
-
+		*/
 		// Subsystems
 		orangeDrive = OrangeDrive.getInstance();
 		robotState = RobotTracker.getInstance();
@@ -205,12 +205,14 @@ public class Robot extends IterativeRobot {
 		intake.setState(IntakeState.DOWN);
 
 		shooter.setHome();
+		orangeDrive.toggleSimpleDrive();
 
 	}
 
 	// 50 hz (20 ms)
 	@Override
 	public void teleopPeriodic() {
+		/*
 		xbox.update();
 		joystick.update();
 		buttonBox.update();
@@ -291,6 +293,10 @@ public class Robot extends IterativeRobot {
 		if ((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))) {
 			orangeDrive.toggleSimpleDrive();
 		}
+		*/
+		orangeDrive.arcadeDrive(0.6, 0);
+		orangeDrive.setShiftState(ShiftState.MANUAL);
+		orangeDrive.shiftDown();
 	}
 
 	/**

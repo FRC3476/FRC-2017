@@ -1,8 +1,5 @@
 package org.usfirst.frc.team3476.utility;
 
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
-
 public class SynchronousPid {
 	 
 	private double m_P; // factor for "proportional" control

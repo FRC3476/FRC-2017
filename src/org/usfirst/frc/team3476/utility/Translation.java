@@ -1,6 +1,6 @@
 package org.usfirst.frc.team3476.utility;
 
-public class Translation implements Interpolable {
+public class Translation implements Interpolable<Translation> {
 
 	public static Translation fromAngleDistance(double distance, Rotation angle) {
 		return new Translation(angle.sin() * distance, angle.cos() * distance);
@@ -65,7 +65,7 @@ public class Translation implements Interpolable {
 	}
 
 	@Override
-	public Interpolable interpolate(Interpolable other, double percentage) {
+	public Translation interpolate(Translation other, double percentage) {
 		return null;
 	}
 }

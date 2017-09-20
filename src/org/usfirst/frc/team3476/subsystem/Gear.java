@@ -7,8 +7,6 @@ import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-
 public class Gear extends Threaded {
 
 	public enum GearState {
