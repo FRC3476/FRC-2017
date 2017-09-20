@@ -30,6 +30,7 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -50,7 +51,8 @@ public class Robot extends IterativeRobot {
 	Controller xbox;
 	Controller joystick;
 	Controller buttonBox;
-
+	Compressor a = new Compressor(1);
+	
 	OrangeDrive orangeDrive;
 	RobotTracker robotState;
 	Shooter shooter;
@@ -96,10 +98,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		// double start = System.currentTimeMillis();
 		orangeDrive.zeroSensors();
-
-		if (!shooter.isHomed()) {
-			shooter.setHome();
-		}
+		shooter.setHome();
 
 		try {
 			engine.eval("mainRunner.start()");
@@ -223,7 +222,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 		if (xbox.getRawButton(1) || buttonBox.getRawButton(8)) {
-			orangeDrive.setGearPath();
+			orangeDrive.setManualGearPath();
 		} else if (xbox.getFallingEdge(1) || joystick.getFallingEdge(12)) {
 			if (orangeDrive.getGearState() != GearDrivingState.DONE) {
 				gearMech.setState(GearState.PEG);
@@ -268,29 +267,35 @@ public class Robot extends IterativeRobot {
 
 		if (buttonBox.getRawButton(5)) {
 			climber.set(.85);
-			System.out.println("Climbing");
 		} else if (joystick.getRawButton(7)) {
 			climber.set(.425);
-			System.out.println("Climbing");
 		} else {
 			climber.set(0);
 		}
 		
 		if (joystick.getRawButton(1)) {
 			shooter.setState(ShooterState.SHOOT);
-		} else if(Math.abs(joystick.getRawAxis(0)) > 0.05 || Math.abs(joystick.getRawAxis(1)) > 0.05){
-			Translation angle = new Translation(joystick.getRawAxis(0), joystick.getRawAxis(1));
-			shooter.setTurretAngle(angle.getAngleFromOffset(new Translation(0, 0)));
+		} else if(joystick.getRawAxis(0) > 0.4){
+			shooter.setTurretSpeed(-0.2);
+			shooter.setState(ShooterState.IDLE);
+		} else if(joystick.getRawAxis(0) < -0.4){
+			shooter.setTurretSpeed(0.2);
 			shooter.setState(ShooterState.IDLE);
 		} else {
+			shooter.setTurretSpeed(0);
 			shooter.setState(ShooterState.IDLE);			
 		}
 		
 		oldAxis = xbox.getRawAxis(3) > .8;
 
-		if ((xbox.getRawButton(8) && xbox.getRisingEdge(7)) || (xbox.getRawButton(7) && xbox.getRisingEdge(8))) {
-			orangeDrive.toggleSimpleDrive();
+		if (xbox.getRisingEdge(8)) {
+			orangeDrive.setSimpleDrive(true);
 		}
+		if (xbox.getRisingEdge(7)){
+			orangeDrive.setSimpleDrive(false);			
+		}
+		
+		
 	}
 
 	/**

@@ -18,7 +18,7 @@ public final class Constants {
 	public static double WheelScrub = 0.8;
 	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
-	public static double TurretCameraOffset = -6.5;// -0.75
+	public static double TurretCameraOffset = -6.20;// -0.75
 	public static double CameraAngleOffset = 0;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
