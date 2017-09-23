@@ -8,7 +8,7 @@ import org.usfirst.frc.team3476.utility.PurePursuitController;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.SynchronousPid;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.Translation;
+import org.usfirst.frc.team3476.utility.Translation2d;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -542,10 +542,10 @@ public class OrangeDrive extends Threaded {
 		double cameraAngle = VisionServer.getInstance().getGearData().getAngle();
 		double desiredDistance = VisionServer.getInstance().getGearData().getDistance();
 		gearDrivingTime = (desiredDistance / Constants.GearSpeed) + 0.5;
-		Translation targetPosition = Translation
+		Translation2d targetPosition = Translation2d
 				.fromAngleDistance(desiredDistance, Rotation.fromDegrees(cameraAngle))
 				.rotateBy(Rotation.fromDegrees(Constants.CameraAngleOffset));
-		Translation offset = new Translation(0.5, -9.5);
+		Translation2d offset = new Translation2d(0.5, -9.5);
 		desiredAngle = getGyroAngle().rotateBy(offset.getAngleTo(targetPosition).inverse());
 		return true;
 	}

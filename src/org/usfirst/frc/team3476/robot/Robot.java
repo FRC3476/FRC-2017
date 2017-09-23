@@ -23,7 +23,7 @@ import org.usfirst.frc.team3476.utility.Controller;
 import org.usfirst.frc.team3476.utility.Dashcomm;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.ThreadScheduler;
-import org.usfirst.frc.team3476.utility.Translation;
+import org.usfirst.frc.team3476.utility.Translation2d;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;

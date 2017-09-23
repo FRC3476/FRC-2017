@@ -3,14 +3,14 @@ package org.usfirst.frc.team3476.utility;
 public class RigidTransform implements Interpolable<RigidTransform> {
 
 	public Rotation rotationMat;
-	public Translation translationMat;
+	public Translation2d translationMat;
 
 	public RigidTransform() {
 		rotationMat = new Rotation();
-		translationMat = new Translation();
+		translationMat = new Translation2d();
 	}
 
-	public RigidTransform(Translation translation, Rotation rotation) {
+	public RigidTransform(Translation2d translation, Rotation rotation) {
 		rotationMat = rotation;
 		translationMat = translation;
 	}

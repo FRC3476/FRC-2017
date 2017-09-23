@@ -59,7 +59,7 @@ public class PurePursuitController {
 	// Move lookaheaddistance to path
 	public double getRadius(RigidTransform robotPose, double lookAheadDistance) {
 		// Get point if robot was centered on 0 degrees
-		Translation lookAheadPoint = robotPath.getLookAheadPoint(robotPose.translationMat, lookAheadDistance); // .rotateBy(robotPosition.rotationMat.inverse());
+		Translation2d lookAheadPoint = robotPath.getLookAheadPoint(robotPose.translationMat, lookAheadDistance); // .rotateBy(robotPosition.rotationMat.inverse());
 																												// Don't
 																												// rotate
 																												// because
@@ -75,7 +75,7 @@ public class PurePursuitController {
 		// check if it is straight ahead or not
 		// TODO: fix method of checking whether to drive straight or not
 		// TODO: Constants
-		Translation lookAheadPointToRobot = robotPose.translationMat.inverse().translateBy(lookAheadPoint);
+		Translation2d lookAheadPointToRobot = robotPose.translationMat.inverse().translateBy(lookAheadPoint);
 
 		if (lookAheadPointToRobot.getX() * robotPose.rotationMat.sin()
 				- lookAheadPointToRobot.getY() * robotPose.rotationMat.cos() < 0) {

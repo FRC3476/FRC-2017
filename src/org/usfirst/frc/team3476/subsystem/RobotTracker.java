@@ -5,7 +5,7 @@ import org.usfirst.frc.team3476.utility.InterpolableValue;
 import org.usfirst.frc.team3476.utility.RigidTransform;
 import org.usfirst.frc.team3476.utility.Rotation;
 import org.usfirst.frc.team3476.utility.Threaded;
-import org.usfirst.frc.team3476.utility.Translation;
+import org.usfirst.frc.team3476.utility.Translation2d;
 
 public class RobotTracker extends Threaded {
 
@@ -30,7 +30,7 @@ public class RobotTracker extends Threaded {
 		gyroHistory = new CircularQueue<>(200);
 		driveBase = OrangeDrive.getInstance();
 		driveBase.zeroSensors();
-		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		currentOdometry = new RigidTransform(new Translation2d(), driveBase.getGyroAngle());
 	}
 
 	public Rotation getGyroAngle(long time) {
@@ -47,7 +47,7 @@ public class RobotTracker extends Threaded {
 
 	public synchronized void resetOdometry() {
 		driveBase.zeroSensors();
-		currentOdometry = new RigidTransform(new Translation(), driveBase.getGyroAngle());
+		currentOdometry = new RigidTransform(new Translation2d(), driveBase.getGyroAngle());
 		oldDistance = 0;
 	}
 
@@ -65,7 +65,7 @@ public class RobotTracker extends Threaded {
 			sTBT = deltaRotation.sin() / deltaRotation.getRadians();
 			cTBT = (1 - deltaRotation.cos()) / deltaRotation.getRadians();
 		}
-		Translation deltaPosition = new Translation(cTBT * deltaDistance, sTBT * deltaDistance);
+		Translation2d deltaPosition = new Translation2d(cTBT * deltaDistance, sTBT * deltaDistance);
 		synchronized (this) {
 			currentOdometry = currentOdometry.transform(new RigidTransform(deltaPosition, deltaRotation));
 			oldDistance = currentDistance;
