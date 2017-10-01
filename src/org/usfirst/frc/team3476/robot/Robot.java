@@ -202,8 +202,8 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		intake.setState(IntakeState.DOWN);
-
 		shooter.setHome();
+		gearMech.setState(GearState.UP);
 
 	}
 
@@ -228,7 +228,8 @@ public class Robot extends IterativeRobot {
 				gearMech.setState(GearState.PEG);
 			}
 		} else {
-			orangeDrive.arcadeDrive(moveVal, rotateVal);
+			//orangeDrive.arcadeDrive(moveVal, rotateVal);
+			orangeDrive.cheesyDrive(moveVal, rotateVal, xbox.getRawButton(6));
 		}
 
 		if (joystick.getRawButton(3)) {

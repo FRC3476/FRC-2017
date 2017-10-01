@@ -202,7 +202,7 @@ public class OrangeDrive extends Threaded {
 			double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
 			double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
 
-			double accel = (moveSpeed - lastValue) / dt;
+		 	double accel = (moveSpeed - lastValue) / dt;
 			if (accel < -Constants.MaxAcceleration) {
 				moveSpeed = lastValue - Constants.MaxAcceleration * dt;
 			} else if (accel > Constants.MaxAcceleration) {
@@ -220,6 +220,9 @@ public class OrangeDrive extends Threaded {
 	}
 
 	public void cheesyDrive(double moveValue, double rotateValue, boolean isQuickTurn) {
+		if (driveState != DriveState.MANUAL) {
+			driveState = DriveState.MANUAL;
+		}
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
 
@@ -231,8 +234,8 @@ public class OrangeDrive extends Threaded {
 
 		if (isQuickTurn) {
 			overPower = 1;
-			if (moveValue < 0.2) {
-				quickStopAccumulator = quickStopAccumulator + rotateValue * 2;
+			if (Math.abs(moveValue) < 0.2) {
+				quickStopAccumulator = 0.7 * quickStopAccumulator + 0.3 + rotateValue * 2;
 			}
 			angularPower = rotateValue;
 		} else {
@@ -250,8 +253,6 @@ public class OrangeDrive extends Threaded {
 		leftMotorSpeed = moveValue - angularPower;
 		rightMotorSpeed = moveValue + angularPower;
 
-		angularPower = Math.abs(moveValue) * rotateValue - quickStopAccumulator;
-
 		if (leftMotorSpeed > 1.0) {
 			rightMotorSpeed -= overPower * (leftMotorSpeed - 1.0);
 			leftMotorSpeed = 1.0;
@@ -265,11 +266,31 @@ public class OrangeDrive extends Threaded {
 			leftMotorSpeed += overPower * (-1.0 - rightMotorSpeed);
 			rightMotorSpeed = -1.0;
 		}
-		leftMotorSpeed *= driveMultiplier;
-		rightMotorSpeed *= driveMultiplier;
+		double now = Timer.getFPGATimestamp();
+		double dt = (now - lastTime);
 
-		setWheelVelocity(
-				new DriveVelocity((leftMotorSpeed + rightMotorSpeed) / 2, (leftMotorSpeed - rightMotorSpeed) / 2));
+		if (drivePercentVbus) {
+			double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
+			double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
+			setWheelPower(new DriveVelocity(moveSpeed, turnSpeed));
+		} else {
+			leftMotorSpeed *= driveMultiplier;
+			rightMotorSpeed *= driveMultiplier;			
+			double moveSpeed = (leftMotorSpeed + rightMotorSpeed) / 2;
+			double turnSpeed = (leftMotorSpeed - rightMotorSpeed) / 2;
+			double accel = (moveSpeed - lastValue) / dt;
+			if (accel < -Constants.MaxAcceleration) {
+				moveSpeed = lastValue - Constants.MaxAcceleration * dt;
+			} else if (accel > Constants.MaxAcceleration) {
+				moveSpeed = lastValue + Constants.MaxAcceleration * dt;
+			}
+
+			lastTime = now;
+			lastValue = moveSpeed;
+			setWheelVelocity(new DriveVelocity(moveSpeed, turnSpeed));
+
+			System.out.println(moveSpeed + "  " + turnSpeed);
+		}
 	}
 
 	public double getAngle() {
@@ -491,6 +512,13 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setSimpleDrive(boolean setting) {
 		drivePercentVbus = setting;
+		if(setting){
+			leftTalon.enableBrakeMode(false);
+			rightTalon.enableBrakeMode(false);
+		} else {
+			leftTalon.enableBrakeMode(true);
+			rightTalon.enableBrakeMode(true);			
+		}
 	}
 
 	@Override
