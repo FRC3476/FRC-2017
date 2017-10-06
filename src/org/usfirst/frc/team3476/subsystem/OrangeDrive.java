@@ -133,6 +133,7 @@ public class OrangeDrive extends Threaded {
 	public synchronized void arcadeDrive(double moveValue, double rotateValue) {
 		if (driveState != DriveState.MANUAL) {
 			driveState = DriveState.MANUAL;
+			setSimpleDrive(false);
 		}
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
@@ -222,6 +223,7 @@ public class OrangeDrive extends Threaded {
 	public void cheesyDrive(double moveValue, double rotateValue, boolean isQuickTurn) {
 		if (driveState != DriveState.MANUAL) {
 			driveState = DriveState.MANUAL;
+			setSimpleDrive(false);
 		}
 		moveValue = scaleJoystickValues(moveValue);
 		rotateValue = scaleJoystickValues(rotateValue);
@@ -386,7 +388,7 @@ public class OrangeDrive extends Threaded {
 		// double robotDiameter, Path robotPath)
 		if (driveState != DriveState.AUTO) {
 			driveState = DriveState.AUTO;
-			setBrakeState(true);
+			setSimpleDrive(false);
 			shiftUp();
 		}
 
@@ -400,7 +402,7 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setAutoTime(double speed, double time) {
 		driveState = DriveState.AUTO;
-		setBrakeState(true);
+		setSimpleDrive(false);
 		shiftUp();
 		autoState = AutoState.TIMED;
 		driveTime = time;
@@ -419,7 +421,7 @@ public class OrangeDrive extends Threaded {
 		if (driveState != DriveState.GEAR) {
 			driveState = DriveState.GEAR;
 			gearState = GearDrivingState.TURNING;
-			setBrakeState(true);
+			setSimpleDrive(false);
 			shiftUp();
 			updateAngleToPeg();
 			gear.setState(GearState.PEG);
@@ -435,15 +437,11 @@ public class OrangeDrive extends Threaded {
 		if (driveState != DriveState.GEAR) {
 			driveState = DriveState.GEAR;
 			gearState = GearDrivingState.REVERSING;
-			setBrakeState(true);
+			setSimpleDrive(false);
 			shiftUp();
 			gearReversingTime = System.currentTimeMillis();
 			updateGearPath();
 		}
-	}
-
-	public void setNormal() {
-		driveMultiplier = 1;
 	}
 
 	public void setOffset(Rotation angleOffset) {
@@ -452,7 +450,7 @@ public class OrangeDrive extends Threaded {
 
 	public synchronized void setRotation(Rotation desiredRotation) {
 		driveState = DriveState.AUTO;
-		setBrakeState(true);
+		setSimpleDrive(false);
 		shiftUp();
 
 		if (autoState != AutoState.ROTATING) {
@@ -513,11 +511,9 @@ public class OrangeDrive extends Threaded {
 	public synchronized void setSimpleDrive(boolean setting) {
 		drivePercentVbus = setting;
 		if(setting){
-			leftTalon.enableBrakeMode(false);
-			rightTalon.enableBrakeMode(false);
+			setBrakeState(false);
 		} else {
-			leftTalon.enableBrakeMode(true);
-			rightTalon.enableBrakeMode(true);			
+			setBrakeState(true);			
 		}
 	}
 

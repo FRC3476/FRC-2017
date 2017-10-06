@@ -54,6 +54,7 @@ public class Robot extends IterativeRobot {
 	Compressor a = new Compressor(1);
 	
 	OrangeDrive orangeDrive;
+	
 	RobotTracker robotState;
 	Shooter shooter;
 	Intake intake;
@@ -64,7 +65,7 @@ public class Robot extends IterativeRobot {
 	DigitalOutput led;
 
 	boolean lowExposure = true;
-
+	
 	PowerDistributionPanel pdp = new PowerDistributionPanel(1);
 	Future<?> logger;
 
@@ -125,7 +126,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void disabledInit() {
 		orangeDrive.resetState();
-		shooter.resetState();
+		//shooter.resetState();
 	}
 
 	@Override
@@ -169,6 +170,7 @@ public class Robot extends IterativeRobot {
 
 		// Subsystems
 		orangeDrive = OrangeDrive.getInstance();
+		
 		robotState = RobotTracker.getInstance();
 		shooter = Shooter.getInstance();
 		intake = Intake.getInstance();
@@ -179,7 +181,7 @@ public class Robot extends IterativeRobot {
 		climberSlave = new CANTalon(Constants.Climber2Id);
 		climberSlave.changeControlMode(TalonControlMode.Follower);
 		climberSlave.set(climber.getDeviceID());
-
+		
 		scheduler.schedule(robotState, 500000, mainExecutor);
 		scheduler.schedule(orangeDrive, 5000000, mainExecutor);
 		scheduler.schedule(shooter, 5000000, mainExecutor);
@@ -201,10 +203,11 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		
 		intake.setState(IntakeState.DOWN);
 		shooter.setHome();
 		gearMech.setState(GearState.UP);
-
+		
 	}
 
 	// 50 hz (20 ms)
@@ -215,6 +218,7 @@ public class Robot extends IterativeRobot {
 		buttonBox.update();
 		double moveVal = xbox.getRawAxis(1);
 		double rotateVal = -xbox.getRawAxis(4);
+		
 		if (gearMech.getWheelCurent() > 9.0) {
 			xbox.setRumble(RumbleType.kRightRumble, 1);
 		} else {
@@ -229,9 +233,10 @@ public class Robot extends IterativeRobot {
 			}
 		} else {
 			//orangeDrive.arcadeDrive(moveVal, rotateVal);
-			orangeDrive.cheesyDrive(moveVal, rotateVal, xbox.getRawButton(6));
+			moveVal = moveVal < 0 ? -Math.pow(moveVal, 2) : Math.pow(moveVal, 2);
+			orangeDrive.arcadeDrive(moveVal, rotateVal);
 		}
-
+		
 		if (joystick.getRawButton(3)) {
 			gearMech.setSucking(.5);
 		} else if (joystick.getRawButton(4)) {
@@ -296,6 +301,9 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setSimpleDrive(false);			
 		}
 		
+
+		moveVal = moveVal < 0 ? -Math.pow(moveVal, 2) : Math.pow(moveVal, 2);
+		orangeDrive.cheesyDrive(moveVal, rotateVal, xbox.getRawButton(6));
 		
 	}
 

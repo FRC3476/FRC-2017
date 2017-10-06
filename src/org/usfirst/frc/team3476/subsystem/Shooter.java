@@ -124,22 +124,22 @@ public class Shooter extends Threaded {
 		 */
 
 		lookupTable1.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(1000.0)));
-		
-		lookupTable09.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3225.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(100.0, new InterpolatingDouble(3250.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(109.0, new InterpolatingDouble(3375.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(123.0, new InterpolatingDouble(3450.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(3550.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(148.0, new InterpolatingDouble(3650.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(158.0, new InterpolatingDouble(3800.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(164.0, new InterpolatingDouble(3850.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(168.0, new InterpolatingDouble(4050.0 + 275)));
-		lookupTable09.add(new InterpolableValue<>(185.0, new InterpolatingDouble(4150.0 + 275)));
+		double addition = 300;
+		lookupTable09.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3225.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(100.0, new InterpolatingDouble(3250.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(109.0, new InterpolatingDouble(3375.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(123.0, new InterpolatingDouble(3450.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(135.0, new InterpolatingDouble(3550.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(148.0, new InterpolatingDouble(3650.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(158.0, new InterpolatingDouble(3800.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(164.0, new InterpolatingDouble(3850.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(168.0, new InterpolatingDouble(4050.0 + addition)));
+		lookupTable09.add(new InterpolableValue<>(185.0, new InterpolatingDouble(4150.0 + addition)));
 
 		lookupTable08.add(new InterpolableValue<>(1000.0, new InterpolatingDouble(10000.0)));
 
-		lookupTable07.add(new InterpolableValue<>(75.0, new InterpolatingDouble(3175.0 + 275))); 
-		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3225.0 + 275)));
+		lookupTable07.add(new InterpolableValue<>(75.0, new InterpolatingDouble(3175.0 + addition))); 
+		lookupTable07.add(new InterpolableValue<>(92.0, new InterpolatingDouble(3225.0 + addition)));
 		hood.set(0.7);
 	}
 
