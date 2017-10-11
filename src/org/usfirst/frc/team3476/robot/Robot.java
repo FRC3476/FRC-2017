@@ -301,10 +301,6 @@ public class Robot extends IterativeRobot {
 			orangeDrive.setSimpleDrive(false);			
 		}
 		
-
-		moveVal = moveVal < 0 ? -Math.pow(moveVal, 2) : Math.pow(moveVal, 2);
-		orangeDrive.cheesyDrive(moveVal, rotateVal, xbox.getRawButton(6));
-		
 	}
 
 	/**

@@ -19,7 +19,7 @@ public final class Constants {
 	public static double GearSpeed = 50;
 	public static double cameraOffset = 5.5;
 	public static double TurretCameraOffset = -6.0;// -0.75
-	public static double CameraAngleOffset = 0;
+	public static double CameraAngleOffset = -3;
 	public static double DrivingAngleTolerance = 5;
 	public static double DrivingGearTolerance = 10;
 	public static double WheelDiameter = 4;

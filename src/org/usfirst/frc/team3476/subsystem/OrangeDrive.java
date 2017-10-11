@@ -71,7 +71,7 @@ public class OrangeDrive extends Threaded {
 	private double driveTime;
 
 	private double driveMultiplier;
-	private boolean dontShiftDown = false;
+	private boolean dontShiftDown = true;
 	private boolean drivePercentVbus = false;
 
 	private ADXRS450_Gyro gyroSensor = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
